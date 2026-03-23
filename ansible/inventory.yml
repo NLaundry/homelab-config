@@ -1,0 +1,19 @@
+all:
+  children:
+    routers:
+      hosts:
+        opnsense:
+          ansible_host: 10.10.10.1
+    openwrt:
+      hosts:
+        ax23:
+          ansible_host: 10.10.10.2
+          ansible_shell_type: sh
+    proxmox:
+      hosts:
+        proxbox:
+          ansible_host: 10.10.10.10
+    nas:
+      hosts:
+        nasty:
+          ansible_host: 10.10.10.11
