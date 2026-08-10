@@ -26,7 +26,7 @@ bindings:
         - --json
         - .#nixosConfigurations.nas.config.services.samba.settings
       cwd: .
-    limitations: Confirms the shares, paths, guest options, force-operator mapping, and mdns flag in the evaluated flake; it does not prove the shares work over the network or that mDNS is actually broadcasting. Note: targets `services.samba.settings` (not the whole `services.samba` attrset) because nixos-26.05 migrated Samba to the RFC0042 structured `settings` API and the legacy `shares`/`configText`/`extraConfig` options are removed-option stubs that throw when the whole attrset is forced to JSON.
+    limitations: Confirms the shares, paths, guest options, force-operator mapping, and mdns flag in the evaluated flake; it does not prove the shares work over the network or that mDNS is actually broadcasting. Targets services.samba.settings (not the whole services.samba attrset) because nixos-26.05 migrated Samba to the RFC0042 structured settings API and the legacy shares/configText/extraConfig options are removed-option stubs that throw when the whole attrset is forced to JSON.
 
   - id: samba-firewall-eval
     covers: [smb-ports-open, smb-ports-open-scenario]

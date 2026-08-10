@@ -49,14 +49,20 @@ makes every SMB operation execute with `operator`'s filesystem identity, so
 guest read-write genuinely holds. Trade-off: all writes are attributed to one
 user — acceptable for a single-operator homelab.
 
-**D3 — Samba built-in mDNS (`mdns name = mdns`), not avahi.**
-Chosen to keep the runtime minimal — no extra discovery daemon. Modern Samba
-advertises `_smb._tcp` itself, which is all macOS needs to resolve
-`smb://NASty.local`; Linux clients resolve mDNS on their own side. Avahi would
-only be worth the additional dependency if the NAS later advertises *other*
-services (SSH, printer, UPnP). Known minor risk: Samba's built-in mDNS has
-occasional broadcast flakiness with macOS (share not showing until Finder
-refreshes); acceptable and easy to switch to avahi later if it bites.
+**D3 — Avahi mDNS publishing (reverses the original built-in-mDNS choice).**
+Originally this change chose Samba's built-in `mdns name = mdns` to keep the
+runtime minimal. At apply time that proved to be a no-op on this setup:
+`mdns name = mdns`'s mDNS responder lives in Samba's AD-DC `samba` daemon
+(which we don't run — we run standalone `smbd`/`nmbd`), and the nixpkgs
+`samba` package isn't compiled with avahi/dns_sd support at all (`smbd -b`
+shows no mDNS feature and `smbd` links no mDNS library). So the NAS broadcast
+nothing on `_smb._tcp` and Finder never discovered it. Reversed to Avahi, the
+standard minimal mDNS daemon: `services.avahi` publishes the host's A record
+and a `_smb._tcp` service file on port 445 under the hostname (`NASty` →
+`NASty.local`). Verified: `dns-sd -B _smb._tcp local.` shows `NASty`, and
+`NASty.local` resolves to `10.10.10.11` from the macOS deployer. The trade-off
+is one extra daemon (avahi-daemon), justified because nothing else publishes
+the service. See `hosts/nas/avahi.nix`.
 
 **D4 — `fruit` + `streams_xattr` VFS modules.**
 Enables Apple's SMB protocol extensions so Finder handles Resource Forks,
@@ -85,8 +91,10 @@ Add TCP `139` and `445` to `allowedTCPPorts` alongside the existing `22`.
 
 ## Risks / Trade-offs
 
-- [Samba built-in mDNS flakiness with macOS] -> Acceptable; switch to avahi
-  (single config flip) if Finder discovery is unreliable.
+- [Samba built-in mDNS does not publish for standalone smbd] -> Confirmed at
+  apply time: `mdns name = mdns` is a no-op here (responder is in the AD-DC
+  `samba` daemon we don't run, and this nixpkgs build has no mDNS support
+  compiled in). Reversed D3 to Avahi; Finder now discovers the server.
 - [Guest-open RW exposes write to any LAN client] -> Acceptable for a trusted
   homelab LAN; can tighten to guest read-only or add auth later without
   reworking share structure.

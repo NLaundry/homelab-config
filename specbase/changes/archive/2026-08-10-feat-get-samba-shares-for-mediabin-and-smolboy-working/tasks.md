@@ -29,9 +29,13 @@
       `smbutil view -N -G //10.10.10.11` lists `mediaBin` and `smolBoy`.
       (Verified: `make deploy` succeeded; manual `smbutil view -N -G //10.10.10.11`
       lists mediaBin and smolBoy.)
-- [ ] 2.3 Execute `samba-runtime-review` for the residue: verify `NASty.local`
+- [x] 2.3 Execute `samba-runtime-review` for the residue: verify `NASty.local`
       resolves/lists over `_smb._tcp` mDNS and that a guest write into an
       operator-owned dataset succeeds; record the outcome.
+      (Verified via Avahi — see design D3 reversal: `dns-sd -B _smb._tcp local.`
+      lists `NASty`; `NASty.local` resolves to `10.10.10.11`; guest mounts of both
+      shares via `smb://NASty.local` succeed and list contents. `mdns name = mdns`
+      was a no-op on this nixpkgs Samba build, so Avahi now publishes discovery.)
 
 ## 3. Cleanup
 
