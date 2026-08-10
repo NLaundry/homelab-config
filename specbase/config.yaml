@@ -1,0 +1,51 @@
+schema: spec-driven-governed
+
+# Spec planes governing this project — the authoritative source of
+# truth. Add a record to gain a plane, remove one to drop it, empty
+# the list to go flat.
+specModel:
+  planes:
+    - id: behavior
+      purpose: User/client-visible outcomes that must remain true
+      enforcementFlavor: tests / property tests
+      reviewLens: behavioural
+    - id: architecture
+      purpose: Package responsibilities, boundaries, and structural invariants
+      enforcementFlavor: lint / static-analysis / conformance
+      reviewLens: architectural
+    - id: ops
+      purpose: "What we use and how it runs: packages, dev env, IaC, deployment"
+      enforcementFlavor: lockfile audit / plan validate / drift detect
+      reviewLens: ops
+    - id: code-quality
+      purpose: "What good code looks like: smells, qualities, and rules"
+      enforcementFlavor: smell-lint + review
+      reviewLens: code-quality
+    - id: agents
+      purpose: "The repo's own agentic instruments: review panel, repo-specific
+        skills, subagents, and hooks it builds. Members are instruments the repo
+        owns, NOT behavioral guardrails on agents (those ride on the plane whose
+        subject they constrain). Each spec DESCRIBES an agent-operational
+        artifact (config.yaml, DEFAULT_LENSES, a SKILL.md, a hook) and its
+        enforcement binds a conformance/drift check to that artifact."
+      enforcementFlavor: instrument conforms to its spec (config / lens / frontmatter
+        / hook checks)
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

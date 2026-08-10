@@ -4,6 +4,8 @@
   imports = [
     ./hardware-configuration.nix
     ./zfs.nix
+    ./samba.nix
+    ./avahi.nix
   ];
 
   # Boot loader (systemd-boot / EFI).
@@ -45,7 +47,13 @@
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  # SSH plus SMB (139/445) for the guest-open mediaBin/smolBoy shares — see
+  # ./samba.nix and specbase `behavior.storage.nas-samba`.
+  networking.firewall.allowedTCPPorts = [
+    22
+    139
+    445
+  ];
 
   # This value determines the NixOS release from which the default settings for
   # stateful data were taken. Do NOT change after initial install. See

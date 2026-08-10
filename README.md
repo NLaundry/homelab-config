@@ -37,7 +37,7 @@ Override the target if needed: `make deploy TARGET=root@10.10.10.11`.
 
 Deploys currently authenticate as `root` over SSH (existing homelab key). SSH
 hardening (key-only, disable password auth) is a deferred decision — see
-`openspec/changes/flakify-nas/design.md`.
+`openspec/changes/archive/2026-08-06-flakify-nas/design.md`.
 
 ## nixpkgs updates
 
