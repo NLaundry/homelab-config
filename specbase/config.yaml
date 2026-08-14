@@ -6,39 +6,77 @@ schema: spec-driven-governed
 specModel:
   planes:
     - id: behavior
-      purpose: User/client-visible outcomes that must remain true
-      enforcementFlavor: tests / property tests
+      purpose: >-
+        Observable contracts at the homelab boundary: what human administrators,
+        users, devices, and client services can reach, do, and observe. This
+        includes externally meaningful URLs, protocols and ports, authorization
+        outcomes, errors, and state that must survive declared lifecycle events.
+        Internal bind ports and the mechanism that produces an outcome are not
+        behavioral truth unless a client depends on them.
+      enforcementFlavor: tests / property tests / network probes / honest review
       reviewLens: behavioural
     - id: architecture
-      purpose: Package responsibilities, boundaries, and structural invariants
-      enforcementFlavor: lint / static-analysis / conformance
+      purpose: >-
+        Enduring topology, responsibilities, dependency edges, and trust or state
+        boundaries among physical hosts, virtual machines, containers, networks,
+        storage, identity systems, and services. Architectural truth should remain
+        true when an implementation tool is replaced with an equivalent one; it
+        does not prescribe package versions or operational procedures.
+      enforcementFlavor: topology conformance / static analysis / fitness functions
       reviewLens: architectural
     - id: ops
-      purpose: "What we use and how it runs: packages, dev env, IaC, deployment"
-      enforcementFlavor: lockfile audit / plan validate / drift detect
+      purpose: >-
+        The selected technology and lifecycle machinery that makes the homelab run
+        cleanly: packages and versions, Nix modules and IaC, internal listeners and
+        firewall realization, boot ordering, deployment, updates, secret
+        materialization and rotation, monitoring, backup, restore, and operational
+        runbooks. Ops records how behavioral and architectural truth is realized
+        and safely operated.
+      enforcementFlavor: evaluation / lockfile audit / plan validation / drift detection / recovery drills
       reviewLens: ops
     - id: code-quality
       purpose: "What good code looks like: smells, qualities, and rules"
       enforcementFlavor: smell-lint + review
       reviewLens: code-quality
     - id: agents
-      purpose: "The repo's own agentic instruments: review panel, repo-specific
-        skills, subagents, and hooks it builds. Members are instruments the repo
-        owns, NOT behavioral guardrails on agents (those ride on the plane whose
-        subject they constrain). Each spec DESCRIBES an agent-operational
-        artifact (config.yaml, DEFAULT_LENSES, a SKILL.md, a hook) and its
-        enforcement binds a conformance/drift check to that artifact."
-      enforcementFlavor: instrument conforms to its spec (config / lens / frontmatter
-        / hook checks)
+      purpose: >-
+        The repo's own agentic instruments: review panels, repo-specific skills,
+        subagents, and hooks it builds. Members are instruments the repo owns, not
+        behavioral guardrails on agents. Human operational runbooks remain Ops
+        even when agents can read them; only a repo-owned runbook skill, registry,
+        checker, or execution hook belongs here. Each agents spec describes an
+        agent-operational artifact and binds conformance or drift checks to it.
+      enforcementFlavor: instrument conforms to its spec (config / lens / frontmatter / hook checks)
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context shown when creating artifacts.
+context: |
+  This repository declares and operates a homelab rather than a single software
+  application. Classify individual normative claims, not whole initiatives or
+  products: one initiative commonly touches several planes.
+
+  Use the substitution test when classification is unclear:
+  - If changing the implementation while preserving the result would be visible
+    to a human, device, or client service, the claim is behavior.
+  - If it would change topology, responsibility, dependency direction, trust, or
+    mutable-state boundaries, the claim is architecture.
+  - If it would change the selected product, version, configuration, deployment,
+    update, secret, monitoring, backup, restore, or operating procedure, the claim
+    is ops.
+
+  Examples:
+  - Client reachability and denial matrices are behavior; internal bind ports and
+    firewall rules are ops; the required network-zone crossing is architecture.
+  - Command execution as a user capability is behavior; separation of the control
+    and execution planes is architecture; Docker or Podman selection is ops.
+  - State surviving reboot is behavior; confinement to an explicit durable volume
+    is architecture; ZFS encryption, snapshots, replication, and restore are ops.
+
+  Put non-automatable setup, recovery, rotation, and disaster procedures in
+  operational runbooks. Ops specs state the durable guarantees and maintenance
+  expectations; runbooks contain ordered procedures, prerequisites, safety and
+  rollback guidance, verification, and last-tested evidence. A runbook belongs to
+  the agents plane only when the subject is a repo-owned agentic instrument that
+  selects, validates, or executes runbooks.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
