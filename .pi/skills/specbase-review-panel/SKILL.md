@@ -36,9 +36,10 @@ Confirm the review model and load the affected pairs:
 specbase status --change "<name>" --json   # resolve the model and touched pairs
 specbase coverage --json                    # lens rollup, un-lensed gaps, split candidates
 ```
-Read every affected `spec.md` / `enforcement.md` pair the status reports; the set
-of touched pairs (their locators) is the router's input. If the change touches
-no spec pair, say so and stop.
+Read every affected `spec.md` / `enforcement.yaml` pair the status reports. The
+set of touched pairs and the complete changed-path name/status records are the
+router's inputs. Preserve both paths for renames and copies. If the change
+touches no spec pair and no repository test path, say so and stop.
 
 ## Step 1 — Router: touched subtrees → the projected lenses
 
@@ -61,6 +62,21 @@ A pair under a scoped lens (e.g. `architecture/rings/boundaries`) routes to that
 scoped lens rather than the plane-wide one (most-specific wins). A lens the model
 does not project simply does not exist here.
 
+<!-- test-quality-route-contract:start -->
+Before finalizing the lens set, require the selected change to be fully staged
+and require unrelated workspace changes to remain unstaged; if the index mixes
+changes, stop and request a clean selected-change index. Run
+`.pi/skills/specbase-review-panel/route-test-quality.sh` with no arguments. It
+uses `git diff --cached --name-status --diff-filter=ACDMRTUXB` as the canonical,
+read-only changed-path producer, including both paths for renames and copies. If
+it emits `code-quality\tcode-quality/testing`, select the `code-quality` lens
+and load the current `code-quality/testing` pair as policy even when no
+Code-quality delta is touched. This path route is additive to ordinary pair
+routing. Added, modified, deleted, or either side of renamed/copied paths beneath
+`tests/**` select the policy; non-test paths do not. The selected lens remains
+advisory and non-gating like every other panel lens.
+<!-- test-quality-route-contract:end -->
+
 Then explicitly **`log`** the selected lens set and, for EVERY lens **skipped**,
 why (e.g. "`architectural` skipped — no `architecture/` pair touched").
 Silence is never coverage: the skipped list is part of the report and the
@@ -68,8 +84,8 @@ completeness critic (step 5) audits it. **Every finding is tagged with its lens.
 
 ## Step 2 — Deterministic gate FIRST (when bindings exist), then compute the residue
 
-Run the project's declared automated bindings (their `run: {command, args,
-cwd}` vectors) BEFORE any reviewer, so each lens reviews only the residue above
+Run the project's declared automated binding sources through their native
+project harness BEFORE any reviewer, so each lens reviews only the residue above
 the gate. For each lens, prepare two inputs:
 1. **already-covered findings** — the concrete gate output, so no reviewer
    re-reports a line a deterministic check already flagged.

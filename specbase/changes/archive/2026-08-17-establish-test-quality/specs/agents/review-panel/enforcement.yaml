@@ -1,8 +1,4 @@
 bindings:
-  lens-roster-conforms:
-    type: command
-    covers: panel-covers-planes
-    source: tests/agents/specbase-instruments.sh#lenses
   test-quality-routing-conforms:
     type: command
     covers: panel-routes-test-quality

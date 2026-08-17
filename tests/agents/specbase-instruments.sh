@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 CONFIG_FILE=${SPECBASE_CONFIG_FILE:-"$ROOT/specbase/config.yaml"}
 REVIEW_SKILL_FILE=${REVIEW_SKILL_FILE:-"$ROOT/.pi/skills/specbase-review-panel/SKILL.md"}
+TEST_QUALITY_ROUTER_FILE=${TEST_QUALITY_ROUTER_FILE:-"$ROOT/.pi/skills/specbase-review-panel/route-test-quality.sh"}
 COVERAGE_JSON_FILE=${COVERAGE_JSON_FILE:-}
 
 fail() {
@@ -99,13 +100,92 @@ check_lenses() {
   printf 'lenses: declared and resolved lens rosters conform\n'
 }
 
+assert_test_quality_route() {
+  local fixture=$1 expected=$2 actual fixture_label
+  printf -v fixture_label '%q' "$fixture"
+  actual=$(printf '%s' "$fixture" | "$TEST_QUALITY_ROUTER_FILE" --records) ||
+    fail "test-quality router rejected controlled fixture: $fixture_label"
+  [[ $actual == "$expected" ]] ||
+    fail "test-quality route mismatch for $fixture_label: expected '${expected:-<none>}', found '${actual:-<none>}'"
+}
+
+assert_index_test_quality_route() (
+  local workdir index blob actual expected
+  workdir=$(mktemp -d)
+  trap 'rm -rf "$workdir"' EXIT
+  index=$workdir/index
+  cp "$ROOT/.git/index" "$index"
+  blob=$(git -C "$ROOT" rev-parse HEAD:README.md)
+  GIT_INDEX_FILE=$index git -C "$ROOT" update-index --add \
+    --cacheinfo 100644 "$blob" tests/controlled-routing.bats
+  actual=$(cd "$ROOT" && GIT_INDEX_FILE=$index "$TEST_QUALITY_ROUTER_FILE")
+  expected=$'code-quality\tcode-quality/testing'
+  [[ $actual == "$expected" ]] || {
+    printf 'index-produced route mismatch: expected %q, found %q\n' \
+      "$expected" "$actual" >&2
+    return 1
+  }
+)
+
+check_test_quality_routing() {
+  [[ -x "$TEST_QUALITY_ROUTER_FILE" ]] ||
+    fail "test-quality router is not executable: $TEST_QUALITY_ROUTER_FILE"
+  [[ -f "$REVIEW_SKILL_FILE" ]] ||
+    fail "review-panel skill not found: $REVIEW_SKILL_FILE"
+
+  local contract
+  contract=$(awk '
+    /test-quality-route-contract:start/ { in_contract = 1; next }
+    /test-quality-route-contract:end/ { in_contract = 0 }
+    in_contract { print }
+  ' "$REVIEW_SKILL_FILE")
+  [[ -n $contract ]] || fail "review-panel skill has no bounded test-quality route contract"
+  grep -Fq '.pi/skills/specbase-review-panel/route-test-quality.sh' <<<"$contract" ||
+    fail "route contract does not invoke the test-quality router"
+  grep -Fq 'with no arguments' <<<"$contract" ||
+    fail "route contract does not invoke the canonical producer mode"
+  grep -Fq 'git diff --cached --name-status --diff-filter=ACDMRTUXB' <<<"$contract" ||
+    fail "route contract does not declare the selected-change producer"
+  grep -Fq "select the \`code-quality\` lens" <<<"$contract" ||
+    fail "route contract does not apply the emitted lens"
+  grep -Fq "load the current \`code-quality/testing\` pair as policy" <<<"$contract" ||
+    fail "route contract does not apply the emitted policy"
+  if ! grep -Fq 'remains' <<<"$contract" || ! grep -Fq 'advisory and non-gating' <<<"$contract"; then
+    fail "route contract does not preserve advisory routing semantics"
+  fi
+
+  assert_index_test_quality_route ||
+    fail "canonical staged-index producer did not select the testing policy"
+
+  local route fixture
+  route=$'code-quality\tcode-quality/testing'
+  for fixture in \
+    $'A\ttests/new.bats\n' \
+    $'M\ttests/existing.bats\n' \
+    $'D\ttests/retired.bats\n' \
+    $'R100\ttests/old.bats\tdocs/new.md\n' \
+    $'R091\tdocs/old.md\ttests/new.bats\n'; do
+    assert_test_quality_route "$fixture" "$route"
+  done
+
+  for fixture in \
+    $'M\tREADME.md\n' \
+    $'A\tcontest/example.bats\n' \
+    $'A\ttest/example.bats\n' \
+    $'R100\tdocs/old.md\tdocs/new.md\n'; do
+    assert_test_quality_route "$fixture" ''
+  done
+
+  printf 'routing: test paths select only the advisory testing policy\n'
+}
+
 check_validate() {
   require_command specbase
   (cd "$ROOT" && specbase validate --specs --strict --json)
 }
 
 usage() {
-  printf 'usage: %s {all|config|lenses|validate}\n' "${0##*/}" >&2
+  printf 'usage: %s {all|config|lenses|test-quality-routing|validate}\n' "${0##*/}" >&2
   exit 2
 }
 
@@ -114,9 +194,11 @@ case ${1:-} in
     check_config
     check_validate
     check_lenses
+    check_test_quality_routing
     ;;
   config) check_config ;;
   lenses) check_lenses ;;
+  test-quality-routing) check_test_quality_routing ;;
   validate) check_validate ;;
   *) usage ;;
 esac

@@ -1,0 +1,20 @@
+bindings:
+  semantic-evidence-review:
+    type: review
+    covers:
+      - production-path-fidelity
+      - defect-sensitive-assertions
+    source: enforcement
+  test-hygiene-review:
+    type: review
+    covers:
+      - condition-based-synchronization
+      - run-scoped-state
+      - order-independent-tests
+      - failure-safe-live-cleanup
+      - live-cleanup-preserves-failure
+      - residual-state-visible
+      - residual-resource-identified
+      - actionable-test-failures
+      - failure-context-preserved
+    source: code-quality
