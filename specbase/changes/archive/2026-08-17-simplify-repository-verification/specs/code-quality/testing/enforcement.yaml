@@ -1,3 +1,6 @@
+remove:
+  - semantic-evidence-review
+  - test-hygiene-review
 bindings:
   lean-test-review:
     type: review

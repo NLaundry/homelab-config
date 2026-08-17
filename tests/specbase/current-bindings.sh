@@ -60,30 +60,6 @@ eval_no_force_import_root_warning() {
   trap - RETURN
 }
 
-samba_config_eval() {
-  need nix; need jq
-  nix eval --json .#nixosConfigurations.nas.config.services.samba.settings | jq -e '
-    .mediaBin.path == "/mediaBin/data/media" and .smolBoy.path == "/smolBoy/data" and
-    .mediaBin["guest ok"] == "yes" and .smolBoy["guest ok"] == "yes" and
-    .mediaBin["read only"] == "no" and .smolBoy["read only"] == "no" and
-    .mediaBin["force user"] == "operator" and .smolBoy["force user"] == "operator" and
-    .mediaBin["force group"] == "users" and .smolBoy["force group"] == "users" and
-    .global["map to guest"] == "Bad User"
-  ' >/dev/null || fail 'evaluated Samba settings do not conform'
-  [[ $(nix eval --json .#nixosConfigurations.nas.config.services.avahi.enable) == true ]] || fail 'Avahi is not enabled'
-  nix eval --raw .#nixosConfigurations.nas.config.services.avahi.extraServiceFiles.smb | grep -Fq '_smb._tcp' || fail 'SMB mDNS service is not declared'
-}
-
-samba_firewall_eval() {
-  need nix; need jq
-  nix eval --json .#nixosConfigurations.nas.config.networking.firewall.allowedTCPPorts | jq -e 'index(139) != null and index(445) != null' >/dev/null || fail 'SMB firewall ports are not open'
-}
-
-smbutil_view_wire() {
-  need smbutil
-  smbutil view -N -G //10.10.10.11
-}
-
 operator_config_intent() {
   need nix; need jq
   nix eval --json .#nixosConfigurations.nas.config.users.users.operator | jq -e '
@@ -119,9 +95,6 @@ run_mode() {
     default-imports-role-module) default_imports_role_module ;;
     config-intent) config_intent ;;
     eval-no-force-import-root-warning) eval_no_force_import_root_warning ;;
-    samba-config-eval) samba_config_eval ;;
-    samba-firewall-eval) samba_firewall_eval ;;
-    smbutil-view-wire) smbutil_view_wire ;;
     operator-config-intent) operator_config_intent ;;
     utility-packages-eval) utility_packages_eval ;;
     flake-input-pins-release) flake_input_pins_release ;;
@@ -136,8 +109,7 @@ case ${1:-} in
     for mode in \
       flake-exposes-role-attribute no-hostname-derived-attribute role-attribute-evaluates \
       default-imports-siblings default-imports-role-module config-intent \
-      eval-no-force-import-root-warning samba-config-eval samba-firewall-eval \
-      operator-config-intent utility-packages-eval \
+      eval-no-force-import-root-warning operator-config-intent utility-packages-eval \
       flake-input-pins-release lock-committed-pinned flake-evaluates-against-pin; do
       printf 'binding %s... ' "$mode"
       run_mode "$mode"

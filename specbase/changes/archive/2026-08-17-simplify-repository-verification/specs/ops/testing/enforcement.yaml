@@ -1,0 +1,11 @@
+bindings:
+  test-operation-conforms:
+    type: test
+    covers:
+      - test-stage
+      - test-builder-selection
+    source: tests/harness/test-operation.bats
+  verify-runner-conforms:
+    type: test
+    covers: verify-stage
+    source: tests/harness/verify-runner.bats

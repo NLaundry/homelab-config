@@ -1,0 +1,7 @@
+bindings:
+  nas-samba-vm-isolation:
+    type: test
+    covers:
+      - test-subject-boundary
+      - test-network-boundary
+    source: tests/nas-vm.nix

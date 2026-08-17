@@ -1,0 +1,3 @@
+remove:
+  - verification-identity-boundary
+  - verification-capacity-exhaustion

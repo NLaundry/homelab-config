@@ -4,8 +4,8 @@
 # Testing operations keep validation, disposable VM tests, and deployed checks
 # distinct. Run `make help` for the documented operation surface.
 
-OPERATIONS := deploy boot try dry build lint test verify
-NON_LIVE_PHASES := harness tooling agents current-bindings vm
+OPERATIONS := deploy boot try dry build lint test test-vm verify
+NON_LIVE_PHASES := harness tooling agents current-bindings
 
 HOST    ?= nas
 TARGET  ?= operator@10.10.10.11
@@ -54,7 +54,8 @@ help: ## List documented repository operations
 		'  dry        Preview activation without applying it' \
 		'  build      Build the NAS configuration without activation' \
 		'  lint       Validate current specs and evaluate flake checks' \
-		'  test       Run every safe non-live test phase' \
+		'  test       Run fast non-live repository checks' \
+		'  test-vm    Run the optional disposable NixOS VM integration suite' \
 		'  verify     Run checks against the deployed homelab'
 
 deploy: ## Build on NAS, activate persistently, then verify

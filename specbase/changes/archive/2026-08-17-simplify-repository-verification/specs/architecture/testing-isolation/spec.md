@@ -3,7 +3,10 @@ id: architecture.testing-isolation
 ---
 
 ## Purpose
+
 Disposable system tests use their execution host only as compute and keep candidate guests off the physical homelab network.
+
+## MODIFIED Requirements
 
 ### Requirement: The test subject is isolated from its compute provider
 **ID:** `test-subject-boundary`

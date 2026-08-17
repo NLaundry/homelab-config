@@ -23,7 +23,6 @@
               tools.byName.ssh
               tools.byName.yq
               pkgs.coreutils
-              pkgs.expect
             ];
             text = ''
               tests=( ${self}/tests/verify/*.bats )
@@ -46,7 +45,6 @@
               tools.byName.make
               tools.byName.specbase
               pkgs.coreutils
-              pkgs.expect
               pkgs.findutils
               pkgs.gawk
               pkgs.gnugrep
@@ -70,6 +68,7 @@
 
       linuxPkgs = pkgsFor "x86_64-linux";
       vmHarness = linuxPkgs.callPackage ./tests/harness/nixos-vm.nix { };
+      nasVm = linuxPkgs.callPackage ./tests/nas-vm.nix { };
     in
     {
       # Host-agnostic attribute name: deploy with `.#nas`, not the hostname.
@@ -126,13 +125,17 @@
         // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
           # Focused attribute for diagnosis and forced runtime attestation.
           vm-harness-private-network = vmHarness;
+          nas-samba-vm = nasVm;
 
-          # Stable aggregate selected by `make test`. New VM tests join this
-          # farm; callers continue to build the same attribute.
+          # Stable aggregate selected explicitly by `make test-vm`.
           vm-tests = linuxPkgs.linkFarm "homelab-vm-tests" [
             {
               name = "harness-private-network";
               path = vmHarness;
+            }
+            {
+              name = "nas-samba-behavior";
+              path = nasVm;
             }
           ];
         });

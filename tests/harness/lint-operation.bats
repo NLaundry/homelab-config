@@ -89,26 +89,3 @@ run_lint() {
   grep -Fxq 'specbase:validate --specs --strict' "$CALL_LOG"
   grep -Fxq 'nix:flake check --all-systems --no-build' "$CALL_LOG"
 }
-
-@test "the packaged Specbase accepts valid compact enforcement and rejects a broken source" {
-  [[ $(command -v specbase) == /nix/store/* ]]
-
-  run specbase validate --specs --strict
-  [ "$status" -eq 0 ]
-
-  fixture=$WORKDIR/compact-fixture
-  mkdir -p "$fixture/specbase"
-  cp "$ROOT/specbase/config.yaml" "$fixture/specbase/config.yaml"
-  cp -R "$ROOT/specbase/specs" "$fixture/specbase/specs"
-  ln -s "$ROOT/tests" "$fixture/tests"
-  cat >>"$fixture/specbase/specs/ops/tooling/enforcement.yaml" <<'YAML'
-  fixture-broken-source:
-    type: test
-    covers: repository-tool-set
-    source: tests/does-not-exist.bats
-YAML
-
-  run bash -c 'cd "$1" && specbase validate --specs --strict' _ "$fixture"
-  [ "$status" -ne 0 ]
-  [[ $output == *"tests/does-not-exist.bats"* ]]
-}

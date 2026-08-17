@@ -1,3 +1,0 @@
-# Ordinary data shares that must deny the verification tester.
-mediaBin
-smolBoy

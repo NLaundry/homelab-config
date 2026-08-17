@@ -3,17 +3,10 @@ id: ops.testing
 ---
 
 ## Purpose
+
 Repository testing keeps fast static checks, focused deterministic tests, optional VM integration, and live deployed behavior distinct.
 
-### Requirement: Repository validation uses the lint operation
-**ID:** `lint-stage`
-The repository SHALL define a `lint` operation that strictly validates current governed specifications and evaluates the Nix flake without starting a test VM or addressing a deployed homelab service. A failure in either validation step SHALL make the operation fail.
-
-#### Scenario: An operator validates current repository truth
-**ID:** `lint-validates-repository`
-- **WHEN** an operator runs the `lint` operation
-- **THEN** strict current-spec validation and flake evaluation run
-- **AND** any failure stops the operation before isolated or live testing
+## MODIFIED Requirements
 
 ### Requirement: Fast non-live checks use the test operation
 **ID:** `test-stage`

@@ -7,3 +7,9 @@ bindings:
     type: test
     covers: test-network-boundary
     source: tests/harness/nixos-vm.nix
+  nas-samba-vm-isolation:
+    type: test
+    covers:
+      - test-subject-boundary
+      - test-network-boundary
+    source: tests/nas-vm.nix

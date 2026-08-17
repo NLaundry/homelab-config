@@ -54,8 +54,9 @@ registered operation surface.
 
 ```bash
 make lint      # strict current-spec validation, then flake evaluation
-make test      # every safe non-live phase, including the remote VM suite
-make verify    # selected Bats checks against the deployed homelab
+make test      # fast non-live repository checks
+make test-vm   # optional disposable NixOS integration suite on the remote KVM store
+make verify    # user-facing checks against the deployed homelab
 make build     # build the NAS configuration without activation
 make dry       # preview physical NAS activation
 make try       # activate temporarily, then verify; activation reverts on reboot
@@ -65,21 +66,20 @@ make deploy    # activate persistently, then verify the deployed NAS
 
 `lint`, `test`, and `verify` are intentionally separate. `lint` is the fast
 validation/evaluation stage and starts no test or deployed-service probe. `test`
-is the complete non-live gate: after lint it runs the registered harness,
-tooling, agent-instrument, current-binding, and VM phases. Candidate systems run
-only as disposable guests on an explicit private test-driver network. The
-execution host supplies compute; `make test` does not activate a candidate
-generation on that host and gives guests no physical-LAN interface or route.
+runs the fast registered harness, tooling, agent-instrument, and current-binding
+phases. `test-vm` is an explicit optional integration operation. Candidate
+systems run only as disposable guests on an explicit private test-driver
+network; the execution host supplies compute without activating a candidate
+as its own generation or giving guests a physical-LAN interface or route.
 
 `verify` runs selected checks against the current deployment without activating
 a system. Successful `try` and `deploy` activations invoke the same default
 suite automatically. If post-activation verification fails, the Make operation
 fails but does not roll back: the temporary or persistent generation remains
 active until the operator takes another lifecycle action. The default suite
-contains checks safe for frequent post-activation use, including the confined
-SMB verification transaction. Destructive capacity exercises remain separately
-selected under `tests/verify/profiles/`. The suite does not yet claim ordinary
-Samba, ZFS, or user-access coverage. Deployment health is covered
+contains checks safe for frequent post-activation use, including guest listing
+and bounded write/read/delete transactions on the ordinary SMB shares. The
+suite does not claim ZFS or user-access coverage. Deployment health is covered
 after activation; the exact end-to-end build/activation mechanism retains its
 separate operational evidence.
 
@@ -102,13 +102,13 @@ The default `TEST_STORE` is the physical NAS's SSH-accessible Nix store:
 ssh-ng://operator@10.10.10.11?ssh-key=$HOME/.ssh/id_ed25519&system-features=kvm%20nixos-test
 ```
 
-Only execution placement is configurable; the VM phase of `make test` always
-selects `.#checks.x86_64-linux.vm-tests`. The tooling phase uses the same store
+Only execution placement is configurable; `make test-vm` always selects
+`.#checks.x86_64-linux.vm-tests`. The tooling phase uses the same store
 for its native x86_64-linux contract. Move those phases to another compatible
 host by overriding the one URI:
 
 ```bash
-make test TEST_STORE='ssh-ng://ci@builder.example?ssh-key=/path/to/key&system-features=kvm%20nixos-test'
+make test-vm TEST_STORE='ssh-ng://ci@builder.example?ssh-key=/path/to/key&system-features=kvm%20nixos-test'
 ```
 
 The foreground Nix client targets this store with `--eval-store auto`; the Mac

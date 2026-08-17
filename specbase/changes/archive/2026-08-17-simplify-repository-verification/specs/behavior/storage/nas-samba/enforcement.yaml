@@ -1,0 +1,11 @@
+remove:
+  - samba-config-eval
+  - samba-firewall-eval
+  - samba-runtime-review
+bindings:
+  nas-samba-vm:
+    type: test
+    covers:
+      - samba-shares-exposed
+      - guest-force-operator
+    source: tests/nas-vm.nix

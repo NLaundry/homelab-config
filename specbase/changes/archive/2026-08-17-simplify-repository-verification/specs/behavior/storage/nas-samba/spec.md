@@ -3,7 +3,10 @@ id: behavior.storage.nas-samba
 ---
 
 ## Purpose
+
 The NAS gives homelab clients simple credential-free access to the two intended data shares and preserves guest read/write behavior.
+
+## MODIFIED Requirements
 
 ### Requirement: The NAS exposes guest-open SMB shares for mediaBin and smolBoy
 **ID:** `samba-shares-exposed`
@@ -27,3 +30,15 @@ A guest SMB client SHALL be able to create, read, and remove a uniquely named fi
 **ID:** `guest-write-operator`
 - **WHEN** a guest creates uniquely named content on `mediaBin` or `smolBoy`
 - **THEN** the same client reads the content and removes its exact fixture cleanly
+
+## REMOVED Requirements
+
+### Requirement: The NAS advertises SMB over mDNS for automatic discovery
+**ID:** `smb-multicast-discovery`
+**Reason:** Default verification and the selected user workflow address the inventory NAS endpoint directly; mDNS is not part of the retained success contract.
+**Migration:** Avahi configuration may remain, but no dedicated behavioral requirement or test is maintained.
+
+### Requirement: The firewall allows SMB traffic
+**ID:** `smb-ports-open`
+**Reason:** Successful guest enumeration and mounts already prove the externally meaningful reachability outcome; an exact firewall-port list is operational mechanism rather than separate behavior.
+**Migration:** Preserve the production firewall configuration while relying on direct client behavior as evidence.

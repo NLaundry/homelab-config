@@ -3,7 +3,10 @@ id: code-quality.testing
 ---
 
 ## Purpose
+
 Repository tests protect selected homelab behavior and critical invariants without becoming a second product or unsafe live workload.
+
+## MODIFIED Requirements
 
 ### Requirement: Tests protect selected behavior or critical invariants
 **ID:** `production-path-fidelity`
@@ -40,3 +43,40 @@ A repository check failure SHALL identify the user-visible behavior or critical 
 **ID:** `remote-failure-identifies-outcome`
 - **WHEN** transport, setup, or assertion failure prevents a remote outcome from being established
 - **THEN** the failure names that outcome and preserves the relevant observation
+
+## REMOVED Requirements
+
+### Requirement: Assertions are sensitive to the covered defect
+**ID:** `defect-sensitive-assertions`
+**Reason:** The rule encouraged a controlled negative fixture for each assertion rather than higher-leverage behavior evidence.
+**Migration:** Semantic evidence remains part of production-path review.
+
+### Requirement: Waiting uses bounded relevant conditions
+**ID:** `condition-based-synchronization`
+**Reason:** This implementation-level checklist does not require a separate durable requirement.
+**Migration:** Review blocking or unbounded waits as ordinary code quality.
+
+### Requirement: Tests are order-independent
+**ID:** `order-independent-tests`
+**Reason:** Unique state and responsible setup cover the selected live risk without a separate normative rule.
+**Migration:** Treat unexplained cross-test state as an ordinary defect.
+
+### Requirement: Live cleanup preserves the original failure
+**ID:** `live-cleanup-preserves-failure`
+**Reason:** Failure precedence does not need a separate governed requirement.
+**Migration:** The responsible live check should report both the missing outcome and cleanup residue.
+
+### Requirement: Residual live state fails the test
+**ID:** `residual-state-visible`
+**Reason:** This is incorporated into `failure-safe-live-cleanup`.
+**Migration:** Cleanup residue remains a failing outcome under the retained requirement.
+
+### Requirement: Residual live state identifies the resource
+**ID:** `residual-resource-identified`
+**Reason:** Exact state scope and actionable failures already require useful identification.
+**Migration:** Retained requirements govern exact namespaces and diagnostics.
+
+### Requirement: Failures preserve observed context
+**ID:** `failure-context-preserved`
+**Reason:** This is incorporated into `actionable-test-failures`.
+**Migration:** Relevant observed context remains required by the retained requirement.
