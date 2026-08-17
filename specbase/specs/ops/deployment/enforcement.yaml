@@ -12,3 +12,7 @@ bindings:
       - post-activation-failure-semantics
       - deployment-inputs-overridable
     source: tests/harness/deployment-operations.bats
+  deploy-live-verification:
+    type: test
+    covers: post-deploy-verification
+    source: tests/verify/deployment.bats

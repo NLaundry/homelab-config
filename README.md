@@ -79,7 +79,9 @@ active until the operator takes another lifecycle action. The default suite
 contains checks safe for frequent post-activation use, including the confined
 SMB verification transaction. Destructive capacity exercises remain separately
 selected under `tests/verify/profiles/`. The suite does not yet claim ordinary
-Samba, ZFS, user-access, or deployment-success coverage.
+Samba, ZFS, or user-access coverage. Deployment health is covered
+after activation; the exact end-to-end build/activation mechanism retains its
+separate operational evidence.
 
 Each phase remains directly runnable for focused diagnosis:
 
@@ -129,7 +131,10 @@ be imported before activation. `try` and `deploy` run deployed
 verification only after activation succeeds; a verification failure is reported
 as a failed operation without claiming or attempting rollback. `boot`, `dry`,
 and `build` do not run deployed verification because they do not activate a
-candidate immediately.
+candidate immediately. The default post-activation suite includes deployment
+health checks for bounded SSH reachability, failed systemd units, and the active
+`/run/current-system` closure. A failed check reports the activated generation
+as unverified and does not perform rollback.
 
 Deployment inputs are independently overridable:
 

@@ -21,6 +21,7 @@
             runtimeInputs = [
               tools.byName.bats
               tools.byName.ssh
+              tools.byName.yq
               pkgs.coreutils
               pkgs.expect
             ];

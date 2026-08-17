@@ -1,0 +1,5 @@
+bindings:
+  deploy-live-verification:
+    type: test
+    covers: post-deploy-verification
+    source: tests/verify/deployment.bats

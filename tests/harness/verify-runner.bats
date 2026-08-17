@@ -32,6 +32,7 @@ teardown() {
 @test "the packaged runner selects the default live-verification suite without executing it" {
   run "$VERIFY_RUNNER" --list-default
   [ "$status" -eq 0 ]
+  [[ $output == *"/tests/verify/deployment.bats"* ]]
   [[ $output == *"/tests/verify/suite.bats"* ]]
   [[ $output == *"/tests/verify/smb-fixtures.bats"* ]]
   [[ $output != *"/tests/verify/profiles/"* ]]
