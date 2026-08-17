@@ -29,10 +29,12 @@ teardown() {
   rm -rf "$WORKDIR"
 }
 
-@test "the packaged runner selects the default live-verification suite" {
-  run "$VERIFY_RUNNER"
+@test "the packaged runner selects the default live-verification suite without executing it" {
+  run "$VERIFY_RUNNER" --list-default
   [ "$status" -eq 0 ]
-  [[ $output == *"deployed checks are supplied by capability-specific changes"* ]]
+  [[ $output == *"/tests/verify/suite.bats"* ]]
+  [[ $output == *"/tests/verify/smb-fixtures.bats"* ]]
+  [[ $output != *"/tests/verify/profiles/"* ]]
 }
 
 @test "the packaged Bats runner accepts a controlled passing fixture" {

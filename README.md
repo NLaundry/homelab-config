@@ -68,17 +68,18 @@ validation/evaluation stage and starts no test or deployed-service probe. `test`
 is the complete non-live gate: after lint it runs the registered harness,
 tooling, agent-instrument, current-binding, and VM phases. Candidate systems run
 only as disposable guests on an explicit private test-driver network. The
-execution host supplies compute; `make test` does not activate a candidate generation
-on that host and gives guests no physical-LAN interface or route.
+execution host supplies compute; `make test` does not activate a candidate
+generation on that host and gives guests no physical-LAN interface or route.
 
 `verify` runs selected checks against the current deployment without activating
 a system. Successful `try` and `deploy` activations invoke the same default
 suite automatically. If post-activation verification fails, the Make operation
 fails but does not roll back: the temporary or persistent generation remains
-active until the operator takes another lifecycle action. This foundation adds
-only a non-mutating placeholder; it does not yet govern the repeatability of
-future live checks or claim Samba, ZFS, user-access, or deployment-success
-coverage.
+active until the operator takes another lifecycle action. The default suite
+contains checks safe for frequent post-activation use, including the confined
+SMB verification transaction. Destructive capacity exercises remain separately
+selected under `tests/verify/profiles/`. The suite does not yet claim ordinary
+Samba, ZFS, user-access, or deployment-success coverage.
 
 Each phase remains directly runnable for focused diagnosis:
 
@@ -122,7 +123,9 @@ The NAS (`NASty`, `10.10.10.11`) is deployed remotely. Because the operator
 workstation is macOS/aarch64, Linux builds run on the NAS through
 `--build-host`; the workstation evaluates the flake and activates remotely.
 Deployment defaults authenticate as `operator` with the configured Ed25519 key
-and use passwordless sudo for activation. `try` and `deploy` run deployed
+and use passwordless sudo for activation. On a multi-user Nix workstation, the
+initiating account must be trusted by the local daemon so build-host outputs can
+be imported before activation. `try` and `deploy` run deployed
 verification only after activation succeeds; a verification failure is reported
 as a failed operation without claiming or attempting rollback. `boot`, `dry`,
 and `build` do not run deployed verification because they do not activate a

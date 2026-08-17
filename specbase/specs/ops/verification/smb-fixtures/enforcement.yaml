@@ -1,0 +1,13 @@
+bindings:
+  verification-smb-operations:
+    type: test
+    covers:
+      - verification-share-realized
+      - ordinary-shares-deny-tester
+      - verification-storage-bounded
+      - verification-audit-enabled
+    source: tests/harness/verification-smb-operations.bats
+  live-verification-recovery:
+    type: manual
+    covers: fixture-recovery-procedure
+    source: tests/specbase/manual-verification.md#live-verification-recovery

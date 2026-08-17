@@ -1,0 +1,13 @@
+bindings:
+  verification-identity-operations:
+    type: test
+    covers:
+      - tester-account-provisioned
+      - tester-secret-external
+    source: tests/harness/verification-identity-operations.bats
+  verification-credential-lifecycle:
+    type: manual
+    covers:
+      - tester-principal-managed
+      - tester-secret-rotatable
+    source: tests/specbase/manual-verification.md#verification-credential-lifecycle

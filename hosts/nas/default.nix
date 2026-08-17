@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ./zfs.nix
     ./samba.nix
+    ./verification.nix
     ./avahi.nix
   ];
 

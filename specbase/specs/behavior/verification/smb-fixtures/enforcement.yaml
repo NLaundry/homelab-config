@@ -1,0 +1,12 @@
+bindings:
+  live-smb-fixture-transaction:
+    type: test
+    covers:
+      - tester-authenticated
+      - tester-credential-required
+      - fixture-transaction
+    source: tests/verify/smb-fixtures.bats
+  live-verification-audit:
+    type: manual
+    covers: mutation-attribution
+    source: tests/specbase/manual-verification.md#live-verification-audit

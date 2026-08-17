@@ -21,10 +21,16 @@
             runtimeInputs = [
               tools.byName.bats
               tools.byName.ssh
+              pkgs.coreutils
+              pkgs.expect
             ];
             text = ''
+              tests=( ${self}/tests/verify/*.bats )
+              if [[ ''${1:-} == --list-default ]]; then
+                printf '%s\n' "''${tests[@]}"
+                exit 0
+              fi
               if (( $# == 0 )); then
-                tests=( ${self}/tests/verify/*.bats )
                 set -- "''${tests[@]}"
               fi
               exec bats "$@"
@@ -39,6 +45,7 @@
               tools.byName.make
               tools.byName.specbase
               pkgs.coreutils
+              pkgs.expect
               pkgs.findutils
               pkgs.gawk
               pkgs.gnugrep
