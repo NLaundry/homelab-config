@@ -1,0 +1,13 @@
+bindings:
+  flake-input-pins-release:
+    type: command
+    covers: nixpkgs-release-pinned
+    source: tests/specbase/current-bindings.sh#flake-input-pins-release
+  lock-committed-pinned:
+    type: command
+    covers: nixpkgs-release-pinned
+    source: tests/specbase/current-bindings.sh#lock-committed-pinned
+  flake-evaluates-against-pin:
+    type: command
+    covers: nixpkgs-release-pinned
+    source: tests/specbase/current-bindings.sh#flake-evaluates-against-pin

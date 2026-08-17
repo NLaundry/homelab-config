@@ -1,0 +1,19 @@
+bindings:
+  lint-stage-runs:
+    type: test
+    covers: lint-stage
+    source: tests/harness/lint-operation.bats
+  test-operation-conforms:
+    type: test
+    covers:
+      - test-stage
+      - test-builder-selection
+    source: tests/harness/test-operation.bats
+  test-store-kvm-runtime:
+    type: manual
+    covers: test-builder-selection
+    source: tests/specbase/manual-verification.md#test-store-kvm-runtime
+  verify-runner-conforms:
+    type: test
+    covers: verify-stage
+    source: tests/harness/verify-runner.bats

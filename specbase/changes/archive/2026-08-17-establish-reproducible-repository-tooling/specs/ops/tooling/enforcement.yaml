@@ -1,0 +1,11 @@
+bindings:
+  tooling-environment-conforms:
+    type: test
+    covers:
+      - repository-tool-set
+      - operator-dev-shell
+    source: tests/tooling/environment.bats
+  tooling-catalogue-reviewed:
+    type: review
+    covers: tooling-catalogue
+    source: ops

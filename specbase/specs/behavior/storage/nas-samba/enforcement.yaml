@@ -1,0 +1,22 @@
+bindings:
+  samba-config-eval:
+    type: command
+    covers:
+      - samba-shares-exposed
+      - guest-force-operator
+      - smb-multicast-discovery
+    source: tests/specbase/current-bindings.sh#samba-config-eval
+  samba-firewall-eval:
+    type: command
+    covers: smb-ports-open
+    source: tests/specbase/current-bindings.sh#samba-firewall-eval
+  smbutil-view-wire:
+    type: command
+    covers: samba-shares-exposed
+    source: tests/specbase/current-bindings.sh#smbutil-view-wire
+  samba-runtime-review:
+    type: review
+    covers:
+      - smb-multicast-discovery
+      - guest-force-operator
+    source: behavioural

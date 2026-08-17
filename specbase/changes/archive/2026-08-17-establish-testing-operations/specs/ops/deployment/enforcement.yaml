@@ -1,0 +1,14 @@
+remove:
+  - makefile-targets-expand
+  - makefile-uses-target-and-build-host
+  - makefile-vars-overridable
+bindings:
+  deployment-operations-conform:
+    type: test
+    covers:
+      - remote-deploy-mechanism
+      - deployment-operation-set
+      - post-activation-verification
+      - post-activation-failure-semantics
+      - deployment-inputs-overridable
+    source: tests/harness/deployment-operations.bats

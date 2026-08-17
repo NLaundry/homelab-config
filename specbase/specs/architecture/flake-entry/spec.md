@@ -2,6 +2,9 @@
 id: architecture.flake-entry
 ---
 
+## Purpose
+This pair preserves a host-agnostic flake entry point whose role-named NixOS configuration can be evaluated independently of the machine hostname.
+
 ### Requirement: The flake exposes a host-agnostic NixOS configuration attribute
 **ID:** `flake-exposes-role-attribute`
 The repository SHALL contain a `flake.nix` that exposes

@@ -2,6 +2,9 @@
 id: behavior.storage.nas-users
 ---
 
+## Purpose
+This pair governs the operator administration contract: key-based SSH access and passwordless root escalation on the deployed NAS.
+
 ### Requirement: operator admin user can administer over SSH without a password
 **ID:** `operator-access`
 The NAS configuration SHALL define an `operator` user in the `wheel` group with

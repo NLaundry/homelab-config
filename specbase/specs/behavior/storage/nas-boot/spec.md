@@ -2,6 +2,9 @@
 id: behavior.storage.nas-boot
 ---
 
+## Purpose
+This pair governs the NAS boot contract for importing its existing ZFS data pools with a compatible kernel and an explicit safe root-import policy.
+
 ### Requirement: NAS boots with its ZFS data pools imported
 **ID:** `pools-import-on-boot`
 The NAS configuration SHALL import the `smolBoy` and `mediaBin` ZFS pools via

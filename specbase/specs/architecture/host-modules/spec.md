@@ -2,6 +2,9 @@
 id: architecture.host-modules
 ---
 
+## Purpose
+This pair keeps each managed host composed from an explicit role directory whose default module imports hardware and concern-specific sibling modules.
+
 ### Requirement: Each host lives under hosts/<role>/ as a split module set
 **ID:** `host-module-split`
 Each NixOS host the repository manages SHALL live under `hosts/<role>/`. The

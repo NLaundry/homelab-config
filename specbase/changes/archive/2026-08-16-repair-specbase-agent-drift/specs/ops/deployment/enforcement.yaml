@@ -1,0 +1,19 @@
+bindings:
+  makefile-targets-expand:
+    type: command
+    covers: makefile-target-surface
+    source: tests/specbase/current-bindings.sh#makefile-targets-expand
+  makefile-uses-target-and-build-host:
+    type: command
+    covers:
+      - remote-deploy-mechanism
+      - makefile-target-surface
+    source: tests/specbase/current-bindings.sh#makefile-uses-target-and-build-host
+  makefile-vars-overridable:
+    type: command
+    covers: makefile-target-surface
+    source: tests/specbase/current-bindings.sh#makefile-vars-overridable
+  deploy-succeeds-runtime:
+    type: manual
+    covers: remote-deploy-mechanism
+    source: tests/specbase/manual-verification.md#deploy-succeeds-runtime

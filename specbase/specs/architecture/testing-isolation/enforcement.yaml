@@ -1,0 +1,9 @@
+bindings:
+  test-subject-boundary-conforms:
+    type: test
+    covers: test-subject-boundary
+    source: tests/harness/test-operation.bats
+  test-network-boundary-conforms:
+    type: test
+    covers: test-network-boundary
+    source: tests/harness/nixos-vm.nix

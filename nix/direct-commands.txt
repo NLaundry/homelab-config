@@ -1,0 +1,12 @@
+ansible
+ansible-playbook
+bats
+git
+jq
+make
+nixos-rebuild
+shellcheck
+shfmt
+specbase
+ssh
+yq

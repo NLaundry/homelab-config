@@ -1,0 +1,11 @@
+remove:
+  - openspec-validates
+bindings:
+  specbase-validates:
+    type: command
+    covers: practices-sdd
+    source: tests/agents/specbase-instruments.sh#validate
+  governed-schema-declared:
+    type: command
+    covers: practices-sdd
+    source: tests/agents/specbase-instruments.sh#config

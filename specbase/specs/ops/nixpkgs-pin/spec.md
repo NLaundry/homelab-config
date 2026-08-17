@@ -2,6 +2,9 @@
 id: ops.nixpkgs-pin
 ---
 
+## Purpose
+This pair keeps nixpkgs pinned to the intended NixOS release through a committed lockfile and verifies that the flake evaluates against that pin.
+
 ### Requirement: nixpkgs is pinned to a NixOS release with a committed lock
 **ID:** `nixpkgs-release-pinned`
 The flake input for nixpkgs SHALL pin a NixOS release channel matching the

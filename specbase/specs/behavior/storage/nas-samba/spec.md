@@ -3,10 +3,7 @@ id: behavior.storage.nas-samba
 ---
 
 ## Purpose
-The NAS holds the user's media and personal data on two ZFS pools
-(`mediaBin`, `smolBoy`) but exposes nothing to the LAN. This pair governs
-guest-open, mDNS-discoverable SMB access to both pools so macOS and Linux
-clients can browse them without credentials at `smb://NASty.local`.
+The NAS holds media and personal data on two ZFS pools. This pair governs guest-open, mDNS-discoverable SMB access to both pools for homelab clients.
 
 ### Requirement: The NAS exposes guest-open SMB shares for mediaBin and smolBoy
 **ID:** `samba-shares-exposed`
