@@ -1,0 +1,17 @@
+command=make test-vm
+started=2026-08-28T19:28:09Z
+revision=32a5772200a82509db25a27647a28ee7ae3590b3
+store=ssh-ng://operator@10.10.10.11?<sanitized>&system-features=kvm%20nixos-test
+nix build --no-update-lock-file --store "ssh-ng://operator@10.10.10.11?ssh-key=<redacted-key-path>&system-features=kvm%20nixos-test" --eval-store auto --no-link .\#checks.x86_64-linux.vm-tests
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+copying 0 paths...
+finished=2026-08-28T19:28:19Z
+exit=0
+command=forced rebuild of registered VM leaves
+started=2026-08-28T19:28:32Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+copying 0 paths...
+checking outputs of '/nix/store/rd700da8llqpp709ixasf5kcl5ba63qh-vm-test-run-harness-private-network.drv'...
+checking outputs of '/nix/store/3mbzvda6zb0s9hcziwvjqbv7qmz1land-vm-test-run-nas-samba-behavior.drv'...
+finished=2026-08-28T19:30:36Z
+exit=0

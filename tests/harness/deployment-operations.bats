@@ -7,7 +7,8 @@ setup() {
   ROOT=${HOMELAB_ROOT:-"$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"}
   WORKDIR=$(mktemp -d)
   EVENT_LOG="$WORKDIR/events.log"
-  export EVENT_LOG ACTIVATION_STATUS=0 VERIFY_STATUS=0
+  VERIFY_ENV_LOG="$WORKDIR/verify-env.log"
+  export EVENT_LOG VERIFY_ENV_LOG ACTIVATION_STATUS=0 VERIFY_STATUS=0
 
   cat >"$WORKDIR/nixos-rebuild" <<'SCRIPT'
 #!/bin/sh
@@ -21,6 +22,10 @@ SCRIPT
 for argument in "$@"; do
   if [ "$argument" = '.#verify' ]; then
     printf 'verify\n' >>"$EVENT_LOG"
+    printf 'target=%s\naddress=%s\nidentity=%s\n' \
+      "${HOMELAB_DEPLOYMENT_TARGET:-}" \
+      "${HOMELAB_NAS_ADDRESS:-}" \
+      "${HOMELAB_DEPLOYMENT_SSH_IDENTITY:-}" >"$VERIFY_ENV_LOG"
     exit "${VERIFY_STATUS:-0}"
   fi
 done
@@ -64,6 +69,11 @@ assert_deployment_operations() {
     esac
 
     output=$(make -rR --no-print-directory -f "$makefile" -n "$target") || return 1
+    require_text "$output" "deployment-plan flake=.#nas" "$target omits resolved deployment plan" || return 1
+    require_text "$output" "build-host=operator@10.10.10.11" "$target plan ignores build host" || return 1
+    require_text "$output" "activation-host=operator@10.10.10.11" "$target plan ignores activation host" || return 1
+    require_text "$output" "ssh-identity=$HOME/.ssh/id_ed25519" "$target plan omits SSH identity" || return 1
+    require_text "$output" "privilege=--sudo" "$target plan omits privilege boundary" || return 1
     require_text "$output" "--flake .#nas" "$target ignores FLAKE" || return 1
     require_text "$output" "--build-host operator@10.10.10.11" "$target ignores TARGET for builds" || return 1
     printf '%s\n' "$output" | grep -Eq "[[:space:]]${action}$" || {
@@ -77,6 +87,9 @@ assert_deployment_operations() {
     fi
 
     if [[ $target == deploy || $target == try ]]; then
+      require_text "$output" "HOMELAB_NAS_ADDRESS=\"10.10.10.11\"" "$target verification ignores selected address" || return 1
+      require_text "$output" "HOMELAB_DEPLOYMENT_TARGET=\"operator@10.10.10.11\"" "$target verification ignores selected target" || return 1
+      require_text "$output" "HOMELAB_DEPLOYMENT_SSH_IDENTITY=\"$HOME/.ssh/id_ed25519\"" "$target verification ignores selected identity" || return 1
       require_text "$output" "run .#verify --" "$target omits post-activation verification" || return 1
       require_text "$output" "No rollback was attempted" "$target omits failure-state diagnostic" || return 1
       activation_line=$(grep -nE "[[:space:]]${action}$" <<<"$output" | head -n 1 | cut -d: -f1)
@@ -102,12 +115,16 @@ assert_deployment_operations() {
 
     output=$(make -rR --no-print-directory -f "$makefile" -n "$target" 'FLAKE=.#custom')
     require_text "$output" "--flake .#custom" "$target ignores FLAKE" || return 1
+
+    output=$(make -rR --no-print-directory -f "$makefile" -n "$target" KEY=/tmp/alternate-identity)
+    require_text "$output" "ssh-identity=/tmp/alternate-identity" "$target ignores KEY" || return 1
   done
 }
 
 run_deployment_operation() {
   local target=$1
-  make -rR --no-print-directory -C "$ROOT" "$target" \
+  shift
+  make -rR --no-print-directory -C "$ROOT" "$target" "$@" \
     NIX="$WORKDIR/nix" NRB="$WORKDIR/nixos-rebuild"
 }
 
@@ -143,7 +160,7 @@ run_deployment_operation() {
 @test "a target-specific build override regression is detected without deployment" {
   awk '
     /^build:/ { in_build = 1 }
-    in_build && /^\t/ {
+    in_build && /^\t.*\$\(NRB\)/ {
       gsub(/--build-host \$\(TARGET\)/, "--build-host operator@10.10.10.11")
       in_build = 0
     }
@@ -153,6 +170,14 @@ run_deployment_operation() {
   run assert_deployment_operations "$WORKDIR/Makefile"
   [ "$status" -ne 0 ]
   [[ $output == *"build ignores TARGET for builds"* ]]
+}
+
+@test "activation verification receives the resolved target address and identity" {
+  run run_deployment_operation deploy TARGET=operator@example.test KEY=/tmp/alternate-identity
+  [ "$status" -eq 0 ]
+  grep -Fxq 'target=operator@example.test' "$VERIFY_ENV_LOG"
+  grep -Fxq 'address=example.test' "$VERIFY_ENV_LOG"
+  grep -Fxq 'identity=/tmp/alternate-identity' "$VERIFY_ENV_LOG"
 }
 
 @test "try and deploy verify strictly after successful activation" {

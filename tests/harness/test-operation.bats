@@ -43,7 +43,7 @@ teardown() { rm -rf "$WORKDIR"; }
 @test "test-vm selects the fixed aggregate through the default store" {
   run make -rR --no-print-directory -C "$ROOT" test-vm NIX="$WORKDIR/nix"
   [ "$status" -eq 0 ]
-  grep -Fq 'build --store ssh-ng://operator@10.10.10.11' "$NIX_LOG"
+  grep -Fq 'build --no-update-lock-file --store ssh-ng://operator@10.10.10.11' "$NIX_LOG"
   grep -Fq -- '--eval-store auto --no-link .#checks.x86_64-linux.vm-tests' "$NIX_LOG"
 }
 
@@ -51,7 +51,7 @@ teardown() { rm -rf "$WORKDIR"; }
   store='ssh-ng://ci@example.test?ssh-key=/tmp/key&system-features=kvm%20nixos-test'
   run make -rR --no-print-directory -C "$ROOT" test-vm NIX="$WORKDIR/nix" TEST_STORE="$store"
   [ "$status" -eq 0 ]
-  grep -Fq "build --store $store" "$NIX_LOG"
+  grep -Fq "build --no-update-lock-file --store $store" "$NIX_LOG"
   grep -Fq '.#checks.x86_64-linux.vm-tests' "$NIX_LOG"
 }
 

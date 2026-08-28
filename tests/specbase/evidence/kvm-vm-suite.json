@@ -1,0 +1,21 @@
+{
+  "id": "kvm-vm-suite",
+  "binding": "governance.testing-control/kvm-builder-runtime",
+  "type": "manual",
+  "status": "current",
+  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "environment": "aarch64-darwin evaluator with trusted ssh-ng x86_64-linux KVM/nixos-test store at operator@10.10.10.11",
+  "sourcePersona": "repository test operator",
+  "observedAt": "2026-08-28T20:29:07Z",
+  "freshUntil": "2026-09-27T20:29:07Z",
+  "limitations": "Forced rebuild proves both registered disposable VM derivations and their runtime assertions on the selected builder; it does not prove live NAS services or physical network isolation.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Builds and runs disposable VM derivations in the selected Nix store; no host activation."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "success"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+}

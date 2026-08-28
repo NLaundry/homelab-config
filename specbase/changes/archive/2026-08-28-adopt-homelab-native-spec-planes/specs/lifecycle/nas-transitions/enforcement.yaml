@@ -1,0 +1,20 @@
+bindings:
+  pools-import-after-boot:
+    type: manual
+    covers: pools-import-on-boot
+    source: tests/specbase/manual-verification.md#pools-import-on-boot-runtime
+  deployment-runtime:
+    type: manual
+    covers: deployment-succeeds
+    source: tests/specbase/manual-verification.md#deploy-succeeds-runtime
+  deployment-transition-semantics:
+    type: test
+    covers:
+      - deployment-operation-set
+      - post-activation-verification
+      - post-activation-failure-semantics
+    source: tests/harness/deployment-operations.bats
+  post-deploy-observations:
+    type: test
+    covers: post-deploy-verification
+    source: tests/verify/deployment.bats

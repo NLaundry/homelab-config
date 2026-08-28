@@ -1,0 +1,5 @@
+1..4
+ok 1 valid projected NAS, operator, and kernel/ZFS records conform
+ok 2 a forced-root-import configuration mutant is rejected diagnostically
+ok 3 an extra approved-key mutant is rejected diagnostically
+ok 4 a broken ZFS module mutant is rejected diagnostically

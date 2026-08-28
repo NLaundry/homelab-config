@@ -1,30 +1,13 @@
 #!/usr/bin/env bats
 
 # bats file_tags=nas,samba
+# shellcheck source=tests/verify/lib/nas-samba-safety.sh
+source "$BATS_TEST_DIRNAME/lib/nas-samba-safety.sh"
 
 setup() {
   ROOT=${HOMELAB_ROOT:-"$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"}
   SERVER=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/ansible/inventory.yml")"}
   EXPECTED_SHARES=(mediaBin smolBoy)
-}
-
-cleanup_guest_resources() {
-  trap - EXIT INT TERM
-  GUEST_CLEANUP_ERROR=''
-  if [[ ${GUEST_NAMESPACE_CREATED:-false} == true ]]; then
-    rm -f -- "$GUEST_FIXTURE" || GUEST_CLEANUP_ERROR='guest fixture cleanup failed'
-    rmdir -- "$GUEST_MOUNTPOINT/$GUEST_NAMESPACE" ||
-      GUEST_CLEANUP_ERROR="${GUEST_CLEANUP_ERROR:+$GUEST_CLEANUP_ERROR; }guest namespace cleanup failed"
-  fi
-  if [[ ${GUEST_MOUNT_ATTEMPTED:-false} == true ]]; then
-    /sbin/umount "$GUEST_MOUNTPOINT" ||
-      GUEST_CLEANUP_ERROR="${GUEST_CLEANUP_ERROR:+$GUEST_CLEANUP_ERROR; }guest unmount failed"
-  fi
-  if [[ -n ${GUEST_MOUNTPOINT:-} && -d $GUEST_MOUNTPOINT ]]; then
-    rmdir "$GUEST_MOUNTPOINT" ||
-      GUEST_CLEANUP_ERROR="${GUEST_CLEANUP_ERROR:+$GUEST_CLEANUP_ERROR; }local mountpoint cleanup failed"
-  fi
-  [[ -z $GUEST_CLEANUP_ERROR ]]
 }
 
 guest_share_round_trip() {
@@ -36,7 +19,7 @@ guest_share_round_trip() {
   trap cleanup_guest_resources EXIT
   trap 'cleanup_guest_resources; exit 130' INT
   trap 'cleanup_guest_resources; exit 143' TERM
-  GUEST_NAMESPACE=".homelab-verify-$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM"
+  GUEST_NAMESPACE=$(new_guest_namespace) || return 1
   GUEST_FIXTURE="$GUEST_MOUNTPOINT/$GUEST_NAMESPACE/round-trip.txt"
   expected="homelab guest SMB verification $GUEST_NAMESPACE"
 

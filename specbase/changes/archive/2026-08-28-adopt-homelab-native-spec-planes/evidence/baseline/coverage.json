@@ -1,0 +1,598 @@
+{
+  "summary": {
+    "totals": {
+      "specs": 15,
+      "requirements": 32,
+      "coveredRequirements": 32,
+      "hangingRequirements": 0,
+      "scenarios": 54,
+      "coveredScenarios": 54,
+      "uncoveredScenarios": 0
+    },
+    "planes": {
+      "agents": {
+        "specs": 2,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 0,
+          "complete": 2
+        },
+        "counts": {
+          "requirements": 3,
+          "coveredRequirements": 3,
+          "hangingRequirements": 0,
+          "scenarios": 6,
+          "coveredScenarios": 6,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 4,
+          "review": 0,
+          "manual": 0
+        }
+      },
+      "architecture": {
+        "specs": 3,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 0,
+          "complete": 3
+        },
+        "counts": {
+          "requirements": 4,
+          "coveredRequirements": 4,
+          "hangingRequirements": 0,
+          "scenarios": 6,
+          "coveredScenarios": 6,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 8,
+          "review": 0,
+          "manual": 0
+        }
+      },
+      "behavior": {
+        "specs": 4,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 0,
+          "complete": 4
+        },
+        "counts": {
+          "requirements": 6,
+          "coveredRequirements": 6,
+          "hangingRequirements": 0,
+          "scenarios": 11,
+          "coveredScenarios": 11,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 6,
+          "review": 0,
+          "manual": 2
+        }
+      },
+      "code-quality": {
+        "specs": 1,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 1,
+          "complete": 0
+        },
+        "counts": {
+          "requirements": 4,
+          "coveredRequirements": 4,
+          "hangingRequirements": 0,
+          "scenarios": 4,
+          "coveredScenarios": 4,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 0,
+          "review": 1,
+          "manual": 0
+        }
+      },
+      "ops": {
+        "specs": 5,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 1,
+          "complete": 4
+        },
+        "counts": {
+          "requirements": 15,
+          "coveredRequirements": 15,
+          "hangingRequirements": 0,
+          "scenarios": 27,
+          "coveredScenarios": 27,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 10,
+          "review": 1,
+          "manual": 2
+        }
+      }
+    },
+    "states": {
+      "incomplete-pair": 0,
+      "broken": 0,
+      "stale": 0,
+      "hanging": 0,
+      "degraded": 2,
+      "complete": 13
+    },
+    "strengths": {
+      "automated": 28,
+      "review": 2,
+      "manual": 4
+    },
+    "review": {
+      "threshold": 4,
+      "lenses": [
+        {
+          "lens": "architectural",
+          "scope": "architecture",
+          "crossCutting": false,
+          "reviewClaims": 0
+        },
+        {
+          "lens": "behavioural",
+          "scope": "behavior",
+          "crossCutting": false,
+          "reviewClaims": 0
+        },
+        {
+          "lens": "code-quality",
+          "scope": "code-quality",
+          "crossCutting": false,
+          "reviewClaims": 1
+        },
+        {
+          "lens": "enforcement",
+          "scope": "",
+          "crossCutting": true,
+          "reviewClaims": 0
+        },
+        {
+          "lens": "ops",
+          "scope": "ops",
+          "crossCutting": false,
+          "reviewClaims": 1
+        }
+      ],
+      "unlensed": [],
+      "splitCandidates": []
+    }
+  },
+  "specs": [
+    {
+      "locator": "agents/review-panel",
+      "specId": "agents.review-panel",
+      "plane": "agents",
+      "state": "complete",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 4,
+        "coveredScenarios": 4,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "panel-covers-planes",
+        "panel-routes-test-quality"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "agents/spec-driven",
+      "specId": "agents.spec-driven",
+      "plane": "agents",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "practices-sdd"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "architecture/flake-entry",
+      "specId": "architecture.flake-entry",
+      "plane": "architecture",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "flake-exposes-role-attribute"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 3,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "architecture/host-modules",
+      "specId": "architecture.host-modules",
+      "plane": "architecture",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "host-module-split"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "architecture/testing-isolation",
+      "specId": "architecture.testing-isolation",
+      "plane": "architecture",
+      "state": "complete",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "test-network-boundary",
+        "test-subject-boundary"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 3,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "behavior/storage/nas-boot",
+      "specId": "behavior.storage.nas-boot",
+      "plane": "behavior",
+      "state": "complete",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 4,
+        "coveredScenarios": 4,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "force-import-root-clean",
+        "pools-import-on-boot"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 1
+      }
+    },
+    {
+      "locator": "behavior/storage/nas-samba",
+      "specId": "behavior.storage.nas-samba",
+      "plane": "behavior",
+      "state": "complete",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 3,
+        "coveredScenarios": 3,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "guest-force-operator",
+        "samba-shares-exposed"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "behavior/storage/nas-users",
+      "specId": "behavior.storage.nas-users",
+      "plane": "behavior",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 3,
+        "coveredScenarios": 3,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "operator-access"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 1,
+        "review": 0,
+        "manual": 1
+      }
+    },
+    {
+      "locator": "behavior/storage/nas-utility-packages",
+      "specId": "behavior.storage.nas-utility-packages",
+      "plane": "behavior",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 1,
+        "coveredScenarios": 1,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "utility-packages-enabled"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 1,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "code-quality/testing",
+      "specId": "code-quality.testing",
+      "plane": "code-quality",
+      "state": "degraded",
+      "counts": {
+        "requirements": 4,
+        "coveredRequirements": 4,
+        "hangingRequirements": 0,
+        "scenarios": 4,
+        "coveredScenarios": 4,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "actionable-test-failures",
+        "failure-safe-live-cleanup",
+        "production-path-fidelity",
+        "run-scoped-state"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "actionable-test-failures",
+        "failure-safe-live-cleanup",
+        "production-path-fidelity",
+        "run-scoped-state"
+      ],
+      "strengths": {
+        "automated": 0,
+        "review": 1,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "ops/deployment",
+      "specId": "ops.deployment",
+      "plane": "ops",
+      "state": "complete",
+      "counts": {
+        "requirements": 6,
+        "coveredRequirements": 6,
+        "hangingRequirements": 0,
+        "scenarios": 11,
+        "coveredScenarios": 11,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "deployment-inputs-overridable",
+        "deployment-operation-set",
+        "post-activation-failure-semantics",
+        "post-activation-verification",
+        "post-deploy-verification",
+        "remote-deploy-mechanism"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 1
+      }
+    },
+    {
+      "locator": "ops/nixpkgs-pin",
+      "specId": "ops.nixpkgs-pin",
+      "plane": "ops",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 3,
+        "coveredScenarios": 3,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "nixpkgs-release-pinned"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 3,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "ops/repository-operations",
+      "specId": "ops.repository-operations",
+      "plane": "ops",
+      "state": "complete",
+      "counts": {
+        "requirements": 1,
+        "coveredRequirements": 1,
+        "hangingRequirements": 0,
+        "scenarios": 1,
+        "coveredScenarios": 1,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "makefile-operation-surface"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 1,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "ops/testing",
+      "specId": "ops.testing",
+      "plane": "ops",
+      "state": "complete",
+      "counts": {
+        "requirements": 4,
+        "coveredRequirements": 4,
+        "hangingRequirements": 0,
+        "scenarios": 7,
+        "coveredScenarios": 7,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "lint-stage",
+        "test-builder-selection",
+        "test-stage",
+        "verify-stage"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 3,
+        "review": 0,
+        "manual": 1
+      }
+    },
+    {
+      "locator": "ops/tooling",
+      "specId": "ops.tooling",
+      "plane": "ops",
+      "state": "degraded",
+      "counts": {
+        "requirements": 3,
+        "coveredRequirements": 3,
+        "hangingRequirements": 0,
+        "scenarios": 5,
+        "coveredScenarios": 5,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "operator-dev-shell",
+        "repository-tool-set",
+        "tooling-catalogue"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "tooling-catalogue"
+      ],
+      "strengths": {
+        "automated": 1,
+        "review": 1,
+        "manual": 0
+      }
+    }
+  ],
+  "orphans": {
+    "staleBindings": [],
+    "enforcementOnlyPairs": [],
+    "brokenTargets": [],
+    "unboundEvidence": []
+  },
+  "strict": false,
+  "valid": true,
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}

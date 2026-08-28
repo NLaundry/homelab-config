@@ -57,7 +57,7 @@ run_lint() {
   [ "$status" -eq 0 ]
   [ "$before" = "$after" ]
   [ "$(sed -n '1p' "$CALL_LOG")" = "specbase:validate --specs --strict" ]
-  [ "$(sed -n '2p' "$CALL_LOG")" = "nix:flake check --all-systems --no-build" ]
+  [ "$(sed -n '2p' "$CALL_LOG")" = "nix:flake check --no-update-lock-file --all-systems --no-build" ]
   [ "$(wc -l <"$CALL_LOG" | tr -d ' ')" -eq 2 ]
 }
 
@@ -87,5 +87,5 @@ run_lint() {
   [ "$status" -ne 0 ]
   [ "$before" = "$after" ]
   grep -Fxq 'specbase:validate --specs --strict' "$CALL_LOG"
-  grep -Fxq 'nix:flake check --all-systems --no-build' "$CALL_LOG"
+  grep -Fxq 'nix:flake check --no-update-lock-file --all-systems --no-build' "$CALL_LOG"
 }

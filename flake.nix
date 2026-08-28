@@ -69,6 +69,11 @@
       linuxPkgs = pkgsFor "x86_64-linux";
       vmHarness = linuxPkgs.callPackage ./tests/harness/nixos-vm.nix { };
       nasVm = linuxPkgs.callPackage ./tests/nas-vm.nix { };
+      vmSuite = import ./nix/vm-tests.nix {
+        inherit (nixpkgs) lib;
+        pkgs = linuxPkgs;
+        inherit vmHarness nasVm;
+      };
     in
     {
       # Host-agnostic attribute name: deploy with `.#nas`, not the hostname.
@@ -122,22 +127,6 @@
         {
           tooling-environment = (toolsFor system).toolingCheck;
         }
-        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-          # Focused attribute for diagnosis and forced runtime attestation.
-          vm-harness-private-network = vmHarness;
-          nas-samba-vm = nasVm;
-
-          # Stable aggregate selected explicitly by `make test-vm`.
-          vm-tests = linuxPkgs.linkFarm "homelab-vm-tests" [
-            {
-              name = "harness-private-network";
-              path = vmHarness;
-            }
-            {
-              name = "nas-samba-behavior";
-              path = nasVm;
-            }
-          ];
-        });
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") vmSuite.checks);
     };
 }

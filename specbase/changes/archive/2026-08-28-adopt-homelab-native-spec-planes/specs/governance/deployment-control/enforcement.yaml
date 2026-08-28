@@ -1,0 +1,7 @@
+bindings:
+  deployment-plan-conforms:
+    type: test
+    covers:
+      - remote-deploy-mechanism
+      - deployment-inputs-overridable
+    source: tests/harness/deployment-operations.bats

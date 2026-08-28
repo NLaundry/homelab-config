@@ -1,0 +1,22 @@
+{
+  "id": "post-deploy-health",
+  "binding": "lifecycle.nas-transitions/post-deploy-observations",
+  "type": "live",
+  "status": "current",
+  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "generation": "/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1",
+  "environment": "aarch64-darwin operator workstation to NAS 10.10.10.11",
+  "sourcePersona": "deployment health verifier",
+  "observedAt": "2026-08-28T20:29:01Z",
+  "freshUntil": "2026-08-29T20:29:01Z",
+  "limitations": "Establishes current reachability, failed-unit state, and active generation only; it does not prove that a deployment transition produced this state.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Read-only bounded SSH health observations."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "not-applicable"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+}

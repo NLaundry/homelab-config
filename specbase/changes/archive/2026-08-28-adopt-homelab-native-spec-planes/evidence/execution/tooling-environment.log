@@ -1,0 +1,21 @@
+command=make test-tooling
+started=2026-08-28T19:31:52Z
+nix develop --no-update-lock-file --command env "TEST_STORE=ssh-ng://operator@10.10.10.11?ssh-key=<redacted-key-path>&system-features=kvm%20nixos-test" bats tests/tooling/environment.bats
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+1..14
+ok 1 repo-tools, default shell, and native contract evaluate for every supported system
+ok 2 the native repo-tools contract executes on every supported system
+ok 3 the Darwin SSH command is a bounded adapter to the platform transport
+ok 4 the current development shell supplies every declared direct command
+ok 5 registered Make operations use only managed or explicit bootstrap commands
+ok 6 the independent command inventory matches the Nix package registry
+ok 7 the Nix-packaged Specbase CLI reports the selected compatible release
+ok 8 every default shell derivation directly consumes repo-tools
+ok 9 a controlled missing direct command is rejected
+ok 10 controlled direct-command inventory drift is rejected
+ok 11 a controlled unregistered Make operation command is rejected
+ok 12 a controlled supported-system removal is rejected
+ok 13 controlled default-shell input drift is rejected
+ok 14 managed commands do not resolve through Homebrew or global npm
+finished=2026-08-28T19:32:45Z
+exit=0

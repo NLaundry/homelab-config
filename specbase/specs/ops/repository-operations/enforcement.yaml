@@ -1,5 +1,0 @@
-bindings:
-  makefile-operation-surface-conforms:
-    type: test
-    covers: makefile-operation-surface
-    source: tests/harness/make-operation-surface.bats

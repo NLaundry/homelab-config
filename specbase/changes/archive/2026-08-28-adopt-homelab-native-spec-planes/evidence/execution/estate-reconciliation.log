@@ -1,0 +1,11 @@
+command=read-only Estate reconciliation
+started=2026-08-28T19:26:58Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+host=NASty
+generation=/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1
+active
+mediaBin	ONLINE
+smolBoy	ONLINE
+all pools are healthy
+finished=2026-08-28T19:27:02Z
+exit=0

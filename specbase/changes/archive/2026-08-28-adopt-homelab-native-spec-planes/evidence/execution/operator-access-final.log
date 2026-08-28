@@ -1,0 +1,7 @@
+implementation_digest=implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52
+started=2026-08-28T20:26:12Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+host=NASty generation=/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1
+root
+finished=2026-08-28T20:26:16Z
+exit=0

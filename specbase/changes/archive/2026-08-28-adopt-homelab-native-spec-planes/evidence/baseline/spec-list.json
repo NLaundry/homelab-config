@@ -1,0 +1,293 @@
+{
+  "specs": [
+    {
+      "id": "agents.review-panel",
+      "requirementCount": 2,
+      "locator": "agents/review-panel",
+      "specId": "agents.review-panel",
+      "plane": "agents",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/agents/review-panel/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/agents/review-panel/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 2,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "agents.spec-driven",
+      "requirementCount": 1,
+      "locator": "agents/spec-driven",
+      "specId": "agents.spec-driven",
+      "plane": "agents",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/agents/spec-driven/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/agents/spec-driven/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "architecture.flake-entry",
+      "requirementCount": 1,
+      "locator": "architecture/flake-entry",
+      "specId": "architecture.flake-entry",
+      "plane": "architecture",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/flake-entry/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/flake-entry/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "architecture.host-modules",
+      "requirementCount": 1,
+      "locator": "architecture/host-modules",
+      "specId": "architecture.host-modules",
+      "plane": "architecture",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/host-modules/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/host-modules/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "architecture.testing-isolation",
+      "requirementCount": 2,
+      "locator": "architecture/testing-isolation",
+      "specId": "architecture.testing-isolation",
+      "plane": "architecture",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/testing-isolation/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/architecture/testing-isolation/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 2,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "behavior.storage.nas-boot",
+      "requirementCount": 2,
+      "locator": "behavior/storage/nas-boot",
+      "specId": "behavior.storage.nas-boot",
+      "plane": "behavior",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-boot/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-boot/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 2,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "behavior.storage.nas-samba",
+      "requirementCount": 2,
+      "locator": "behavior/storage/nas-samba",
+      "specId": "behavior.storage.nas-samba",
+      "plane": "behavior",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-samba/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-samba/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 2,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "behavior.storage.nas-users",
+      "requirementCount": 1,
+      "locator": "behavior/storage/nas-users",
+      "specId": "behavior.storage.nas-users",
+      "plane": "behavior",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-users/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-users/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "behavior.storage.nas-utility-packages",
+      "requirementCount": 1,
+      "locator": "behavior/storage/nas-utility-packages",
+      "specId": "behavior.storage.nas-utility-packages",
+      "plane": "behavior",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-utility-packages/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/behavior/storage/nas-utility-packages/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "code-quality.testing",
+      "requirementCount": 4,
+      "locator": "code-quality/testing",
+      "specId": "code-quality.testing",
+      "plane": "code-quality",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/code-quality/testing/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/code-quality/testing/enforcement.yaml",
+      "coverage": {
+        "state": "broken",
+        "ready": false,
+        "covered": 0,
+        "hanging": 4,
+        "stale": 0,
+        "broken": 1,
+        "planned": 0
+      }
+    },
+    {
+      "id": "ops.deployment",
+      "requirementCount": 6,
+      "locator": "ops/deployment",
+      "specId": "ops.deployment",
+      "plane": "ops",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/deployment/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/deployment/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 6,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "ops.nixpkgs-pin",
+      "requirementCount": 1,
+      "locator": "ops/nixpkgs-pin",
+      "specId": "ops.nixpkgs-pin",
+      "plane": "ops",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/nixpkgs-pin/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/nixpkgs-pin/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "ops.repository-operations",
+      "requirementCount": 1,
+      "locator": "ops/repository-operations",
+      "specId": "ops.repository-operations",
+      "plane": "ops",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/repository-operations/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/repository-operations/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 1,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "ops.testing",
+      "requirementCount": 4,
+      "locator": "ops/testing",
+      "specId": "ops.testing",
+      "plane": "ops",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/testing/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/testing/enforcement.yaml",
+      "coverage": {
+        "state": "complete",
+        "ready": true,
+        "covered": 4,
+        "hanging": 0,
+        "stale": 0,
+        "broken": 0,
+        "planned": 0
+      }
+    },
+    {
+      "id": "ops.tooling",
+      "requirementCount": 3,
+      "locator": "ops/tooling",
+      "specId": "ops.tooling",
+      "plane": "ops",
+      "pairStatus": "complete",
+      "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/tooling/spec.md",
+      "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/ops/tooling/enforcement.yaml",
+      "coverage": {
+        "state": "broken",
+        "ready": false,
+        "covered": 2,
+        "hanging": 1,
+        "stale": 0,
+        "broken": 1,
+        "planned": 0
+      }
+    }
+  ],
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}

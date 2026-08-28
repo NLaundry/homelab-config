@@ -9,6 +9,7 @@ NON_LIVE_PHASES := harness tooling agents current-bindings
 
 HOST    ?= nas
 TARGET  ?= operator@10.10.10.11
+TARGET_ADDRESS = $(lastword $(subst @, ,$(TARGET)))
 # NOTE: the '#' must be escaped as '\#' — in Make a bare '#' starts a comment.
 FLAKE   ?= .\#$(HOST)
 
@@ -37,7 +38,8 @@ TEST_STORE ?= ssh-ng://operator@10.10.10.11?ssh-key=$(KEY)&system-features=kvm%2
 VERIFY_ARGS ?=
 
 REBUILD = $(NRB) --flake $(FLAKE) --target-host $(TARGET) --build-host $(TARGET) $(SUDO)
-RUN_VERIFY = $(NIX) run .\#verify --
+DEPLOYMENT_PLAN = @printf '%s\n' 'deployment-plan flake=$(FLAKE) build-host=$(TARGET) activation-host=$(TARGET) ssh-identity=$(KEY) privilege=$(SUDO)'
+RUN_VERIFY = env HOMELAB_NAS_ADDRESS="$(TARGET_ADDRESS)" HOMELAB_DEPLOYMENT_TARGET="$(TARGET)" HOMELAB_DEPLOYMENT_SSH_IDENTITY="$(KEY)" $(NIX) run .\#verify --
 RUN_SELECTED_VERIFY = $(RUN_VERIFY) $(VERIFY_ARGS)
 
 .DEFAULT_GOAL := help
@@ -59,27 +61,32 @@ help: ## List documented repository operations
 		'  verify     Run checks against the deployed homelab'
 
 deploy: ## Build on NAS, activate persistently, then verify
+	$(DEPLOYMENT_PLAN)
 	$(REBUILD) switch
 	@printf '%s\n' 'Activation succeeded. Running deployed verification.'
 	@$(RUN_VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but deployed verification failed. No rollback was attempted.' >&2; exit $$status; }
 
 boot: ## Build on NAS and set the next-boot default without activating
+	$(DEPLOYMENT_PLAN)
 	$(REBUILD) boot
 
 try: ## Build on NAS, activate temporarily, then verify
+	$(DEPLOYMENT_PLAN)
 	$(REBUILD) test
 	@printf '%s\n' 'Activation succeeded. Running deployed verification.'
 	@$(RUN_VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but deployed verification failed. No rollback was attempted.' >&2; exit $$status; }
 
 dry: ## Preview the NAS activation without applying it
+	$(DEPLOYMENT_PLAN)
 	$(REBUILD) dry-activate
 
 build: ## Build the NAS configuration without activating it
+	$(DEPLOYMENT_PLAN)
 	$(NRB) --flake $(FLAKE) --build-host $(TARGET) build
 
 lint: ## Strictly validate current specs, then evaluate all flake checks
 	$(SPECBASE) validate --specs --strict
-	$(NIX) flake check --all-systems --no-build
+	$(NIX) flake check --no-update-lock-file --all-systems --no-build
 
 test: lint ## Run every registered non-live phase
 	@for phase in $(NON_LIVE_PHASES); do \
@@ -91,16 +98,16 @@ test-harness:
 	$(NIX) run .\#harness
 
 test-tooling:
-	$(NIX) develop --command env "TEST_STORE=$(TEST_STORE)" bats tests/tooling/environment.bats
+	$(NIX) develop --no-update-lock-file --command env "TEST_STORE=$(TEST_STORE)" bats tests/tooling/environment.bats
 
 test-agents:
-	$(NIX) develop --command tests/agents/specbase-instruments.sh all
+	$(NIX) develop --no-update-lock-file --command tests/agents/specbase-instruments.sh all
 
 test-current-bindings:
-	$(NIX) develop --command tests/specbase/current-bindings.sh all-local
+	$(NIX) develop --no-update-lock-file --command env "TEST_STORE=$(TEST_STORE)" tests/specbase/current-bindings.sh all-local
 
 test-vm:
-	$(NIX) build --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.vm-tests
+	$(NIX) build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.vm-tests
 
 verify: ## Run selected Bats checks against the deployed homelab
 	$(RUN_SELECTED_VERIFY)

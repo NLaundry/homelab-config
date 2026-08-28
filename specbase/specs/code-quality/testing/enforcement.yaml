@@ -1,9 +1,0 @@
-bindings:
-  lean-test-review:
-    type: review
-    covers:
-      - production-path-fidelity
-      - run-scoped-state
-      - failure-safe-live-cleanup
-      - actionable-test-failures
-    source: code-quality

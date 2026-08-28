@@ -1,0 +1,6 @@
+id: homelab-native-governed-spec-planes-1e6a11e0
+summary: Homelab-native governed spec planes
+created: 2026-08-28
+members:
+  - adopt-homelab-native-spec-planes-c64eba2e
+  - introduce-typed-estate-registry-8462ce1d

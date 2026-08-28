@@ -1,0 +1,24 @@
+{
+  "id": "live-samba",
+  "binding": "service.nas-capabilities/smb-live-macos-contract",
+  "type": "live",
+  "status": "current",
+  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "generation": "/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1",
+  "environment": "aarch64-darwin native smbutil/mount_smbfs client to NAS 10.10.10.11",
+  "sourcePersona": "unauthenticated guest SMB verifier",
+  "observedAt": "2026-08-28T20:29:01Z",
+  "freshUntil": "2026-08-29T20:29:01Z",
+  "limitations": "Point-in-time client-visible SMB evidence; it does not independently prove server-side UID ownership or physical state ownership.",
+  "mutation": {
+    "mutating": true,
+    "namespace": ".homelab-verify-<128-bit-random-token>",
+    "blastRadius": "One unique directory and file inside each declared writable share."
+  },
+  "cleanup": {
+    "required": true,
+    "target": "Exact fixture, verifier namespace, SMB mount, and local mountpoint.",
+    "result": "success"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+}

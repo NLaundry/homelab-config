@@ -1,0 +1,177 @@
+command=nix develop --no-update-lock-file --command tests/agents/specbase-instruments.sh all
+started=2026-08-28T19:24:21Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+config: schema, plane roster, and lens assignments conform
+{
+  "valid": true,
+  "specs": [
+    {
+      "locator": "configuration/nas-realization",
+      "specId": "configuration.nas-realization",
+      "plane": "configuration",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "estate/nas-storage",
+      "specId": "estate.nas-storage",
+      "plane": "estate",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/deployment-control",
+      "specId": "governance.deployment-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/enforcement-quality",
+      "specId": "governance.enforcement-quality",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/nix-repository",
+      "specId": "governance.nix-repository",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/operator-tooling",
+      "specId": "governance.operator-tooling",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/specbase",
+      "specId": "governance.specbase",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/testing-control",
+      "specId": "governance.testing-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "lifecycle/nas-transitions",
+      "specId": "lifecycle.nas-transitions",
+      "plane": "lifecycle",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "service/nas-capabilities",
+      "specId": "service.nas-capabilities",
+      "plane": "service",
+      "valid": true,
+      "diagnostics": []
+    }
+  ],
+  "unsafeLocators": [],
+  "unknownPlanes": [],
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}
+lenses: declared and resolved lens rosters conform
+specbase-instruments: route contract does not apply the emitted lens
+finished=2026-08-28T19:24:24Z
+exit=1
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+config: schema, plane roster, and lens assignments conform
+{
+  "valid": true,
+  "specs": [
+    {
+      "locator": "configuration/nas-realization",
+      "specId": "configuration.nas-realization",
+      "plane": "configuration",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "estate/nas-storage",
+      "specId": "estate.nas-storage",
+      "plane": "estate",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/deployment-control",
+      "specId": "governance.deployment-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/enforcement-quality",
+      "specId": "governance.enforcement-quality",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/nix-repository",
+      "specId": "governance.nix-repository",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/operator-tooling",
+      "specId": "governance.operator-tooling",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/specbase",
+      "specId": "governance.specbase",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/testing-control",
+      "specId": "governance.testing-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "lifecycle/nas-transitions",
+      "specId": "lifecycle.nas-transitions",
+      "plane": "lifecycle",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "service/nas-capabilities",
+      "specId": "service.nas-capabilities",
+      "plane": "service",
+      "valid": true,
+      "diagnostics": []
+    }
+  ],
+  "unsafeLocators": [],
+  "unknownPlanes": [],
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}
+lenses: declared and resolved lens rosters conform
+routing: test paths select only advisory governance enforcement-quality policy
+guidance: generated skills and prompts use the homelab-native roster and decision order
+mutants: missing/extra planes and missing/extra/scope-drift lenses rejected
+/Users/nlaundry/Projects/homelab-config/tests/agents/specbase-instruments.sh: line 1: workdir: unbound variable

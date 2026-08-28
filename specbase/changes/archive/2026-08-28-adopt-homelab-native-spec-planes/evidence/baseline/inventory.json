@@ -1,0 +1,379 @@
+{
+  "capturedAt": "2026-08-28T18:58:38.809Z",
+  "summary": {
+    "pairs": 15,
+    "requirements": 32,
+    "scenarios": 54,
+    "bindings": 34,
+    "uniqueSources": [
+      "code-quality",
+      "ops",
+      "tests/agents/specbase-instruments.sh#config",
+      "tests/agents/specbase-instruments.sh#lenses",
+      "tests/agents/specbase-instruments.sh#test-quality-routing",
+      "tests/agents/specbase-instruments.sh#validate",
+      "tests/harness/deployment-operations.bats",
+      "tests/harness/lint-operation.bats",
+      "tests/harness/make-operation-surface.bats",
+      "tests/harness/nixos-vm.nix",
+      "tests/harness/test-operation.bats",
+      "tests/harness/verify-runner.bats",
+      "tests/nas-vm.nix",
+      "tests/specbase/current-bindings.sh#config-intent",
+      "tests/specbase/current-bindings.sh#default-imports-role-module",
+      "tests/specbase/current-bindings.sh#default-imports-siblings",
+      "tests/specbase/current-bindings.sh#eval-no-force-import-root-warning",
+      "tests/specbase/current-bindings.sh#flake-evaluates-against-pin",
+      "tests/specbase/current-bindings.sh#flake-exposes-role-attribute",
+      "tests/specbase/current-bindings.sh#flake-input-pins-release",
+      "tests/specbase/current-bindings.sh#lock-committed-pinned",
+      "tests/specbase/current-bindings.sh#no-hostname-derived-attribute",
+      "tests/specbase/current-bindings.sh#operator-config-intent",
+      "tests/specbase/current-bindings.sh#role-attribute-evaluates",
+      "tests/specbase/current-bindings.sh#utility-packages-eval",
+      "tests/specbase/manual-verification.md#deploy-succeeds-runtime",
+      "tests/specbase/manual-verification.md#operator-ssh-sudo-runtime",
+      "tests/specbase/manual-verification.md#pools-import-on-boot-runtime",
+      "tests/specbase/manual-verification.md#test-store-kvm-runtime",
+      "tests/tooling/environment.bats",
+      "tests/verify/deployment.bats",
+      "tests/verify/nas-samba.bats"
+    ]
+  },
+  "specs": [
+    {
+      "locator": "agents/review-panel",
+      "specId": "agents.review-panel",
+      "requirements": [
+        "panel-covers-planes",
+        "panel-routes-test-quality"
+      ],
+      "scenarios": [
+        "lens-per-plane",
+        "lenses-conform",
+        "behavior-change-routes-test-quality",
+        "non-test-change-keeps-normal-routing"
+      ],
+      "bindings": [
+        "lens-roster-conforms",
+        "test-quality-routing-conforms"
+      ],
+      "sources": [
+        "tests/agents/specbase-instruments.sh#lenses",
+        "tests/agents/specbase-instruments.sh#test-quality-routing"
+      ]
+    },
+    {
+      "locator": "agents/spec-driven",
+      "specId": "agents.spec-driven",
+      "requirements": [
+        "practices-sdd"
+      ],
+      "scenarios": [
+        "governed-schema-declared",
+        "project-validates"
+      ],
+      "bindings": [
+        "governed-schema-declared",
+        "specbase-validates"
+      ],
+      "sources": [
+        "tests/agents/specbase-instruments.sh#config",
+        "tests/agents/specbase-instruments.sh#validate"
+      ]
+    },
+    {
+      "locator": "architecture/flake-entry",
+      "specId": "architecture.flake-entry",
+      "requirements": [
+        "flake-exposes-role-attribute"
+      ],
+      "scenarios": [
+        "role-attribute-exposed",
+        "role-attribute-evaluates"
+      ],
+      "bindings": [
+        "flake-exposes-role-attribute",
+        "no-hostname-derived-attribute",
+        "role-attribute-evaluates"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#flake-exposes-role-attribute",
+        "tests/specbase/current-bindings.sh#no-hostname-derived-attribute",
+        "tests/specbase/current-bindings.sh#role-attribute-evaluates"
+      ]
+    },
+    {
+      "locator": "architecture/host-modules",
+      "specId": "architecture.host-modules",
+      "requirements": [
+        "host-module-split"
+      ],
+      "scenarios": [
+        "default-imports-siblings",
+        "role-module-owns-concern"
+      ],
+      "bindings": [
+        "default-imports-siblings",
+        "default-imports-role-module"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#default-imports-siblings",
+        "tests/specbase/current-bindings.sh#default-imports-role-module"
+      ]
+    },
+    {
+      "locator": "architecture/testing-isolation",
+      "specId": "architecture.testing-isolation",
+      "requirements": [
+        "test-subject-boundary",
+        "test-network-boundary"
+      ],
+      "scenarios": [
+        "builder-remains-compute-only",
+        "guests-use-private-test-network"
+      ],
+      "bindings": [
+        "test-subject-boundary-conforms",
+        "test-network-boundary-conforms",
+        "nas-samba-vm-isolation"
+      ],
+      "sources": [
+        "tests/harness/test-operation.bats",
+        "tests/harness/nixos-vm.nix",
+        "tests/nas-vm.nix"
+      ]
+    },
+    {
+      "locator": "behavior/storage/nas-boot",
+      "specId": "behavior.storage.nas-boot",
+      "requirements": [
+        "pools-import-on-boot",
+        "force-import-root-clean"
+      ],
+      "scenarios": [
+        "pools-declared",
+        "zfs-kernel-selected",
+        "pools-import-on-boot-runtime",
+        "force-import-root-false-clean"
+      ],
+      "bindings": [
+        "config-intent",
+        "eval-no-force-import-root-warning",
+        "pools-import-on-boot-runtime"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#config-intent",
+        "tests/specbase/current-bindings.sh#eval-no-force-import-root-warning",
+        "tests/specbase/manual-verification.md#pools-import-on-boot-runtime"
+      ]
+    },
+    {
+      "locator": "behavior/storage/nas-samba",
+      "specId": "behavior.storage.nas-samba",
+      "requirements": [
+        "samba-shares-exposed",
+        "guest-force-operator"
+      ],
+      "scenarios": [
+        "shares-declared",
+        "guest-access",
+        "guest-write-operator"
+      ],
+      "bindings": [
+        "nas-samba-live",
+        "nas-samba-vm"
+      ],
+      "sources": [
+        "tests/verify/nas-samba.bats",
+        "tests/nas-vm.nix"
+      ]
+    },
+    {
+      "locator": "behavior/storage/nas-users",
+      "specId": "behavior.storage.nas-users",
+      "requirements": [
+        "operator-access"
+      ],
+      "scenarios": [
+        "operator-declared",
+        "wheel-passwordless-sudo",
+        "operator-ssh-sudo-runtime"
+      ],
+      "bindings": [
+        "operator-config-intent",
+        "operator-ssh-sudo-runtime"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#operator-config-intent",
+        "tests/specbase/manual-verification.md#operator-ssh-sudo-runtime"
+      ]
+    },
+    {
+      "locator": "behavior/storage/nas-utility-packages",
+      "specId": "behavior.storage.nas-utility-packages",
+      "requirements": [
+        "utility-packages-enabled"
+      ],
+      "scenarios": [
+        "vim-git-enabled"
+      ],
+      "bindings": [
+        "utility-packages-eval"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#utility-packages-eval"
+      ]
+    },
+    {
+      "locator": "code-quality/testing",
+      "specId": "code-quality.testing",
+      "requirements": [
+        "production-path-fidelity",
+        "run-scoped-state",
+        "failure-safe-live-cleanup",
+        "actionable-test-failures"
+      ],
+      "scenarios": [
+        "copied-logic-rejected",
+        "concurrent-runs-separated",
+        "failed-live-assertion-cleans",
+        "remote-failure-identifies-outcome"
+      ],
+      "bindings": [
+        "lean-test-review"
+      ],
+      "sources": [
+        "code-quality"
+      ]
+    },
+    {
+      "locator": "ops/deployment",
+      "specId": "ops.deployment",
+      "requirements": [
+        "remote-deploy-mechanism",
+        "deployment-operation-set",
+        "post-activation-verification",
+        "post-activation-failure-semantics",
+        "deployment-inputs-overridable",
+        "post-deploy-verification"
+      ],
+      "scenarios": [
+        "build-on-host",
+        "activate-as-operator",
+        "deploy-succeeds-runtime",
+        "activation-mode-selected",
+        "non-activation-mode-selected",
+        "successful-activation-verified",
+        "failed-activation-not-verified",
+        "activated-generation-fails-verification",
+        "deployment-input-override-applied",
+        "active-generation-verified",
+        "post-deploy-failure-reported"
+      ],
+      "bindings": [
+        "deploy-succeeds-runtime",
+        "deployment-operations-conform",
+        "deploy-live-verification"
+      ],
+      "sources": [
+        "tests/specbase/manual-verification.md#deploy-succeeds-runtime",
+        "tests/harness/deployment-operations.bats",
+        "tests/verify/deployment.bats"
+      ]
+    },
+    {
+      "locator": "ops/nixpkgs-pin",
+      "specId": "ops.nixpkgs-pin",
+      "requirements": [
+        "nixpkgs-release-pinned"
+      ],
+      "scenarios": [
+        "flake-input-pins-release",
+        "lock-committed-pinned",
+        "flake-evaluates-against-pin"
+      ],
+      "bindings": [
+        "flake-input-pins-release",
+        "lock-committed-pinned",
+        "flake-evaluates-against-pin"
+      ],
+      "sources": [
+        "tests/specbase/current-bindings.sh#flake-input-pins-release",
+        "tests/specbase/current-bindings.sh#lock-committed-pinned",
+        "tests/specbase/current-bindings.sh#flake-evaluates-against-pin"
+      ]
+    },
+    {
+      "locator": "ops/repository-operations",
+      "specId": "ops.repository-operations",
+      "requirements": [
+        "makefile-operation-surface"
+      ],
+      "scenarios": [
+        "declared-operation-dispatched"
+      ],
+      "bindings": [
+        "makefile-operation-surface-conforms"
+      ],
+      "sources": [
+        "tests/harness/make-operation-surface.bats"
+      ]
+    },
+    {
+      "locator": "ops/testing",
+      "specId": "ops.testing",
+      "requirements": [
+        "lint-stage",
+        "test-stage",
+        "test-builder-selection",
+        "verify-stage"
+      ],
+      "scenarios": [
+        "lint-validates-repository",
+        "non-live-suite-executed",
+        "non-live-phase-failure-propagates",
+        "test-runs-on-builder",
+        "test-builder-overridden",
+        "verify-runs-independently",
+        "verify-propagates-failure"
+      ],
+      "bindings": [
+        "lint-stage-runs",
+        "test-operation-conforms",
+        "test-store-kvm-runtime",
+        "verify-runner-conforms"
+      ],
+      "sources": [
+        "tests/harness/lint-operation.bats",
+        "tests/harness/test-operation.bats",
+        "tests/specbase/manual-verification.md#test-store-kvm-runtime",
+        "tests/harness/verify-runner.bats"
+      ]
+    },
+    {
+      "locator": "ops/tooling",
+      "specId": "ops.tooling",
+      "requirements": [
+        "repository-tool-set",
+        "operator-dev-shell",
+        "tooling-catalogue"
+      ],
+      "scenarios": [
+        "direct-command-declared",
+        "platform-transport-adapted",
+        "operator-enters-dev-shell",
+        "automation-enters-dev-shell",
+        "tool-selection-catalogued"
+      ],
+      "bindings": [
+        "tooling-environment-conforms",
+        "tooling-catalogue-reviewed"
+      ],
+      "sources": [
+        "tests/tooling/environment.bats",
+        "ops"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+bindings:
+  enforcement-conformance:
+    type: command
+    covers:
+      - evidence-record-integrity
+      - actionable-test-failures
+    source: tests/specbase/enforcement-quality.sh#conformance
+  enforcement-conformance-fixtures:
+    type: test
+    covers:
+      - evidence-record-integrity
+      - evidence-family-fault-detection
+    source: tests/harness/enforcement-quality.bats
+  nix-evidence-fault-fixtures:
+    type: test
+    covers: evidence-family-fault-detection
+    source: tests/harness/current-bindings-diagnostics.bats
+  live-samba-safety-fixtures:
+    type: test
+    covers:
+      - run-scoped-state
+      - failure-safe-live-cleanup
+      - evidence-family-fault-detection
+    source: tests/harness/nas-samba-safety.bats
+  live-samba-evidence-quality:
+    type: test
+    covers:
+      - production-path-fidelity
+      - run-scoped-state
+      - failure-safe-live-cleanup
+      - actionable-test-failures
+    source: tests/verify/nas-samba.bats
+  enforcement-quality-review:
+    type: review
+    covers:
+      - production-path-fidelity
+      - run-scoped-state
+      - failure-safe-live-cleanup
+      - actionable-test-failures
+      - assertion-scoped-evidence
+      - evidence-record-integrity
+      - evidence-family-fault-detection
+      - enforcement-quality-review
+    source: enforcement

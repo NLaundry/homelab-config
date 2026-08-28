@@ -1,0 +1,5 @@
+schema: spec-driven-governed
+created: 2026-08-28
+id: introduce-typed-estate-registry-8462ce1d
+goal: Make the desired homelab topology machine-readable and deterministically
+  enforceable without duplicating full NixOS configuration.

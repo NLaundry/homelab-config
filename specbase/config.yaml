@@ -1,89 +1,72 @@
 schema: spec-driven-governed
 
-# Spec planes governing this project — the authoritative source of
-# truth. Add a record to gain a plane, remove one to drop it, empty
-# the list to go flat.
+# Permanent truth planes for this homelab. Every durable fact has one owning
+# plane; initiatives may legitimately change several peer planes.
 specModel:
   planes:
-    - id: behavior
+    - id: service
       purpose: >-
-        Observable contracts at the homelab boundary: what human administrators,
-        users, devices, and client services can reach, do, and observe. This
-        includes externally meaningful URLs, protocols and ports, authorization
-        outcomes, errors, and state that must survive declared lifecycle events.
-        Internal bind ports and the mechanism that produces an outcome are not
-        behavioral truth unless a client depends on them.
-      enforcementFlavor: tests / property tests / network probes / honest review
-      reviewLens: behavioural
-    - id: architecture
+        Steady-state outcomes directly observed by people, administrators,
+        devices, and client services: reachable capabilities, protocol results,
+        authorization outcomes, errors, and externally meaningful state.
+      enforcementFlavor: protocol tests / property tests / bounded live probes / honest review
+      reviewLens: service
+    - id: estate
       purpose: >-
-        Enduring topology, responsibilities, dependency edges, and trust or state
-        boundaries among physical hosts, virtual machines, containers, networks,
-        storage, identity systems, and services. Architectural truth should remain
-        true when an implementation tool is replaced with an equivalent one; it
-        does not prescribe package versions or operational procedures.
-      enforcementFlavor: topology conformance / static analysis / fitness functions
-      reviewLens: architectural
-    - id: ops
+        The desired homelab graph: sites, hosts, roles, workload placement,
+        dependencies, state ownership, authorities, trust boundaries, and failure
+        domains.
+      enforcementFlavor: evaluated graph properties / reconciliation / topology review
+      reviewLens: estate
+    - id: configuration
       purpose: >-
-        The selected technology and lifecycle machinery that makes the homelab run
-        cleanly: packages and versions, Nix modules and IaC, internal listeners and
-        firewall realization, boot ordering, deployment, updates, secret
-        materialization and rotation, monitoring, backup, restore, and operational
-        runbooks. Ops records how behavioral and architectural truth is realized
-        and safely operated.
-      enforcementFlavor: evaluation / lockfile audit / plan validation / drift detection / recovery drills
-      reviewLens: ops
-    - id: code-quality
-      purpose: "What good code looks like: smells, qualities, and rules"
-      enforcementFlavor: smell-lint + review
-      reviewLens: code-quality
-    - id: agents
+        Proposal-worthy realization choices: selected products, versions, NixOS
+        options, addresses, listeners, mounts, identities, groups, ACLs, schedules,
+        and firewall realization.
+      enforcementFlavor: Nix evaluation / closure builds / VM composition / configuration audit
+      reviewLens: configuration
+    - id: lifecycle
       purpose: >-
-        The repo's own agentic instruments: review panels, repo-specific skills,
-        subagents, and hooks it builds. Members are instruments the repo owns, not
-        behavioral guardrails on agents. Human operational runbooks remain Ops
-        even when agents can read them; only a repo-owned runbook skill, registry,
-        checker, or execution hook belongs here. Each agents spec describes an
-        agent-operational artifact and binds conformance or drift checks to it.
-      enforcementFlavor: instrument conforms to its spec (config / lens / frontmatter / hook checks)
+        Durable guarantees whose meaning depends on time, an event, or a
+        transition, including boot, deploy, update, rollback, revocation, backup,
+        restore, failover, and recovery.
+      enforcementFlavor: transition tests / fault injection / bounded drills / manual evidence
+      reviewLens: lifecycle
+    - id: governance
+      purpose: >-
+        The repository and control machinery that declares, builds, tests,
+        reviews, and deploys the estate, including Nix and IaC conventions,
+        Specbase workflow, evidence quality, CI, operator tooling, and repo-owned
+        agent instruments.
+      enforcementFlavor: deterministic conformance / mutation tests / semantic review
+      reviewLens: governance
 
-# Project context shown when creating artifacts.
 context: |
-  This repository declares and operates a homelab rather than a single software
-  application. Classify individual normative claims, not whole initiatives or
-  products: one initiative commonly touches several planes.
+  This repository declares and operates a homelab through Specbase, Nix, and
+  infrastructure as code. Classify individual normative claims, not whole
+  initiatives or products. One initiative may touch several peer planes, but
+  each durable fact has exactly one owning plane.
 
-  Use the substitution test when classification is unclear:
-  - If changing the implementation while preserving the result would be visible
-    to a human, device, or client service, the claim is behavior.
-  - If it would change topology, responsibility, dependency direction, trust, or
-    mutable-state boundaries, the claim is architecture.
-  - If it would change the selected product, version, configuration, deployment,
-    update, secret, monitoring, backup, restore, or operating procedure, the claim
-    is ops.
+  Split compound claims, then classify in this order:
+  1. Repository, testing, review, deployment-control, or agent machinery is Governance.
+  2. A fact whose meaning requires time, an event, or a transition is Lifecycle.
+  3. A steady-state outcome observed by a person, device, or client is Service.
+  4. A site, node, role, placement, dependency, authority, boundary, ownership,
+     or failure-domain fact is Estate.
+  5. A selected product, value, version, address, listener, mount, account,
+     group, ACL, schedule, firewall rule, or declarative mechanism is Configuration.
 
-  Examples:
-  - Client reachability and denial matrices are behavior; internal bind ports and
-    firewall rules are ops; the required network-zone crossing is architecture.
-  - Command execution as a user capability is behavior; separation of the control
-    and execution planes is architecture; Docker or Podman selection is ops.
-  - State surviving reboot is behavior; confinement to an explicit durable volume
-    is architecture; ZFS encryption, snapshots, replication, and restore are ops.
+  Use one-truth-one-plane: reference another plane's fact by locator and never
+  restate it. Moving a workload changes Estate unless its selected realization
+  also changes. Replacing a product while preserving outcomes and topology
+  changes Configuration only. Authorization outcomes are Service; authorities
+  and trust boundaries are Estate; groups, ACLs, and certificate settings are
+  Configuration; rotation and revocation are Lifecycle; repository secret
+  controls are Governance.
 
-  Put non-automatable setup, recovery, rotation, and disaster procedures in
-  operational runbooks. Ops specs state the durable guarantees and maintenance
-  expectations; runbooks contain ordered procedures, prerequisites, safety and
-  rollback guidance, verification, and last-tested evidence. A runbook belongs to
-  the agents plane only when the subject is a repo-owned agentic instrument that
-  selects, validates, or executes runbooks.
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Match evidence to the owning truth. Prefer evaluated Nix, graph properties,
+  closure builds, isolated VM behavior, protocol-native probes, fault injection,
+  and recovery drills. Do not substitute source grep when evaluation is
+  available, script-existence checks for behavior, wrapper success for child
+  assertions, or tests created only to improve coverage. Record review/manual
+  limitations honestly when physical or transition truth cannot be automated.

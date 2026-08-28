@@ -1,0 +1,13 @@
+{
+  "availableRequirements": 41,
+  "destinationReferences": 35,
+  "missing": [],
+  "unreferenced": [
+    "configuration.nas-realization#zfs-host-identity-stable",
+    "configuration.nas-realization#zfs-kernel-compatible",
+    "governance.enforcement-quality#assertion-scoped-evidence",
+    "governance.enforcement-quality#evidence-record-integrity",
+    "governance.enforcement-quality#evidence-family-fault-detection",
+    "governance.enforcement-quality#enforcement-quality-review"
+  ]
+}

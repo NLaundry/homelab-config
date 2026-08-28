@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "id": "adopt-homelab-native-spec-planes",
+      "type": "change",
+      "valid": true,
+      "issues": [],
+      "durationMs": 71
+    }
+  ],
+  "summary": {
+    "totals": {
+      "items": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "byType": {
+      "change": {
+        "items": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    }
+  },
+  "version": "1.0",
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}

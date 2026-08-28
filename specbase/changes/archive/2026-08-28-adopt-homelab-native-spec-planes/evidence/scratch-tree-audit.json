@@ -1,0 +1,27 @@
+{
+  "scratchRoot": "/tmp/homelab-specbase-next/specbase/specs",
+  "expectedRoots": [
+    "configuration",
+    "estate",
+    "governance",
+    "lifecycle",
+    "service"
+  ],
+  "pairs": [
+    "configuration/nas-realization",
+    "estate/nas-storage",
+    "governance/deployment-control",
+    "governance/enforcement-quality",
+    "governance/nix-repository",
+    "governance/operator-tooling",
+    "governance/specbase",
+    "governance/testing-control",
+    "lifecycle/nas-transitions",
+    "service/nas-capabilities"
+  ],
+  "pairsWithScenarios": 10,
+  "completePairs": 10,
+  "unknownRoots": [],
+  "missingMappingDestinations": [],
+  "stableSpecIdsPreserved": true
+}

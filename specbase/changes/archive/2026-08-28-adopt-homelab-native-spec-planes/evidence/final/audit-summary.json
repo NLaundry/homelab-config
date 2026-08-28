@@ -1,0 +1,66 @@
+{
+  "valid": true,
+  "specs": 10,
+  "unknownPlanes": [],
+  "coverageTotals": {
+    "specs": 10,
+    "requirements": 41,
+    "coveredRequirements": 41,
+    "hangingRequirements": 0,
+    "scenarios": 45,
+    "coveredScenarios": 45,
+    "uncoveredScenarios": 0
+  },
+  "states": {
+    "incomplete-pair": 0,
+    "broken": 0,
+    "stale": 0,
+    "hanging": 0,
+    "degraded": 5,
+    "complete": 5
+  },
+  "unlensed": [],
+  "expectedLocators": [
+    "configuration/nas-realization",
+    "estate/nas-storage",
+    "governance/deployment-control",
+    "governance/enforcement-quality",
+    "governance/nix-repository",
+    "governance/operator-tooling",
+    "governance/specbase",
+    "governance/testing-control",
+    "lifecycle/nas-transitions",
+    "service/nas-capabilities"
+  ],
+  "actualLocators": [
+    "configuration/nas-realization",
+    "estate/nas-storage",
+    "governance/deployment-control",
+    "governance/enforcement-quality",
+    "governance/nix-repository",
+    "governance/operator-tooling",
+    "governance/specbase",
+    "governance/testing-control",
+    "lifecycle/nas-transitions",
+    "service/nas-capabilities"
+  ],
+  "oldRootsPresent": [],
+  "deltaLocators": [
+    "configuration/nas-realization",
+    "estate/nas-storage",
+    "governance/deployment-control",
+    "governance/enforcement-quality",
+    "governance/nix-repository",
+    "governance/operator-tooling",
+    "governance/specbase",
+    "governance/testing-control",
+    "lifecycle/nas-transitions",
+    "service/nas-capabilities"
+  ],
+  "orphanSummary": {
+    "staleBindings": [],
+    "enforcementOnlyPairs": [],
+    "brokenTargets": [],
+    "unboundEvidence": []
+  }
+}

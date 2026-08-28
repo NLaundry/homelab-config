@@ -1,0 +1,21 @@
+{
+  "id": "tooling-catalogue-review",
+  "binding": "governance.operator-tooling/tooling-catalogue-reviewed",
+  "type": "review",
+  "status": "current",
+  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "environment": "tooling.md plus evaluated cross-system tooling contracts",
+  "sourcePersona": "Governance reviewer",
+  "observedAt": "2026-08-28T20:31:09Z",
+  "freshUntil": "2026-09-27T20:31:09Z",
+  "limitations": "Judges role, scope, authority, and version non-duplication semantics; package contents and command behavior remain owned by evaluated/build evidence.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Read-only catalogue and execution-record review."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "not-applicable"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+}

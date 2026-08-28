@@ -1,0 +1,116 @@
+{
+  "valid": true,
+  "specs": [
+    {
+      "locator": "agents/review-panel",
+      "specId": "agents.review-panel",
+      "plane": "agents",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "agents/spec-driven",
+      "specId": "agents.spec-driven",
+      "plane": "agents",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "architecture/flake-entry",
+      "specId": "architecture.flake-entry",
+      "plane": "architecture",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "architecture/host-modules",
+      "specId": "architecture.host-modules",
+      "plane": "architecture",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "architecture/testing-isolation",
+      "specId": "architecture.testing-isolation",
+      "plane": "architecture",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "behavior/storage/nas-boot",
+      "specId": "behavior.storage.nas-boot",
+      "plane": "behavior",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "behavior/storage/nas-samba",
+      "specId": "behavior.storage.nas-samba",
+      "plane": "behavior",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "behavior/storage/nas-users",
+      "specId": "behavior.storage.nas-users",
+      "plane": "behavior",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "behavior/storage/nas-utility-packages",
+      "specId": "behavior.storage.nas-utility-packages",
+      "plane": "behavior",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "code-quality/testing",
+      "specId": "code-quality.testing",
+      "plane": "code-quality",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "ops/deployment",
+      "specId": "ops.deployment",
+      "plane": "ops",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "ops/nixpkgs-pin",
+      "specId": "ops.nixpkgs-pin",
+      "plane": "ops",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "ops/repository-operations",
+      "specId": "ops.repository-operations",
+      "plane": "ops",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "ops/testing",
+      "specId": "ops.testing",
+      "plane": "ops",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "ops/tooling",
+      "specId": "ops.tooling",
+      "plane": "ops",
+      "valid": true,
+      "diagnostics": []
+    }
+  ],
+  "unsafeLocators": [],
+  "unknownPlanes": [],
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}

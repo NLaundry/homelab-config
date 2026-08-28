@@ -1,0 +1,16 @@
+command=nix develop --no-update-lock-file --command tests/specbase/enforcement-quality.sh conformance
+started=2026-08-28T19:35:02Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+targets: every binding source and selector/anchor resolves
+scopes: multi-requirement automated bindings declare direct observations only
+record boot-pool-import (manual/deferred) conforms
+record estate-reconciliation (review/current) conforms
+record kvm-vm-suite (manual/current) conforms
+record live-samba (live/current) conforms
+record operator-access (live/current) conforms
+record persistent-deployment (manual/deferred) conforms
+record post-deploy-health (live/current) conforms
+record tooling-catalogue-review (review/current) conforms
+records: provenance, freshness, limitations, blast radius, and cleanup metadata conform
+finished=2026-08-28T19:35:06Z
+exit=0

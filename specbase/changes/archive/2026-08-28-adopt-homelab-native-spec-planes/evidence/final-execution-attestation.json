@@ -1,0 +1,48 @@
+{
+  "implementationDigest": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "createdAt": "2026-08-28T20:31:27Z",
+  "runs": {
+    "operator-access": {
+      "observedAt": "2026-08-28T20:26:12Z",
+      "finishedAt": "2026-08-28T20:26:16Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/operator-access-final.log",
+      "logSha256": "5a61f137047b4c85529d901ad9d406852a7795dae3edafa43f8f33eeb032d91b"
+    },
+    "estate-reconciliation": {
+      "observedAt": "2026-08-28T20:26:16Z",
+      "finishedAt": "2026-08-28T20:26:18Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/estate-reconciliation-final.log",
+      "logSha256": "3470a19212840c33f4fb94173140c0a92ec833eb0d359b02a0a14e90ffc63361"
+    },
+    "kvm-vm-suite": {
+      "observedAt": "2026-08-28T20:29:07Z",
+      "finishedAt": "2026-08-28T20:31:09Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/vm-tests-final-attested.log",
+      "logSha256": "635af019c56e1a621f5a9edae659bd3b189388f03e4f87c662ed2ba64d1f060c"
+    },
+    "live-samba": {
+      "observedAt": "2026-08-28T20:29:01Z",
+      "finishedAt": "2026-08-28T20:29:07Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/live-verify-final-attested.log",
+      "logSha256": "59e7829c56bdfaa4b7e5da946ffa3e178ff4362ed9eba77094f13981d331c753"
+    },
+    "post-deploy-health": {
+      "observedAt": "2026-08-28T20:29:01Z",
+      "finishedAt": "2026-08-28T20:29:07Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/live-verify-final-attested.log",
+      "logSha256": "59e7829c56bdfaa4b7e5da946ffa3e178ff4362ed9eba77094f13981d331c753"
+    },
+    "tooling-catalogue-review": {
+      "observedAt": "2026-08-28T20:31:09Z",
+      "finishedAt": "2026-08-28T20:31:09Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/execution/tooling-review-final.log",
+      "logSha256": "a896988d951d9c69ba9040e766b98cc90ffa6d100c9baa585323485c5168e548"
+    }
+  }
+}

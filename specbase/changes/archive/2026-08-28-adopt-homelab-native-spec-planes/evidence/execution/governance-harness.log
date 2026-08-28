@@ -1,0 +1,46 @@
+command=focused governance and lifecycle harness
+started=2026-08-28T19:30:53Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+these 2 derivations will be built:
+  /nix/store/cr0v3xipy4cbffp5lzi0xav07drm5kzj-homelab-verify.drv
+  /nix/store/jji9lkkrz2b8arygcbvsznhcvb6i242x-homelab-harness.drv
+building '/nix/store/cr0v3xipy4cbffp5lzi0xav07drm5kzj-homelab-verify.drv'...
+building '/nix/store/jji9lkkrz2b8arygcbvsznhcvb6i242x-homelab-harness.drv'...
+1..35
+ok 1 deployment operations select every lifecycle action, verification boundary, and input
+ok 2 an incorrect deployment action is detected without deployment
+ok 3 an ignored deployment override is detected without deployment
+ok 4 a target-specific build override regression is detected without deployment
+ok 5 try and deploy verify strictly after successful activation
+ok 6 activation failure prevents deployed verification
+ok 7 verification failure fails activation operation and reports no rollback
+ok 8 non-activating deployment operations never run deployed verification
+ok 9 unreachable SSH cannot satisfy deployment reachability
+ok 10 a failed unit cannot satisfy systemd health
+ok 11 a failed health command is not mistaken for an empty failed-unit set
+ok 12 an invalid current-system path cannot satisfy generation health
+ok 13 lint runs strict current-spec validation before flake evaluation
+ok 14 a current-spec validation failure stops lint and preserves repository truth
+ok 15 a flake-check failure independently makes lint fail
+ok 16 test runs fast non-live phases without VM, live access, or activation
+ok 17 a failed fast phase makes test fail
+ok 18 test-vm selects the fixed aggregate through the default store
+ok 19 test-vm changes execution placement without changing derivation identity
+ok 20 the fixed aggregate contains the isolation harness and Samba behavior VM
+ok 21 the default runner selects only deployed behavior sources
+ok 22 the packaged runner propagates a selected Bats failure
+ok 23 make verify remains non-activating and propagates the selected failure
+ok 24 every registered VM subject is disposable, non-activating, and private
+ok 25 the fixed aggregate is derived from every registered VM leaf
+ok 26 a controlled non-private registry entry is rejected
+ok 27 a controlled implicit-interface declaration is rejected
+ok 28 valid direct observations and deferred metadata conform
+ok 29 helper-existence evidence is rejected
+ok 30 wrapper-only evidence is rejected
+ok 31 overbroad coverage without every observation is rejected
+ok 32 current evidence without provenance is rejected
+ok 33 stale current evidence is rejected
+ok 34 unsafe live mutation metadata is rejected
+ok 35 a missing binding target is rejected with binding identity
+finished=2026-08-28T19:31:44Z
+exit=0

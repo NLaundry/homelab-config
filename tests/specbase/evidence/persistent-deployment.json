@@ -1,0 +1,18 @@
+{
+  "id": "persistent-deployment",
+  "binding": "lifecycle.nas-transitions/deployment-runtime",
+  "type": "manual",
+  "status": "deferred",
+  "deferralReason": "Persistent activation was not approved for a taxonomy-only migration.",
+  "environment": "physical NAS",
+  "sourcePersona": "authorized deployment operator",
+  "limitations": "Controlled adapters prove orchestration only; no active-generation transition was observed.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Persistent host activation and possible service interruption; not executed."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "deferred"
+  }
+}

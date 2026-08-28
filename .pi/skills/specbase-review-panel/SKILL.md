@@ -36,10 +36,11 @@ Confirm the review model and load the affected pairs:
 specbase status --change "<name>" --json   # resolve the model and touched pairs
 specbase coverage --json                    # lens rollup, un-lensed gaps, split candidates
 ```
-Read every affected `spec.md` / `enforcement.yaml` pair the status reports. The
-set of touched pairs and the complete changed-path name/status records are the
-router's inputs. Preserve both paths for renames and copies. If the change
-touches no spec pair and no repository test path, say so and stop.
+Read every affected `spec.md` / `enforcement.yaml` pair the status reports. Preserve
+the complete staged changed-path records as a second router input, including both
+paths for renames and copies. Do not stop merely because no spec pair is touched:
+a test-only change must still run the test-quality route in Step 1. Stop only when
+neither a touched pair nor that path route selects a lens.
 
 ## Step 1 — Router: touched subtrees → the projected lenses
 
@@ -52,13 +53,14 @@ lens fires only when its subtree is touched, and a trivial diff spawns nobody.
 
 | Lens | Question | Scope |
 |---|---|---|
-| `behavioural` | Does the code produce the behavioral specs, consistently and unerringly? | `behavior/**` |
-| `architectural` | Does the code deviate from the architecture specs' invariants and boundaries? | `architecture/**` |
-| `ops` | Does the repo use what the ops specs declare and run it as declared? | `ops/**` |
-| `code-quality` | Is the code clean, simple, and free of cruft? | `code-quality/**` |
+| `service` | Does the implementation honor the service specs' declared intent? | `service/**` |
+| `estate` | Does the implementation honor the estate specs' declared intent? | `estate/**` |
+| `configuration` | Does the implementation honor the configuration specs' declared intent? | `configuration/**` |
+| `lifecycle` | Does the implementation honor the lifecycle specs' declared intent? | `lifecycle/**` |
+| `governance` | Does the implementation honor the governance specs' declared intent? | `governance/**` |
 | `enforcement` | Do the bound checks actually exercise the claim, not merely run? | every pair's bindings |
 
-A pair under a scoped lens (e.g. `architecture/rings/boundaries`) routes to that
+A pair under a scoped lens (e.g. `estate/sites/boundaries`) routes to that
 scoped lens rather than the plane-wide one (most-specific wins). A lens the model
 does not project simply does not exist here.
 
@@ -69,32 +71,35 @@ changes, stop and request a clean selected-change index. Run
 `.pi/skills/specbase-review-panel/route-test-quality.sh` with no arguments. It
 uses `git diff --cached --name-status --diff-filter=ACDMRTUXB` as the canonical,
 read-only changed-path producer, including both paths for renames and copies. If
-it emits `code-quality\tcode-quality/testing`, select the `code-quality` lens
-and load the current `code-quality/testing` pair as policy even when no
-Code-quality delta is touched. This path route is additive to ordinary pair
+it emits `enforcement\tgovernance/enforcement-quality`, select the `enforcement`
+lens and load the current `governance/enforcement-quality` pair as policy even
+when no Governance delta is touched. This route is additive to ordinary pair
 routing. Added, modified, deleted, or either side of renamed/copied paths beneath
 `tests/**` select the policy; non-test paths do not. The selected lens remains
 advisory and non-gating like every other panel lens.
 <!-- test-quality-route-contract:end -->
 
 Then explicitly **`log`** the selected lens set and, for EVERY lens **skipped**,
-why (e.g. "`architectural` skipped — no `architecture/` pair touched").
+why (e.g. "`estate` skipped — no `estate/` pair touched").
 Silence is never coverage: the skipped list is part of the report and the
 completeness critic (step 5) audits it. **Every finding is tagged with its lens.**
 
 ## Step 2 — Deterministic gate FIRST (when bindings exist), then compute the residue
 
-Run the project's declared automated binding sources through their native
-project harness BEFORE any reviewer, so each lens reviews only the residue above
-the gate. For each lens, prepare two inputs:
-1. **already-covered findings** — the concrete gate output, so no reviewer
-   re-reports a line a deterministic check already flagged.
-2. **blind list** — the deterministic binding IDs named in each review binding's
-   `covered_by`. As deterministic bindings are added to `covered_by`, the
-   residue shrinks with NO edit to any lens method.
+For each structurally valid automated binding, follow its `source` into the
+repository and run it through the project's native harness BEFORE any reviewer.
+A resolved source is linkage, not proof that the source ran or passed. Record
+execution outcomes honestly, including sources whose harness cannot be found or
+run.
 
-If the gate is red, note it prominently at the top of the report — the panel
-reviews the residue above a passing gate, it does not excuse a failing one.
+For each lens-backed binding, derive its **blind list** from structurally valid
+automated sibling bindings covering the same requirement. The lens reviews the
+residue above that deterministic evidence; no manual `covered_by` list or inline
+command vector exists in the compact manifest.
+
+If the gate is red or could not run, note it prominently at the top of the
+report — the panel reviews the residue above the gate, it does not excuse a
+failing or unexecuted source.
 
 ## Step 3 — Fan-out: parallel, blind, one slice each
 
@@ -143,32 +148,40 @@ verdicts do not gate archive, verification readiness, or `--strict`.**
 Each lens judges EXACTLY ONE concern and is blind to the others. It reads its
 policy fresh from the specs it covers; it holds no copied rules.
 
-### `behavioural` — scope: `behavior/**`
-Read the affected `specs/behavior/...` pairs and the code they describe.
-Judge only whether the implementation honors Does the code produce the behavioral specs, consistently and unerringly? Nothing outside its
+### `service` — scope: `service/**`
+Read the affected `specs/service/...` pairs and the code they describe.
+Judge only whether the implementation honors Does the implementation honor the service specs' declared intent? Nothing outside its
 plane (structure, style, correctness elsewhere) is yours — drop it.
 
-### `architectural` — scope: `architecture/**`
-Read the affected `specs/architecture/...` pairs and the code they describe.
-Judge only whether the implementation honors Does the code deviate from the architecture specs' invariants and boundaries? Nothing outside its
+### `estate` — scope: `estate/**`
+Read the affected `specs/estate/...` pairs and the code they describe.
+Judge only whether the implementation honors Does the implementation honor the estate specs' declared intent? Nothing outside its
 plane (structure, style, correctness elsewhere) is yours — drop it.
 
-### `ops` — scope: `ops/**`
-Read the affected `specs/ops/...` pairs and the code they describe.
-Judge only whether the implementation honors Does the repo use what the ops specs declare and run it as declared? Nothing outside its
+### `configuration` — scope: `configuration/**`
+Read the affected `specs/configuration/...` pairs and the code they describe.
+Judge only whether the implementation honors Does the implementation honor the configuration specs' declared intent? Nothing outside its
 plane (structure, style, correctness elsewhere) is yours — drop it.
 
-### `code-quality` — scope: `code-quality/**`
-Read the affected `specs/code-quality/...` pairs and the code they describe.
-Judge only whether the implementation honors Is the code clean, simple, and free of cruft? Nothing outside its
+### `lifecycle` — scope: `lifecycle/**`
+Read the affected `specs/lifecycle/...` pairs and the code they describe.
+Judge only whether the implementation honors Does the implementation honor the lifecycle specs' declared intent? Nothing outside its
+plane (structure, style, correctness elsewhere) is yours — drop it.
+
+### `governance` — scope: `governance/**`
+Read the affected `specs/governance/...` pairs and the code they describe.
+Judge only whether the implementation honors Does the implementation honor the governance specs' declared intent? Nothing outside its
 plane (structure, style, correctness elsewhere) is yours — drop it.
 
 ### `enforcement` — scope: every affected pair's bindings
 Judge whether each binding's declared check actually **exercises** the covered
-claim rather than merely running (a test that imports but asserts nothing, a lint
-that never fires). Audit **automated** bindings too, not just review ones — but
-judge evidence adequacy only, and **do not review your own verdicts** (no
-recursion into the enforcement lens itself).
+claim rather than merely running. Assess independent expectations, production-path
+fidelity, assertion-level semantic coverage, environment and freshness limits,
+failure diagnostics, mutation sensitivity, cleanup safety, and maintenance value.
+Reject helper existence, wrapper success, self-fulfilling oracles, and machinery
+whose removal would change no selected homelab truth. Audit automated bindings too,
+but do not review your own verdicts or infer semantic adequacy from deterministic
+conformance alone.
 
 ---
 

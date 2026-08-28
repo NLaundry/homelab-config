@@ -1,0 +1,22 @@
+{
+  "id": "estate-reconciliation",
+  "binding": "estate.nas-storage/nas-estate-review",
+  "type": "review",
+  "status": "current",
+  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "generation": "/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1",
+  "environment": "repository/evaluated declarations plus bounded read-only observation of physical NAS 10.10.10.11",
+  "sourcePersona": "Estate reviewer using authorized operator access",
+  "observedAt": "2026-08-28T20:26:16Z",
+  "freshUntil": "2026-08-29T20:26:16Z",
+  "limitations": "Establishes declared placement and point-in-time workload/pool alignment only; it does not prove physical chassis, cabling, disk ownership, continued health, or exclusive authority.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Read-only repository, evaluation, service-state, generation, and pool-health observations."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "not-applicable"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+}

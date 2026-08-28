@@ -1,0 +1,201 @@
+{
+  "rowCount": 32,
+  "currentCount": 32,
+  "missingFromMap": [],
+  "unknownInMap": [],
+  "duplicateRows": [],
+  "rows": [
+    {
+      "row": 1,
+      "specId": "agents.review-panel",
+      "requirementId": "panel-covers-planes",
+      "verdict": "Keep and update roster"
+    },
+    {
+      "row": 2,
+      "specId": "agents.review-panel",
+      "requirementId": "panel-routes-test-quality",
+      "verdict": "Keep and update policy"
+    },
+    {
+      "row": 3,
+      "specId": "agents.spec-driven",
+      "requirementId": "practices-sdd",
+      "verdict": "Keep"
+    },
+    {
+      "row": 4,
+      "specId": "architecture.flake-entry",
+      "requirementId": "flake-exposes-role-attribute",
+      "verdict": "Keep"
+    },
+    {
+      "row": 5,
+      "specId": "architecture.host-modules",
+      "requirementId": "host-module-split",
+      "verdict": "Keep"
+    },
+    {
+      "row": 6,
+      "specId": "architecture.testing-isolation",
+      "requirementId": "test-subject-boundary",
+      "verdict": "Keep"
+    },
+    {
+      "row": 7,
+      "specId": "architecture.testing-isolation",
+      "requirementId": "test-network-boundary",
+      "verdict": "Keep"
+    },
+    {
+      "row": 8,
+      "specId": "behavior.storage.nas-boot",
+      "requirementId": "pools-import-on-boot",
+      "verdict": "Split"
+    },
+    {
+      "row": 9,
+      "specId": "behavior.storage.nas-boot",
+      "requirementId": "force-import-root-clean",
+      "verdict": "Split/drop"
+    },
+    {
+      "row": 10,
+      "specId": "behavior.storage.nas-samba",
+      "requirementId": "samba-shares-exposed",
+      "verdict": "Split"
+    },
+    {
+      "row": 11,
+      "specId": "behavior.storage.nas-samba",
+      "requirementId": "guest-force-operator",
+      "verdict": "Keep"
+    },
+    {
+      "row": 12,
+      "specId": "behavior.storage.nas-users",
+      "requirementId": "operator-access",
+      "verdict": "Split"
+    },
+    {
+      "row": 13,
+      "specId": "behavior.storage.nas-utility-packages",
+      "requirementId": "utility-packages-enabled",
+      "verdict": "Demote/drop"
+    },
+    {
+      "row": 14,
+      "specId": "code-quality.testing",
+      "requirementId": "production-path-fidelity",
+      "verdict": "Keep"
+    },
+    {
+      "row": 15,
+      "specId": "code-quality.testing",
+      "requirementId": "run-scoped-state",
+      "verdict": "Keep"
+    },
+    {
+      "row": 16,
+      "specId": "code-quality.testing",
+      "requirementId": "failure-safe-live-cleanup",
+      "verdict": "Keep"
+    },
+    {
+      "row": 17,
+      "specId": "code-quality.testing",
+      "requirementId": "actionable-test-failures",
+      "verdict": "Keep"
+    },
+    {
+      "row": 18,
+      "specId": "ops.deployment",
+      "requirementId": "remote-deploy-mechanism",
+      "verdict": "Split"
+    },
+    {
+      "row": 19,
+      "specId": "ops.deployment",
+      "requirementId": "deployment-operation-set",
+      "verdict": "Keep"
+    },
+    {
+      "row": 20,
+      "specId": "ops.deployment",
+      "requirementId": "post-activation-verification",
+      "verdict": "Keep"
+    },
+    {
+      "row": 21,
+      "specId": "ops.deployment",
+      "requirementId": "post-activation-failure-semantics",
+      "verdict": "Keep"
+    },
+    {
+      "row": 22,
+      "specId": "ops.deployment",
+      "requirementId": "deployment-inputs-overridable",
+      "verdict": "Keep"
+    },
+    {
+      "row": 23,
+      "specId": "ops.deployment",
+      "requirementId": "post-deploy-verification",
+      "verdict": "Keep"
+    },
+    {
+      "row": 24,
+      "specId": "ops.nixpkgs-pin",
+      "requirementId": "nixpkgs-release-pinned",
+      "verdict": "Split/drop"
+    },
+    {
+      "row": 25,
+      "specId": "ops.repository-operations",
+      "requirementId": "makefile-operation-surface",
+      "verdict": "Drop"
+    },
+    {
+      "row": 26,
+      "specId": "ops.testing",
+      "requirementId": "lint-stage",
+      "verdict": "Keep"
+    },
+    {
+      "row": 27,
+      "specId": "ops.testing",
+      "requirementId": "test-stage",
+      "verdict": "Keep"
+    },
+    {
+      "row": 28,
+      "specId": "ops.testing",
+      "requirementId": "test-builder-selection",
+      "verdict": "Keep"
+    },
+    {
+      "row": 29,
+      "specId": "ops.testing",
+      "requirementId": "verify-stage",
+      "verdict": "Keep"
+    },
+    {
+      "row": 30,
+      "specId": "ops.tooling",
+      "requirementId": "repository-tool-set",
+      "verdict": "Keep"
+    },
+    {
+      "row": 31,
+      "specId": "ops.tooling",
+      "requirementId": "operator-dev-shell",
+      "verdict": "Keep"
+    },
+    {
+      "row": 32,
+      "specId": "ops.tooling",
+      "requirementId": "tooling-catalogue",
+      "verdict": "Keep"
+    }
+  ]
+}
