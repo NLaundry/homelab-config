@@ -1,0 +1,190 @@
+{
+  "stack": {
+    "id": "homelab-native-governed-spec-planes-1e6a11e0",
+    "valid": true,
+    "projection": {
+      "stack": "homelab-native-governed-spec-planes-1e6a11e0",
+      "valid": true,
+      "firstInvalidMember": null,
+      "blockedByPlannedMember": null,
+      "steps": [
+        {
+          "member": "adopt-homelab-native-spec-planes-c64eba2e",
+          "position": "archived",
+          "status": "skipped-archived",
+          "base": {
+            "accepted": [
+              {
+                "locator": "configuration/nas-realization",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/configuration/nas-realization/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/configuration/nas-realization/enforcement.yaml"
+              },
+              {
+                "locator": "estate/nas-storage",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/estate/nas-storage/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/estate/nas-storage/enforcement.yaml"
+              },
+              {
+                "locator": "governance/deployment-control",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/deployment-control/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/deployment-control/enforcement.yaml"
+              },
+              {
+                "locator": "governance/enforcement-quality",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/enforcement-quality/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/enforcement-quality/enforcement.yaml"
+              },
+              {
+                "locator": "governance/nix-repository",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/nix-repository/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/nix-repository/enforcement.yaml"
+              },
+              {
+                "locator": "governance/operator-tooling",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/operator-tooling/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/operator-tooling/enforcement.yaml"
+              },
+              {
+                "locator": "governance/specbase",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/specbase/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/specbase/enforcement.yaml"
+              },
+              {
+                "locator": "governance/testing-control",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/testing-control/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/testing-control/enforcement.yaml"
+              },
+              {
+                "locator": "lifecycle/nas-transitions",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/lifecycle/nas-transitions/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/lifecycle/nas-transitions/enforcement.yaml"
+              },
+              {
+                "locator": "service/nas-capabilities",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/service/nas-capabilities/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/service/nas-capabilities/enforcement.yaml"
+              }
+            ],
+            "predecessors": []
+          }
+        },
+        {
+          "member": "introduce-typed-estate-registry-8462ce1d",
+          "position": "change",
+          "status": "valid",
+          "base": {
+            "accepted": [
+              {
+                "locator": "configuration/nas-realization",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/configuration/nas-realization/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/configuration/nas-realization/enforcement.yaml"
+              },
+              {
+                "locator": "estate/nas-storage",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/estate/nas-storage/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/estate/nas-storage/enforcement.yaml"
+              },
+              {
+                "locator": "governance/deployment-control",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/deployment-control/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/deployment-control/enforcement.yaml"
+              },
+              {
+                "locator": "governance/enforcement-quality",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/enforcement-quality/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/enforcement-quality/enforcement.yaml"
+              },
+              {
+                "locator": "governance/nix-repository",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/nix-repository/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/nix-repository/enforcement.yaml"
+              },
+              {
+                "locator": "governance/operator-tooling",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/operator-tooling/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/operator-tooling/enforcement.yaml"
+              },
+              {
+                "locator": "governance/specbase",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/specbase/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/specbase/enforcement.yaml"
+              },
+              {
+                "locator": "governance/testing-control",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/testing-control/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/governance/testing-control/enforcement.yaml"
+              },
+              {
+                "locator": "lifecycle/nas-transitions",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/lifecycle/nas-transitions/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/lifecycle/nas-transitions/enforcement.yaml"
+              },
+              {
+                "locator": "service/nas-capabilities",
+                "specPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/service/nas-capabilities/spec.md",
+                "enforcementPath": "/Users/nlaundry/Projects/homelab-config/specbase/specs/service/nas-capabilities/enforcement.yaml"
+              }
+            ],
+            "predecessors": []
+          },
+          "result": {
+            "model": "governed",
+            "pairs": [
+              {
+                "locator": "estate/model",
+                "specId": "estate.model",
+                "operations": {
+                  "added": 5,
+                  "modified": 0,
+                  "removed": 0,
+                  "renamed": 0,
+                  "bindings": {
+                    "added": 3,
+                    "modified": 0,
+                    "removed": 0
+                  }
+                }
+              },
+              {
+                "locator": "estate/nas-storage",
+                "specId": "estate.nas-storage",
+                "operations": {
+                  "added": 0,
+                  "modified": 0,
+                  "removed": 0,
+                  "renamed": 0,
+                  "bindings": {
+                    "added": 2,
+                    "modified": 0,
+                    "removed": 0
+                  }
+                }
+              },
+              {
+                "locator": "governance/estate-registry",
+                "specId": "governance.estate-registry",
+                "operations": {
+                  "added": 6,
+                  "modified": 0,
+                  "removed": 0,
+                  "renamed": 0,
+                  "bindings": {
+                    "added": 6,
+                    "modified": 0,
+                    "removed": 0
+                  }
+                }
+              }
+            ],
+            "diagnostics": []
+          }
+        }
+      ]
+    }
+  },
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  },
+  "status": []
+}

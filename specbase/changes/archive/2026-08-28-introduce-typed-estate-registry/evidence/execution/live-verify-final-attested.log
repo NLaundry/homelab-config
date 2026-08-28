@@ -1,0 +1,13 @@
+implementation_digest=implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329
+started=2026-08-28T21:22:40Z
+env HOMELAB_NAS_ADDRESS="10.10.10.11" HOMELAB_DEPLOYMENT_TARGET="operator@10.10.10.11" HOMELAB_DEPLOYMENT_SSH_IDENTITY="<redacted-key-path>" nix run .#verify --
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+1..6
+ok 1 the activated NAS becomes reachable over SSH within a finite deadline
+ok 2 the activated NAS has no failed systemd units
+ok 3 the activated NAS exposes an existing NixOS system generation
+ok 4 the NAS advertises every expected ordinary SMB share to guests
+ok 5 mediaBin behaves as a guest-readable and guest-writable share
+ok 6 smolBoy behaves as a guest-readable and guest-writable share
+finished=2026-08-28T21:22:45Z
+exit=0

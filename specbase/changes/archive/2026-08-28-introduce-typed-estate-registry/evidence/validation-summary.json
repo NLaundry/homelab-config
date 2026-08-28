@@ -1,0 +1,17 @@
+{
+  "changeValid": true,
+  "stackValid": true,
+  "currentValid": true,
+  "unknownPlanes": [],
+  "orphans": {
+    "staleBindings": [],
+    "enforcementOnlyPairs": [],
+    "brokenTargets": [],
+    "unboundEvidence": []
+  },
+  "deltaPairs": [
+    "estate/model",
+    "estate/nas-storage",
+    "governance/estate-registry"
+  ]
+}

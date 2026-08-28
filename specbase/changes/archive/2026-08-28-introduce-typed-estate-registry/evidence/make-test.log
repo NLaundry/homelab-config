@@ -1,0 +1,309 @@
+implementation_digest=implementation-sha256:e891528d6d5717c08adc32e42fec51a2960a0f941d58534b43b516330d079a4e
+command=make test
+started=2026-08-28T20:43:52Z
+nix run .#specbase -- validate --specs --strict
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+✓ configuration/nas-realization
+✓ estate/nas-storage
+✓ governance/deployment-control
+✓ governance/enforcement-quality
+✓ governance/nix-repository
+✓ governance/operator-tooling
+✓ governance/specbase
+✓ governance/testing-control
+✓ lifecycle/nas-transitions
+✓ service/nas-capabilities
+nix flake check --no-update-lock-file --all-systems --no-build
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluating flake...
+checking flake output 'lib'...
+checking flake output 'checks'...
+checking derivation checks.aarch64-darwin.tooling-environment...
+derivation evaluated to /nix/store/ryjiyndp27ngfswf3snwixlr7i9iwixp-homelab-tooling-environment.drv
+checking derivation checks.aarch64-darwin.estate-registry...
+derivation evaluated to /nix/store/qxp5vxr4kamg2ycwamq7nwp0g1hx7y77-homelab-estate-registry.drv
+checking derivation checks.x86_64-linux.tooling-environment...
+derivation evaluated to /nix/store/78f0315z87jmw8fhampcmlwg9760ir9k-homelab-tooling-environment.drv
+checking derivation checks.x86_64-linux.estate-registry...
+derivation evaluated to /nix/store/7c02m8hzfi0fyvbcixvamkhbk28qwd4y-homelab-estate-registry.drv
+checking derivation checks.x86_64-linux.vm-harness-private-network...
+derivation evaluated to /nix/store/rd700da8llqpp709ixasf5kcl5ba63qh-vm-test-run-harness-private-network.drv
+checking derivation checks.x86_64-linux.nas-samba-vm...
+derivation evaluated to /nix/store/3mbzvda6zb0s9hcziwvjqbv7qmz1land-vm-test-run-nas-samba-behavior.drv
+checking derivation checks.x86_64-linux.vm-tests...
+derivation evaluated to /nix/store/7hp1z36m1qfn53gy1jf0mji1chn4xgks-homelab-vm-tests.drv
+checking flake output 'nixosConfigurations'...
+checking NixOS configuration 'nixosConfigurations.nas'...
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+checking flake output 'packages'...
+checking derivation packages.aarch64-darwin.specbase...
+derivation evaluated to /nix/store/nyq5p33acxaq8m7746zzsdyqym9sd7az-specbase-1.6.0.drv
+checking derivation packages.aarch64-darwin.repo-tools...
+derivation evaluated to /nix/store/k7ngr37c054q3cw83z6iybi9pinx42py-homelab-repo-tools.drv
+checking derivation packages.x86_64-linux.specbase...
+derivation evaluated to /nix/store/d6hl1b1dk0shsyiz7zbdrccb5dh2mp96-specbase-1.6.0.drv
+checking derivation packages.x86_64-linux.repo-tools...
+derivation evaluated to /nix/store/gs1piqc1lrcwna98b54b71al437p00ar-homelab-repo-tools.drv
+checking flake output 'devShells'...
+checking derivation devShells.aarch64-darwin.default...
+derivation evaluated to /nix/store/c036kq1zl2s8428yhg21kfazq6913h8x-homelab-config.drv
+checking derivation devShells.x86_64-linux.default...
+derivation evaluated to /nix/store/vckw0pngckz6rw2ry5ms5sirww9ihz8r-homelab-config.drv
+checking flake output 'apps'...
+checking app 'apps.aarch64-darwin.specbase'...
+checking app 'apps.aarch64-darwin.harness'...
+checking app 'apps.aarch64-darwin.verify'...
+checking app 'apps.aarch64-darwin.nixos-rebuild'...
+checking app 'apps.x86_64-linux.specbase'...
+checking app 'apps.x86_64-linux.harness'...
+checking app 'apps.x86_64-linux.verify'...
+checking app 'apps.x86_64-linux.nixos-rebuild'...
+test phase harness...
+nix run .\#harness
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+1..45
+ok 1 valid projected NAS, operator, and kernel/ZFS records conform
+ok 2 a forced-root-import configuration mutant is rejected diagnostically
+ok 3 an extra approved-key mutant is rejected diagnostically
+ok 4 a duplicated concern declaration is rejected diagnostically
+ok 5 a broken ZFS module mutant is rejected diagnostically
+ok 6 unreachable SSH cannot satisfy deployment reachability
+ok 7 a failed unit cannot satisfy systemd health
+ok 8 a failed health command is not mistaken for an empty failed-unit set
+ok 9 an invalid current-system path cannot satisfy generation health
+ok 10 deployment operations select every lifecycle action, verification boundary, and input
+ok 11 an incorrect deployment action is detected without deployment
+ok 12 an ignored deployment override is detected without deployment
+ok 13 a target-specific build override regression is detected without deployment
+ok 14 activation verification receives the resolved target address and identity
+ok 15 try and deploy verify strictly after successful activation
+ok 16 activation failure prevents deployed verification
+ok 17 verification failure fails activation operation and reports no rollback
+ok 18 non-activating deployment operations never run deployed verification
+ok 19 valid direct observations and deferred metadata conform
+ok 20 helper-existence evidence is rejected
+ok 21 wrapper-only evidence is rejected
+ok 22 overbroad coverage without every observation is rejected
+ok 23 current evidence without provenance is rejected
+ok 24 stale current evidence is rejected
+ok 25 unsafe live mutation metadata is rejected
+ok 26 a missing binding target is rejected with binding identity
+ok 27 lint runs strict current-spec validation before flake evaluation
+ok 28 a current-spec validation failure stops lint and preserves repository truth
+ok 29 a flake-check failure independently makes lint fail
+ok 30 concurrent verifier namespace tokens are 128-bit and unique
+ok 31 post-acquisition assertion failure preserves failure and removes the exact namespace
+ok 32 cleanup failure reports residue as failure
+ok 33 TERM after acquisition executes exact cleanup
+ok 34 test runs fast non-live phases without VM, live access, or activation
+ok 35 a failed fast phase makes test fail
+ok 36 test-vm selects the fixed aggregate through the default store
+ok 37 test-vm changes execution placement without changing derivation identity
+ok 38 the fixed aggregate contains the isolation harness and Samba behavior VM
+ok 39 the default runner selects only deployed behavior sources
+ok 40 the packaged runner propagates a selected Bats failure
+ok 41 make verify remains non-activating and propagates the selected failure
+ok 42 every registered VM subject is disposable, non-activating, and private
+ok 43 the fixed aggregate is derived from every registered VM leaf
+ok 44 a controlled non-private registry entry is rejected
+ok 45 a controlled implicit-interface declaration is rejected
+test phase tooling...
+nix develop --no-update-lock-file --command env "TEST_STORE=ssh-ng://operator@10.10.10.11?ssh-key=<redacted-key-path>&system-features=kvm%20nixos-test" bats tests/tooling/environment.bats
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+1..14
+ok 1 repo-tools, default shell, and native contract evaluate for every supported system
+ok 2 the native repo-tools contract executes on every supported system
+ok 3 the Darwin SSH command is a bounded adapter to the platform transport
+ok 4 the current development shell supplies every declared direct command
+ok 5 registered Make operations use only managed or explicit bootstrap commands
+ok 6 the independent command inventory matches the Nix package registry
+ok 7 the Nix-packaged Specbase CLI reports the selected compatible release
+ok 8 every default shell derivation directly consumes repo-tools
+ok 9 a controlled missing direct command is rejected
+ok 10 controlled direct-command inventory drift is rejected
+ok 11 a controlled unregistered Make operation command is rejected
+ok 12 a controlled supported-system removal is rejected
+ok 13 controlled default-shell input drift is rejected
+ok 14 managed commands do not resolve through Homebrew or global npm
+test phase agents...
+nix develop --no-update-lock-file --command tests/agents/specbase-instruments.sh all
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+config: schema, plane roster, and lens assignments conform
+{
+  "valid": true,
+  "specs": [
+    {
+      "locator": "configuration/nas-realization",
+      "specId": "configuration.nas-realization",
+      "plane": "configuration",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "estate/nas-storage",
+      "specId": "estate.nas-storage",
+      "plane": "estate",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/deployment-control",
+      "specId": "governance.deployment-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/enforcement-quality",
+      "specId": "governance.enforcement-quality",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/nix-repository",
+      "specId": "governance.nix-repository",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/operator-tooling",
+      "specId": "governance.operator-tooling",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/specbase",
+      "specId": "governance.specbase",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "governance/testing-control",
+      "specId": "governance.testing-control",
+      "plane": "governance",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "lifecycle/nas-transitions",
+      "specId": "lifecycle.nas-transitions",
+      "plane": "lifecycle",
+      "valid": true,
+      "diagnostics": []
+    },
+    {
+      "locator": "service/nas-capabilities",
+      "specId": "service.nas-capabilities",
+      "plane": "service",
+      "valid": true,
+      "diagnostics": []
+    }
+  ],
+  "unsafeLocators": [],
+  "unknownPlanes": [],
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}
+lenses: declared and resolved lens rosters conform
+routing: test paths select the advisory Enforcement lens with governance enforcement-quality policy
+guidance: generated skills and prompts use the homelab-native roster and decision order
+mutants: missing/extra planes and missing/extra/scope-drift lenses rejected
+test phase current-bindings...
+nix develop --no-update-lock-file --command env "TEST_STORE=ssh-ng://operator@10.10.10.11?ssh-key=<redacted-key-path>&system-features=kvm%20nixos-test" tests/specbase/current-bindings.sh all-local
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+binding flake-output-shape...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+observation managed-hosts={"nas":{"hostName":"NASty","targetSystem":"x86_64-linux","toplevelDrvPath":"/nix/store/3kk8ndgvrdqzplgvimj9q2xn99bqnbrk-nixos-system-NASty-26.05.20260804.04607e1.drv"}}
+binding flake-output-shape ok
+binding host-module-layout...
+observation host-module-siblings=hosts/nas/avahi.nix,hosts/nas/default.nix,hosts/nas/hardware-configuration.nix,hosts/nas/samba.nix,hosts/nas/zfs.nix,
+binding host-module-layout ok
+binding host-concern-ownership...
+observation host-concern-owners=zfs=zfs.nix,samba=samba.nix,avahi=avahi.nix,hardware=hardware-configuration.nix
+binding host-concern-ownership ok
+binding nas-configuration...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+observation nas-configuration={"forceImportRoot":false,"hostId":"007f0200","pools":["smolBoy","mediaBin"],"stateVersion":"26.05","targetSystem":"x86_64-linux","zfsSupported":true}
+binding nas-configuration ok
+binding operator-configuration...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+observation operator-policy={"extraGroups":["wheel","networkmanager"],"isNormalUser":true,"keyCount":1,"wheelNeedsPassword":false}
+observation operator-key-digest=eb702fd7d530748417c6a7aa240c54ba5f8698fd7b7bc0e97b352619e65d1aa3
+binding operator-configuration ok
+binding kernel-zfs-projection...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+observation kernel-zfs={"kernelDrvPath":"/nix/store/vdg4bivlm5gz342wsh4kf12ns28yildb-linux-6.18.42.drv","kernelVersion":"6.18.42","targetSystem":"x86_64-linux","toplevelDrvPath":"/nix/store/3kk8ndgvrdqzplgvimj9q2xn99bqnbrk-nixos-system-NASty-26.05.20260804.04607e1.drv","zfsModuleAttribute":"zfs_2_4","zfsModuleBroken":false,"zfsModuleDrvPath":"/nix/store/dpynyrz3mkwbikh0x76sm3ycprkv41ws-zfs-kernel-2.4.3-6.18.42.drv"}
+binding kernel-zfs-projection ok
+binding lock-resolution...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+observation nixpkgs-lock={"locked":{"narHash":"sha256-fKCq5jphd6l/Ms6gc3dptkw/TcKLYub9lQE5g6rbbkc=","rev":"04607e1165ac22c5fde6dcc54c9e0b3c0487c555"},"original":{"owner":"NixOS","ref":"nixos-26.05","repo":"nixpkgs","type":"github"}}
+observation state-version=26.05
+binding lock-resolution ok
+binding flake-evaluates-against-lock...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluating flake...
+checking flake output 'lib'...
+checking flake output 'checks'...
+checking derivation checks.aarch64-darwin.tooling-environment...
+derivation evaluated to /nix/store/ryjiyndp27ngfswf3snwixlr7i9iwixp-homelab-tooling-environment.drv
+checking derivation checks.aarch64-darwin.estate-registry...
+derivation evaluated to /nix/store/qxp5vxr4kamg2ycwamq7nwp0g1hx7y77-homelab-estate-registry.drv
+checking derivation checks.x86_64-linux.tooling-environment...
+derivation evaluated to /nix/store/78f0315z87jmw8fhampcmlwg9760ir9k-homelab-tooling-environment.drv
+checking derivation checks.x86_64-linux.estate-registry...
+derivation evaluated to /nix/store/7c02m8hzfi0fyvbcixvamkhbk28qwd4y-homelab-estate-registry.drv
+checking derivation checks.x86_64-linux.vm-harness-private-network...
+derivation evaluated to /nix/store/rd700da8llqpp709ixasf5kcl5ba63qh-vm-test-run-harness-private-network.drv
+checking derivation checks.x86_64-linux.nas-samba-vm...
+derivation evaluated to /nix/store/3mbzvda6zb0s9hcziwvjqbv7qmz1land-vm-test-run-nas-samba-behavior.drv
+checking derivation checks.x86_64-linux.vm-tests...
+derivation evaluated to /nix/store/7hp1z36m1qfn53gy1jf0mji1chn4xgks-homelab-vm-tests.drv
+checking flake output 'nixosConfigurations'...
+checking NixOS configuration 'nixosConfigurations.nas'...
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+checking flake output 'packages'...
+checking derivation packages.aarch64-darwin.specbase...
+derivation evaluated to /nix/store/nyq5p33acxaq8m7746zzsdyqym9sd7az-specbase-1.6.0.drv
+checking derivation packages.aarch64-darwin.repo-tools...
+derivation evaluated to /nix/store/k7ngr37c054q3cw83z6iybi9pinx42py-homelab-repo-tools.drv
+checking derivation packages.x86_64-linux.specbase...
+derivation evaluated to /nix/store/d6hl1b1dk0shsyiz7zbdrccb5dh2mp96-specbase-1.6.0.drv
+checking derivation packages.x86_64-linux.repo-tools...
+derivation evaluated to /nix/store/gs1piqc1lrcwna98b54b71al437p00ar-homelab-repo-tools.drv
+checking flake output 'devShells'...
+checking derivation devShells.aarch64-darwin.default...
+derivation evaluated to /nix/store/c036kq1zl2s8428yhg21kfazq6913h8x-homelab-config.drv
+checking derivation devShells.x86_64-linux.default...
+derivation evaluated to /nix/store/vckw0pngckz6rw2ry5ms5sirww9ihz8r-homelab-config.drv
+checking flake output 'apps'...
+checking app 'apps.aarch64-darwin.specbase'...
+checking app 'apps.aarch64-darwin.harness'...
+checking app 'apps.aarch64-darwin.verify'...
+checking app 'apps.aarch64-darwin.nixos-rebuild'...
+checking app 'apps.x86_64-linux.specbase'...
+checking app 'apps.x86_64-linux.harness'...
+checking app 'apps.x86_64-linux.verify'...
+checking app 'apps.x86_64-linux.nixos-rebuild'...
+observation flake-check=no-build-success
+binding flake-evaluates-against-lock ok
+binding managed-host-closure...
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+evaluation warning: The option `services.avahi.nssmdns' defined in `/nix/store/y12xc7mdifq50r0x9xb5ddr8pgw5jp19-source/hosts/nas/avahi.nix' has been renamed to `services.avahi.nssmdns4'.
+copying 0 paths...
+observation closure-output=/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1
+observation closure-builder=ssh-ng://operator@10.10.10.11?ssh-key=<redacted-key-path>&system-features=kvm%20nixos-test
+binding managed-host-closure ok
+finished=2026-08-28T20:46:40Z
+exit=0

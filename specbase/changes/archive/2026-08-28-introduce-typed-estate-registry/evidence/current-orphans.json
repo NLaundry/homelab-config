@@ -1,0 +1,499 @@
+{
+  "summary": {
+    "totals": {
+      "specs": 10,
+      "requirements": 41,
+      "coveredRequirements": 41,
+      "hangingRequirements": 0,
+      "scenarios": 45,
+      "coveredScenarios": 45,
+      "uncoveredScenarios": 0
+    },
+    "planes": {
+      "configuration": {
+        "specs": 1,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 0,
+          "complete": 1
+        },
+        "counts": {
+          "requirements": 5,
+          "coveredRequirements": 5,
+          "hangingRequirements": 0,
+          "scenarios": 5,
+          "coveredScenarios": 5,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 4,
+          "review": 0,
+          "manual": 0
+        }
+      },
+      "estate": {
+        "specs": 1,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 1,
+          "complete": 0
+        },
+        "counts": {
+          "requirements": 2,
+          "coveredRequirements": 2,
+          "hangingRequirements": 0,
+          "scenarios": 2,
+          "coveredScenarios": 2,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 0,
+          "review": 1,
+          "manual": 0
+        }
+      },
+      "governance": {
+        "specs": 6,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 2,
+          "complete": 4
+        },
+        "counts": {
+          "requirements": 25,
+          "coveredRequirements": 25,
+          "hangingRequirements": 0,
+          "scenarios": 27,
+          "coveredScenarios": 27,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 23,
+          "review": 2,
+          "manual": 1
+        }
+      },
+      "lifecycle": {
+        "specs": 1,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 1,
+          "complete": 0
+        },
+        "counts": {
+          "requirements": 6,
+          "coveredRequirements": 6,
+          "hangingRequirements": 0,
+          "scenarios": 7,
+          "coveredScenarios": 7,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 2,
+          "review": 0,
+          "manual": 2
+        }
+      },
+      "service": {
+        "specs": 1,
+        "states": {
+          "incomplete-pair": 0,
+          "broken": 0,
+          "stale": 0,
+          "hanging": 0,
+          "degraded": 1,
+          "complete": 0
+        },
+        "counts": {
+          "requirements": 3,
+          "coveredRequirements": 3,
+          "hangingRequirements": 0,
+          "scenarios": 4,
+          "coveredScenarios": 4,
+          "uncoveredScenarios": 0
+        },
+        "strengths": {
+          "automated": 2,
+          "review": 0,
+          "manual": 1
+        }
+      }
+    },
+    "states": {
+      "incomplete-pair": 0,
+      "broken": 0,
+      "stale": 0,
+      "hanging": 0,
+      "degraded": 5,
+      "complete": 5
+    },
+    "strengths": {
+      "automated": 31,
+      "review": 3,
+      "manual": 4
+    },
+    "review": {
+      "threshold": 4,
+      "lenses": [
+        {
+          "lens": "configuration",
+          "scope": "configuration",
+          "crossCutting": false,
+          "reviewClaims": 0
+        },
+        {
+          "lens": "enforcement",
+          "scope": "",
+          "crossCutting": true,
+          "reviewClaims": 1
+        },
+        {
+          "lens": "estate",
+          "scope": "estate",
+          "crossCutting": false,
+          "reviewClaims": 1
+        },
+        {
+          "lens": "governance",
+          "scope": "governance",
+          "crossCutting": false,
+          "reviewClaims": 1
+        },
+        {
+          "lens": "lifecycle",
+          "scope": "lifecycle",
+          "crossCutting": false,
+          "reviewClaims": 0
+        },
+        {
+          "lens": "service",
+          "scope": "service",
+          "crossCutting": false,
+          "reviewClaims": 0
+        }
+      ],
+      "unlensed": [],
+      "splitCandidates": []
+    }
+  },
+  "specs": [
+    {
+      "locator": "configuration/nas-realization",
+      "specId": "configuration.nas-realization",
+      "plane": "configuration",
+      "state": "complete",
+      "counts": {
+        "requirements": 5,
+        "coveredRequirements": 5,
+        "hangingRequirements": 0,
+        "scenarios": 5,
+        "coveredScenarios": 5,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "force-import-root-disabled",
+        "operator-account-configuration",
+        "zfs-host-identity-stable",
+        "zfs-kernel-compatible",
+        "zfs-pool-import-configuration"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 4,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "estate/nas-storage",
+      "specId": "estate.nas-storage",
+      "plane": "estate",
+      "state": "degraded",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "smb-workload-placement",
+        "zfs-pool-placement"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "smb-workload-placement",
+        "zfs-pool-placement"
+      ],
+      "strengths": {
+        "automated": 0,
+        "review": 1,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/deployment-control",
+      "specId": "governance.deployment-control",
+      "plane": "governance",
+      "state": "complete",
+      "counts": {
+        "requirements": 2,
+        "coveredRequirements": 2,
+        "hangingRequirements": 0,
+        "scenarios": 2,
+        "coveredScenarios": 2,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "deployment-inputs-overridable",
+        "remote-deploy-mechanism"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 1,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/enforcement-quality",
+      "specId": "governance.enforcement-quality",
+      "plane": "governance",
+      "state": "degraded",
+      "counts": {
+        "requirements": 8,
+        "coveredRequirements": 8,
+        "hangingRequirements": 0,
+        "scenarios": 8,
+        "coveredScenarios": 8,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "actionable-test-failures",
+        "assertion-scoped-evidence",
+        "enforcement-quality-review",
+        "evidence-family-fault-detection",
+        "evidence-record-integrity",
+        "failure-safe-live-cleanup",
+        "production-path-fidelity",
+        "run-scoped-state"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "assertion-scoped-evidence",
+        "enforcement-quality-review"
+      ],
+      "strengths": {
+        "automated": 5,
+        "review": 1,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/nix-repository",
+      "specId": "governance.nix-repository",
+      "plane": "governance",
+      "state": "complete",
+      "counts": {
+        "requirements": 3,
+        "coveredRequirements": 3,
+        "hangingRequirements": 0,
+        "scenarios": 3,
+        "coveredScenarios": 3,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "flake-exposes-role-attribute",
+        "host-module-split",
+        "nixpkgs-release-pinned"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 6,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/operator-tooling",
+      "specId": "governance.operator-tooling",
+      "plane": "governance",
+      "state": "degraded",
+      "counts": {
+        "requirements": 3,
+        "coveredRequirements": 3,
+        "hangingRequirements": 0,
+        "scenarios": 3,
+        "coveredScenarios": 3,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "operator-dev-shell",
+        "repository-tool-set",
+        "tooling-catalogue"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "tooling-catalogue"
+      ],
+      "strengths": {
+        "automated": 1,
+        "review": 1,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/specbase",
+      "specId": "governance.specbase",
+      "plane": "governance",
+      "state": "complete",
+      "counts": {
+        "requirements": 3,
+        "coveredRequirements": 3,
+        "hangingRequirements": 0,
+        "scenarios": 5,
+        "coveredScenarios": 5,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "panel-covers-planes",
+        "panel-routes-test-quality",
+        "practices-sdd"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 4,
+        "review": 0,
+        "manual": 0
+      }
+    },
+    {
+      "locator": "governance/testing-control",
+      "specId": "governance.testing-control",
+      "plane": "governance",
+      "state": "complete",
+      "counts": {
+        "requirements": 6,
+        "coveredRequirements": 6,
+        "hangingRequirements": 0,
+        "scenarios": 6,
+        "coveredScenarios": 6,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "lint-stage",
+        "test-builder-selection",
+        "test-network-boundary",
+        "test-stage",
+        "test-subject-boundary",
+        "verify-stage"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [],
+      "strengths": {
+        "automated": 6,
+        "review": 0,
+        "manual": 1
+      }
+    },
+    {
+      "locator": "lifecycle/nas-transitions",
+      "specId": "lifecycle.nas-transitions",
+      "plane": "lifecycle",
+      "state": "degraded",
+      "counts": {
+        "requirements": 6,
+        "coveredRequirements": 6,
+        "hangingRequirements": 0,
+        "scenarios": 7,
+        "coveredScenarios": 7,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "deployment-operation-set",
+        "deployment-succeeds",
+        "pools-import-on-boot",
+        "post-activation-failure-semantics",
+        "post-activation-verification",
+        "post-deploy-verification"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "deployment-succeeds",
+        "pools-import-on-boot"
+      ],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 2
+      }
+    },
+    {
+      "locator": "service/nas-capabilities",
+      "specId": "service.nas-capabilities",
+      "plane": "service",
+      "state": "degraded",
+      "counts": {
+        "requirements": 3,
+        "coveredRequirements": 3,
+        "hangingRequirements": 0,
+        "scenarios": 4,
+        "coveredScenarios": 4,
+        "uncoveredScenarios": 0
+      },
+      "coveredRequirementIds": [
+        "guest-force-operator",
+        "operator-access",
+        "samba-shares-exposed"
+      ],
+      "hangingRequirementIds": [],
+      "uncoveredScenarioIds": [],
+      "weaklyCoveredRequirementIds": [
+        "operator-access"
+      ],
+      "strengths": {
+        "automated": 2,
+        "review": 0,
+        "manual": 1
+      }
+    }
+  ],
+  "orphans": {
+    "staleBindings": [],
+    "enforcementOnlyPairs": [],
+    "brokenTargets": [],
+    "unboundEvidence": []
+  },
+  "strict": false,
+  "valid": true,
+  "root": {
+    "path": "/Users/nlaundry/Projects/homelab-config",
+    "source": "nearest"
+  }
+}

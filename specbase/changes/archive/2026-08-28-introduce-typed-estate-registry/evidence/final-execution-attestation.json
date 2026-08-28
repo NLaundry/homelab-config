@@ -1,0 +1,55 @@
+{
+  "implementationDigest": "implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329",
+  "createdAt": "2026-08-28T21:44:26Z",
+  "runs": {
+    "operator-access": {
+      "observedAt": "2026-08-28T21:18:11Z",
+      "finishedAt": "2026-08-28T21:18:15Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/operator-access-final.log",
+      "logSha256": "4c31093c9f8f00eebb3de91759f5cb6c0490286eed04bccf3730d4b507cd6517"
+    },
+    "estate-reconciliation": {
+      "observedAt": "2026-08-28T21:18:15Z",
+      "finishedAt": "2026-08-28T21:18:16Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/estate-reconciliation-final.log",
+      "logSha256": "6c396e3fbef53a2b70d72ff19dba11b05466cc1ccec28df4cd6f95b69efc2afe"
+    },
+    "kvm-vm-suite": {
+      "observedAt": "2026-08-28T21:22:45Z",
+      "finishedAt": "2026-08-28T21:43:53Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/vm-tests-final-attested.log",
+      "logSha256": "e28a4224111945ba6996595adbb0b1f1959baba47920ad399a5b1e2462df9e55"
+    },
+    "live-samba": {
+      "observedAt": "2026-08-28T21:22:40Z",
+      "finishedAt": "2026-08-28T21:22:45Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/live-verify-final-attested.log",
+      "logSha256": "ede9b9d69811460b5a4867f7662dfdecbc590a979743498d627a39cc4346ff2b"
+    },
+    "post-deploy-health": {
+      "observedAt": "2026-08-28T21:22:40Z",
+      "finishedAt": "2026-08-28T21:22:45Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/live-verify-final-attested.log",
+      "logSha256": "ede9b9d69811460b5a4867f7662dfdecbc590a979743498d627a39cc4346ff2b"
+    },
+    "tooling-catalogue-review": {
+      "observedAt": "2026-08-28T21:43:53Z",
+      "finishedAt": "2026-08-28T21:43:53Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/tooling-review-final.log",
+      "logSha256": "3a76f0d07aa4cb31414dd29cc719e0e35757ff6bae0926fd2da102c4760c6cf4"
+    },
+    "estate-registry-review": {
+      "observedAt": "2026-08-28T21:44:03Z",
+      "finishedAt": "2026-08-28T21:44:03Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/execution/estate-registry-review-final.log",
+      "logSha256": "ebb3c64ee8ec80712a23ee4d64ae1eab0107c3c31291b53ab0a3081aa1c4e4f5"
+    }
+  }
+}

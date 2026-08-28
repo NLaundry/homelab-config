@@ -3,11 +3,11 @@
   "binding": "governance.testing-control/kvm-builder-runtime",
   "type": "manual",
   "status": "current",
-  "revision": "implementation-sha256:ef020dd66cd7bc131baca8c95e59329633ee09ba93b0517f8cacfa3b65b6df52",
+  "revision": "implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329",
   "environment": "aarch64-darwin evaluator with trusted ssh-ng x86_64-linux KVM/nixos-test store at operator@10.10.10.11",
   "sourcePersona": "repository test operator",
-  "observedAt": "2026-08-28T20:29:07Z",
-  "freshUntil": "2026-09-27T20:29:07Z",
+  "observedAt": "2026-08-28T21:22:45Z",
+  "freshUntil": "2026-09-27T21:22:45Z",
   "limitations": "Forced rebuild proves both registered disposable VM derivations and their runtime assertions on the selected builder; it does not prove live NAS services or physical network isolation.",
   "mutation": {
     "mutating": false,
@@ -17,5 +17,5 @@
     "required": false,
     "result": "success"
   },
-  "attestation": "specbase/changes/archive/2026-08-28-adopt-homelab-native-spec-planes/evidence/final-execution-attestation.json"
+  "attestation": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/final-execution-attestation.json"
 }

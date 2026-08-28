@@ -1,0 +1,17 @@
+implementation_digest=implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329
+started=2026-08-28T21:17:47Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+these 2 derivations will be built:
+  /nix/store/mdnw1kr1hgbzfr2nzrlyv04b81s523g2-homelab-verify.drv
+  /nix/store/in101fydhvgy6z0gphkmdbmxq1pghswb-homelab-harness.drv
+building '/nix/store/mdnw1kr1hgbzfr2nzrlyv04b81s523g2-homelab-verify.drv'...
+building '/nix/store/in101fydhvgy6z0gphkmdbmxq1pghswb-homelab-harness.drv'...
+1..6
+ok 1 schema-export: production graph is normalized, bounded, and JSON-safe
+ok 2 production-graph: current Estate relationships and cardinalities are clean
+ok 3 validator-diagnostics: invalid fixtures emit exact structured violation arrays
+ok 4 graph-diff: every node and relationship bucket is scoped and order-independent
+ok 5 reconciliation: evaluated NAS facts align and a controlled drift is diagnosed
+ok 6 flake-check: Estate graph artifacts build without runtime activation
+finished=2026-08-28T21:18:11Z
+exit=0

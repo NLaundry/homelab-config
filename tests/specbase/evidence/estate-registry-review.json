@@ -1,0 +1,21 @@
+{
+  "id": "estate-registry-review",
+  "binding": "governance.estate-registry/registry-enforcement-review",
+  "type": "review",
+  "status": "current",
+  "revision": "implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329",
+  "environment": "typed Estate registry implementation, exact fixtures, execution evidence, and staged review panel",
+  "sourcePersona": "independent Estate, Governance, Enforcement, Nix, and completeness reviewers",
+  "observedAt": "2026-08-28T21:44:03Z",
+  "freshUntil": "2026-09-27T21:44:03Z",
+  "limitations": "Review judges semantic adequacy and maintenance value; deterministic graph properties, Nix evaluation, and live/physical observations retain their separate boundaries.",
+  "mutation": {
+    "mutating": false,
+    "blastRadius": "Read-only staged-diff and evidence review."
+  },
+  "cleanup": {
+    "required": false,
+    "result": "not-applicable"
+  },
+  "attestation": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/final-execution-attestation.json"
+}

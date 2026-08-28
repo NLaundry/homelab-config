@@ -1,0 +1,33 @@
+bindings:
+  registry-schema-export:
+    type: test
+    covers:
+      - typed-bounded-schema
+      - normalized-json-export
+    source: tests/estate/registry.bats
+  registry-validator-diagnostics:
+    type: static-analysis
+    covers: structured-graph-violations
+    source: tests/estate/registry.bats
+  registry-diff-contract:
+    type: test
+    covers: normalized-graph-diff
+    source: tests/estate/registry.bats
+  registry-mutation-fixtures:
+    type: test
+    covers: registry-fault-fixtures
+    source: tests/estate/registry.bats
+  registry-reconciliation:
+    type: command
+    covers: independent-estate-reconciliation
+    source: tests/estate/registry.bats
+  registry-enforcement-review:
+    type: review
+    covers:
+      - typed-bounded-schema
+      - normalized-json-export
+      - structured-graph-violations
+      - normalized-graph-diff
+      - registry-fault-fixtures
+      - independent-estate-reconciliation
+    source: enforcement

@@ -1,0 +1,17 @@
+bindings:
+  typed-estate-model:
+    type: static-analysis
+    covers: typed-logical-entities
+    source: tests/estate/registry.bats
+  estate-reference-properties:
+    type: static-analysis
+    covers:
+      - relationship-references-resolve
+      - workload-state-dependencies-explicit
+    source: tests/estate/registry.bats
+  estate-cardinality-properties:
+    type: static-analysis
+    covers:
+      - single-workload-placement
+      - single-state-owner
+    source: tests/estate/registry.bats

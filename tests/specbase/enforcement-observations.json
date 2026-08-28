@@ -208,6 +208,71 @@
       "post-deploy-verification": [
         "bounded SSH observations establish current reachability, failed-unit state, and active generation while retaining failed outcomes"
       ]
+    },
+    "estate.model/typed-estate-model": {
+      "typed-logical-entities": [
+        "evaluated normalized nodes contain exactly the current site, host role, workload, and two durable state identities"
+      ]
+    },
+    "estate.model/estate-reference-properties": {
+      "relationship-references-resolve": [
+        "production violations are empty and unknown site, host, and state fixtures emit exact reference diagnostics"
+      ],
+      "workload-state-dependencies-explicit": [
+        "normalized consumes edges resolve file-sharing explicitly to mediaBin and smolBoy state nodes"
+      ]
+    },
+    "estate.model/estate-cardinality-properties": {
+      "single-workload-placement": [
+        "zero and multiple placement fixtures emit workload-placement-count for file-sharing while production has one runs edge"
+      ],
+      "single-state-owner": [
+        "ownerless and multiple-owner fixtures emit state-owner-count while production has one owner edge per state"
+      ]
+    },
+    "estate.nas-storage/nas-estate-graph": {
+      "smb-workload-placement": [
+        "normalized production graph contains exactly host:nas runs workload:file-sharing"
+      ],
+      "zfs-pool-placement": [
+        "normalized production graph contains host:nas ownership edges for mediaBin and smolBoy"
+      ]
+    },
+    "estate.nas-storage/nas-estate-reconciliation": {
+      "smb-workload-placement": [
+        "declared and observed-only file-sharing relations are compared bidirectionally with independently evaluated Samba enablement"
+      ],
+      "zfs-pool-placement": [
+        "declared and observed-only pool relations are compared bidirectionally with independently evaluated NAS extraPools and physical limitations remain explicit"
+      ]
+    },
+    "governance.estate-registry/registry-schema-export": {
+      "typed-bounded-schema": [
+        "module evaluation rejects an undeclared Configuration field and production export contains only selected node and edge keys"
+      ],
+      "normalized-json-export": [
+        "schema version, namespaced node IDs, and edge IDs are sorted and reorder fixtures produce equality"
+      ]
+    },
+    "governance.estate-registry/registry-validator-diagnostics": {
+      "structured-graph-violations": [
+        "every invalid fixture output exactly equals its sorted code, subject, expected, and observed oracle through the production validator"
+      ]
+    },
+    "governance.estate-registry/registry-diff-contract": {
+      "normalized-graph-diff": [
+        "reorder diff is empty; node add/remove and placement/ownership remove-add fixtures assert every intended and empty diff bucket"
+      ]
+    },
+    "governance.estate-registry/registry-mutation-fixtures": {
+      "registry-fault-fixtures": [
+        "reference, placement cardinality, ownership cardinality, and dangling-host fixtures fail with intended codes and subjects"
+      ]
+    },
+    "governance.estate-registry/registry-reconciliation": {
+      "independent-estate-reconciliation": [
+        "current evaluated host facts reconcile cleanly; production-adapter missing-fact and observed-only model mutants emit both mismatch directions"
+      ]
     }
   }
 }
