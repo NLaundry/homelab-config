@@ -4,7 +4,7 @@
 # Testing operations keep validation, disposable VM tests, and deployed checks
 # distinct. Run `make help` for the documented operation surface.
 
-OPERATIONS := deploy boot try dry build lint test test-vm verify
+OPERATIONS := deploy boot try dry build lint test test-vm verify estate-check
 NON_LIVE_PHASES := harness tooling agents current-bindings
 
 HOST    ?= nas
@@ -58,7 +58,8 @@ help: ## List documented repository operations
 		'  lint       Validate current specs and evaluate flake checks' \
 		'  test       Run fast non-live repository checks' \
 		'  test-vm    Run the optional disposable NixOS VM integration suite' \
-		'  verify     Run checks against the deployed homelab'
+		'  verify     Run checks against the deployed homelab' \
+		'  estate-check  Validate the human-maintained estate.yaml inventory'
 
 deploy: ## Build on NAS, activate persistently, then verify
 	$(DEPLOYMENT_PLAN)
@@ -93,6 +94,9 @@ test: lint ## Run every registered non-live phase
 		printf 'test phase %s...\n' "$$phase"; \
 		$(MAKE) --no-print-directory "test-$$phase" || exit $$?; \
 	done
+
+estate-check: ## Validate the human-maintained Estate inventory
+	$(NIX) run .\#harness -- tests/estate/inventory.bats
 
 test-harness:
 	$(NIX) run .\#harness

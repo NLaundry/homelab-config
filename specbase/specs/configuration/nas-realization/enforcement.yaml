@@ -18,3 +18,7 @@ bindings:
     type: command
     covers: operator-account-configuration
     source: tests/specbase/current-bindings.sh#operator-configuration
+  nas-inventory-address:
+    type: test
+    covers: nas-inventory-address
+    source: tests/estate/inventory.bats

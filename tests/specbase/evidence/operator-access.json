@@ -3,12 +3,12 @@
   "binding": "service.nas-capabilities/operator-access-runtime",
   "type": "live",
   "status": "current",
-  "revision": "implementation-sha256:9da23874d6e46607db86c0ea8657206225aa6a7c5c4a831b9787a774b8cbf329",
+  "revision": "implementation-sha256:da398b32b3b22eafd700e61fe55d89bf09b0ed70ae75e3d398837da2e7018e7b",
   "generation": "/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1",
   "environment": "aarch64-darwin operator workstation to operator@10.10.10.11",
   "sourcePersona": "authorized operator using approved key",
-  "observedAt": "2026-08-28T21:18:11Z",
-  "freshUntil": "2026-08-29T21:18:11Z",
+  "observedAt": "2026-08-29T04:57:57Z",
+  "freshUntil": "2026-08-30T04:57:57Z",
   "limitations": "Point-in-time SSH and sudo authorization evidence; it does not establish continuous availability or authorization for another key/persona.",
   "mutation": {
     "mutating": false,
@@ -18,5 +18,5 @@
     "required": false,
     "result": "not-applicable"
   },
-  "attestation": "specbase/changes/archive/2026-08-28-introduce-typed-estate-registry/evidence/final-execution-attestation.json"
+  "attestation": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/final-execution-attestation.json"
 }

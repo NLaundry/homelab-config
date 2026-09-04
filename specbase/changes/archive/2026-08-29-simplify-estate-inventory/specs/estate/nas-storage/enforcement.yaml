@@ -1,10 +1,7 @@
+remove:
+  - nas-estate-graph
+  - nas-estate-reconciliation
 bindings:
-  nas-estate-review:
-    type: review
-    covers:
-      - smb-workload-placement
-      - zfs-pool-placement
-    source: estate
   nas-estate-inventory:
     type: test
     covers:

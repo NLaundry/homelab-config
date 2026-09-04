@@ -1,0 +1,53 @@
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+these 2 derivations will be built:
+  /nix/store/a1sxsgg7pgk9bz6k9gna4bzi61ifh4m3-homelab-verify.drv
+  /nix/store/v9innfbz2nyxyc8mwl4d0a0qr349bh7z-homelab-harness.drv
+building '/nix/store/a1sxsgg7pgk9bz6k9gna4bzi61ifh4m3-homelab-verify.drv'...
+building '/nix/store/v9innfbz2nyxyc8mwl4d0a0qr349bh7z-homelab-harness.drv'...
+1..46
+ok 1 valid projected NAS, operator, and kernel/ZFS records conform
+ok 2 a forced-root-import configuration mutant is rejected diagnostically
+ok 3 an extra approved-key mutant is rejected diagnostically
+ok 4 a duplicated concern declaration is rejected diagnostically
+ok 5 a broken ZFS module mutant is rejected diagnostically
+ok 6 unreachable SSH cannot satisfy deployment reachability
+ok 7 a failed unit cannot satisfy systemd health
+ok 8 a failed health command is not mistaken for an empty failed-unit set
+ok 9 an invalid current-system path cannot satisfy generation health
+ok 10 deployment operations select every lifecycle action, verification boundary, and input
+ok 11 an incorrect deployment action is detected without deployment
+ok 12 an ignored deployment override is detected without deployment
+ok 13 a target-specific build override regression is detected without deployment
+ok 14 activation verification receives the resolved target address and identity
+ok 15 try and deploy verify strictly after successful activation
+ok 16 activation failure prevents deployed verification
+ok 17 verification failure fails activation operation and reports no rollback
+ok 18 non-activating deployment operations never run deployed verification
+ok 19 valid direct observations and deferred metadata conform
+ok 20 helper-existence evidence is rejected
+ok 21 wrapper-only evidence is rejected
+ok 22 overbroad coverage without every observation is rejected
+ok 23 current evidence without provenance is rejected
+ok 24 stale current evidence is rejected
+ok 25 unsafe live mutation metadata is rejected
+ok 26 a missing binding target is rejected with binding identity
+ok 27 lint runs strict current-spec validation before flake evaluation
+ok 28 a current-spec validation failure stops lint and preserves repository truth
+ok 29 a flake-check failure independently makes lint fail
+ok 30 concurrent verifier namespace tokens are 128-bit and unique
+ok 31 post-acquisition assertion failure preserves failure and removes the exact namespace
+ok 32 cleanup failure reports residue as failure
+ok 33 TERM after acquisition executes exact cleanup
+ok 34 test runs fast non-live phases without VM, live access, or activation
+ok 35 a failed fast phase makes test fail
+ok 36 test-vm selects the fixed aggregate through the default store
+ok 37 test-vm changes execution placement without changing derivation identity
+ok 38 the fixed aggregate contains the isolation harness and Samba behavior VM
+ok 39 the default runner selects only deployed behavior sources
+ok 40 the packaged runner propagates a selected Bats failure
+ok 41 make verify remains non-activating and propagates the selected failure
+ok 42 every registered VM subject is disposable, non-activating, and private
+ok 43 the fixed aggregate is derived from every registered VM leaf
+ok 44 a controlled non-private registry entry is rejected
+ok 45 a controlled implicit-interface declaration is rejected
+ok 46 estate.yaml is a readable inventory of the current homelab

@@ -50,3 +50,12 @@ The evaluated NAS configuration SHALL define the selected operator account, appr
 **ID:** `operator-policy-present`
 - **WHEN** the merged NAS account and privilege configuration is inspected
 - **THEN** the selected operator identity, approved key policy, administrator membership, and elevation policy are all present
+
+### Requirement: NAS inventory address is selected
+**ID:** `nas-inventory-address`
+The operator inventory SHALL record `10.10.10.11` as the selected LAN address for the NAS.
+
+#### Scenario: NAS connection details are inspected
+**ID:** `nas-lan-address-visible`
+- **WHEN** an operator reads the NAS entry in the Estate inventory
+- **THEN** the selected LAN address is directly visible

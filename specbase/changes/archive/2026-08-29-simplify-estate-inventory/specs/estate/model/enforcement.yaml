@@ -1,3 +1,7 @@
+remove:
+  - typed-estate-model
+  - estate-reference-properties
+  - estate-cardinality-properties
 bindings:
   estate-inventory-locations:
     type: test

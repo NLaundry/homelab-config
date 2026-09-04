@@ -1,0 +1,9 @@
+nix run .\#harness -- tests/estate/inventory.bats
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+these 2 derivations will be built:
+  /nix/store/hsglvbgczsvwfdhn48d0da4rzlsgp3bw-homelab-verify.drv
+  /nix/store/00jl989bq5n68jdrckwm63q574zlpi29-homelab-harness.drv
+building '/nix/store/hsglvbgczsvwfdhn48d0da4rzlsgp3bw-homelab-verify.drv'...
+building '/nix/store/00jl989bq5n68jdrckwm63q574zlpi29-homelab-harness.drv'...
+1..1
+ok 1 estate.yaml is a readable inventory of the current homelab

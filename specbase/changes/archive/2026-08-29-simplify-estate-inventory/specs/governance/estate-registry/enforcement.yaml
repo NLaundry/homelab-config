@@ -1,3 +1,10 @@
+remove:
+  - registry-schema-export
+  - registry-validator-diagnostics
+  - registry-diff-contract
+  - registry-mutation-fixtures
+  - registry-reconciliation
+  - registry-enforcement-review
 bindings:
   estate-inventory-shape:
     type: test

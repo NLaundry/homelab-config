@@ -1,0 +1,26 @@
+# Human-maintained homelab inventory.
+# Update this file with topology, address, or service changes, then run:
+#   make estate-check
+# Add practical details such as service URLs when they become useful.
+version: 1
+
+sites:
+  home:
+    name: Home
+
+hosts:
+  nas:
+    site: home
+    hostname: NASty
+    addresses:
+      lan: 10.10.10.11
+    storage:
+      pools:
+        - mediaBin
+        - smolBoy
+
+services:
+  file-sharing:
+    host: nas
+    kind: samba
+    protocol: smb

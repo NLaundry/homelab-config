@@ -1,0 +1,8 @@
+implementation_digest=implementation-sha256:da398b32b3b22eafd700e61fe55d89bf09b0ed70ae75e3d398837da2e7018e7b
+started=2026-08-29T04:57:57Z
+warning: Git tree '/Users/nlaundry/Projects/homelab-config' is dirty
+error (ignored): error: SQLite database '/Users/nlaundry/.cache/nix/eval-cache-v5/68b1ad50dcc016989ece3f1055fc4647357ad462f3ce4ccc27c74898fedc5ec3.sqlite' is busy
+host=NASty generation=/nix/store/q5zcyid8f0iv10cf2k23bbh8q9vr4qlj-nixos-system-NASty-26.05.20260804.04607e1
+root
+finished=2026-08-29T04:58:01Z
+exit=0
