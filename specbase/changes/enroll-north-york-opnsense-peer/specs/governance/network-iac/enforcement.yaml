@@ -1,0 +1,9 @@
+bindings:
+  opnsense-authority-contract:
+    type: test
+    covers: opnsense-configuration-authority
+    source: tests/ansible/opnsense-netbird-contracts.bats
+  opnsense-static-validation:
+    type: command
+    covers: opnsense-automation-reusable
+    source: tests/ansible/opnsense-static-check

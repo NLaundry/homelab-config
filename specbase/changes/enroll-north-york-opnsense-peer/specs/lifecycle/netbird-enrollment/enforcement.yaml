@@ -1,0 +1,17 @@
+bindings:
+  enrollment-preflight-procedure:
+    type: manual
+    covers: netbird-enrollment-preflighted
+    source: docs/operations/opnsense-netbird-enrollment.md#preflight
+  enrollment-idempotence-verification:
+    type: manual
+    covers: netbird-enrollment-idempotent
+    source: docs/operations/opnsense-netbird-enrollment.md#post-enrollment-verification
+  setup-key-retirement-verification:
+    type: manual
+    covers: setup-key-ephemeral
+    source: docs/operations/opnsense-netbird-enrollment.md#post-enrollment-verification
+  enrollment-rollback-procedure:
+    type: manual
+    covers: opnsense-peer-rollback
+    source: docs/operations/opnsense-netbird-enrollment.md#rollback

@@ -1,0 +1,11 @@
+bindings:
+  netbird-baseline-validation:
+    type: command
+    covers:
+      - north-york-network-declared
+      - netbird-provider-pinned
+    source: tests/iac/netbird-static-check
+  unrouted-baseline-contract:
+    type: test
+    covers: north-york-routing-unassigned
+    source: tests/iac/netbird-contracts.bats

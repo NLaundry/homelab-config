@@ -1,0 +1,9 @@
+bindings:
+  secret-recovery-drill:
+    type: manual
+    covers: operator-secret-recovery
+    source: docs/operations/network-secret-operations.md#recovery-drill
+  network-credential-rotation-procedure:
+    type: manual
+    covers: network-credential-rotation
+    source: docs/operations/network-secret-operations.md#credential-rotation

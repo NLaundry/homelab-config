@@ -1,0 +1,9 @@
+remove:
+  - unrouted-baseline-contract
+bindings:
+  netbird-routing-validation:
+    type: command
+    covers:
+      - north-york-routing-assigned
+      - north-york-admin-policy-explicit
+    source: tests/iac/netbird-static-check

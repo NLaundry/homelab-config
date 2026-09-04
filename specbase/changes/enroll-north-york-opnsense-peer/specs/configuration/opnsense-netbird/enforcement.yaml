@@ -1,0 +1,13 @@
+bindings:
+  opnsense-netbird-preflight:
+    type: manual
+    covers: opnsense-netbird-plugin-supported
+    source: docs/operations/opnsense-netbird-enrollment.md#preflight
+  bounded-peer-contract:
+    type: test
+    covers: opnsense-netbird-peer-bounded
+    source: tests/ansible/opnsense-netbird-contracts.bats
+  enrolled-peer-verification:
+    type: manual
+    covers: opnsense-wt0-assigned
+    source: docs/operations/opnsense-netbird-enrollment.md#post-enrollment-verification

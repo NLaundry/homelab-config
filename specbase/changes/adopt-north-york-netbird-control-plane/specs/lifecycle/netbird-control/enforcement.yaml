@@ -1,0 +1,9 @@
+bindings:
+  netbird-import-review:
+    type: manual
+    covers: netbird-adoption-preserves-service
+    source: docs/operations/netbird-opentofu.md#import-existing-north-york
+  netbird-state-recovery-drill:
+    type: manual
+    covers: netbird-state-recoverable
+    source: docs/operations/netbird-opentofu.md#state-recovery-drill

@@ -1,0 +1,8 @@
+bindings:
+  network-secret-contracts:
+    type: test
+    covers:
+      - network-credentials-encrypted
+      - network-credentials-process-local
+      - network-secret-recipient-set
+    source: tests/secrets/contracts.bats

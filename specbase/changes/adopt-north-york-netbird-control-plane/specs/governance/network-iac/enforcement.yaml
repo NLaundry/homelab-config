@@ -1,0 +1,11 @@
+bindings:
+  netbird-authority-contract:
+    type: test
+    covers:
+      - netbird-control-plane-authority
+      - netbird-state-excluded-from-git
+    source: tests/iac/netbird-contracts.bats
+  netbird-static-validation:
+    type: command
+    covers: netbird-iac-reproducible
+    source: tests/iac/netbird-static-check

@@ -1,0 +1,7 @@
+remove:
+  - estate-inventory-locations
+bindings:
+  estate-inventory-review:
+    type: review
+    covers: inventory-locates-estate
+    source: estate
