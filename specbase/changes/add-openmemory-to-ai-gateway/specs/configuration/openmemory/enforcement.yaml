@@ -1,0 +1,12 @@
+bindings:
+  openmemory-guest-configuration:
+    type: test
+    covers:
+      - openmemory-runtime
+      - openmemory-listener
+      - openmemory-authentication
+      - openmemory-state-layout
+      - openmemory-litellm-dependency
+      - openmemory-litellm-authentication
+      - openmemory-embedding-dimensions
+    source: tests/openmemory-vm.nix

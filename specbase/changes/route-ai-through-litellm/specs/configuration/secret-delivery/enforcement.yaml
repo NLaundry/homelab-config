@@ -1,0 +1,7 @@
+bindings:
+  guest-secret-mount:
+    type: test
+    covers:
+      - gateway-secret-delivery
+      - gateway-secret-scope
+    source: tests/ai-gateway-vm.nix

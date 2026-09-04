@@ -1,0 +1,10 @@
+bindings:
+  ai-gateway-vm-configuration:
+    type: test
+    covers:
+      - microvm-runtime
+      - macvtap-lan-attachment
+      - gateway-network-values
+      - gateway-resource-budget
+      - gateway-firewall
+    source: tests/ai-gateway-vm.nix

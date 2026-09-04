@@ -1,0 +1,10 @@
+bindings:
+  openmemory-protocols:
+    type: test
+    covers:
+      - openmemory-health
+      - unauthenticated-memory-request-rejected
+      - memory-store-retrieve
+      - stable-user-namespace
+      - client-provenance
+    source: tests/openmemory-vm.nix

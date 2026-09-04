@@ -1,0 +1,9 @@
+bindings:
+  secret-tool-environment:
+    type: test
+    covers: secret-tools-available
+    source: tests/tooling/environment.bats
+  plaintext-secret-contract:
+    type: test
+    covers: plaintext-secret-exclusion
+    source: tests/secrets/contracts.bats

@@ -1,0 +1,5 @@
+bindings:
+  ai-gateway-transitions:
+    type: test
+    covers: guest-autostart
+    source: tests/ai-gateway-vm.nix

@@ -1,0 +1,9 @@
+bindings:
+  openmemory-transitions:
+    type: test
+    covers:
+      - openmemory-start-order
+      - memory-survives-service-restart
+      - memory-survives-guest-restart
+      - embedding-schema-change-control
+    source: tests/openmemory-vm.nix
