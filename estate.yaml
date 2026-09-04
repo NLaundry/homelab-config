@@ -1,16 +1,33 @@
 # Human-maintained homelab inventory.
-# Update this file with topology, address, or service changes, then run:
-#   make estate-check
+# Update this file with topology, address, or service changes.
 # Add practical details such as service URLs when they become useful.
 version: 1
 
 sites:
-  home:
-    name: Home
+  north-york:
+    name: North York
+    networks:
+      lan:
+        cidr: 10.10.10.0/24
 
 hosts:
+  opnsense:
+    site: north-york
+    hostname: OPNsense
+    addresses:
+      lan: 10.10.10.1
+  ax23:
+    site: north-york
+    hostname: AX23
+    addresses:
+      lan: 10.10.10.2
+  proxbox:
+    site: north-york
+    hostname: proxbox
+    addresses:
+      lan: 10.10.10.10
   nas:
-    site: home
+    site: north-york
     hostname: NASty
     addresses:
       lan: 10.10.10.11

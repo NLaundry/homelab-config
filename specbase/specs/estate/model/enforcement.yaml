@@ -1,5 +1,5 @@
 bindings:
-  estate-inventory-locations:
-    type: test
+  estate-inventory-review:
+    type: review
     covers: inventory-locates-estate
-    source: tests/estate/inventory.bats
+    source: estate

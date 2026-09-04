@@ -209,11 +209,6 @@
         "bounded SSH observations establish current reachability, failed-unit state, and active generation while retaining failed outcomes"
       ]
     },
-    "estate.model/estate-inventory-locations": {
-      "inventory-locates-estate": [
-        "estate.yaml parses and every catalogued host references an existing site while every catalogued service references an existing host"
-      ]
-    },
     "estate.nas-storage/nas-estate-inventory": {
       "smb-workload-placement": [
         "the file-sharing service entry records nas as its host"

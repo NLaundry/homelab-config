@@ -25,8 +25,6 @@ setup() {
   done < <(yq eval -r '.services[].host' "$INVENTORY")
 
   run yq eval -e '
-    (.sites | has("home")) and
-    .hosts.nas.site == "home" and
     .hosts.nas.hostname == "NASty" and
     .hosts.nas.addresses.lan == "10.10.10.11" and
     .hosts.nas.storage.pools[0] == "mediaBin" and

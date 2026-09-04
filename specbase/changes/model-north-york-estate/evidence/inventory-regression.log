@@ -1,0 +1,4 @@
+2026-09-04T21:49:07Z
+command: nix run .#harness -- tests/estate/inventory.bats
+result: PASS
+summary: 1 test passed. This is regression evidence for surviving shared bindings only; it is not evidence of North York inventory contents.
