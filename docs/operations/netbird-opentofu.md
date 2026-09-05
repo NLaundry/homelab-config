@@ -1,122 +1,97 @@
-# Adopt the NetBird control plane
+# Adopt the North York NetBird Network
 
-## What
+## Scope
 
-Put the existing North York Network, its LAN resource, and an empty router group
-under OpenTofu control. Do not enable LAN routing.
+OpenTofu manages only:
 
-## Why
+- Network `North York`.
+- Peer-free resource group `North York LAN Resources`.
+- LAN resource `North York LAN` at the `estate.yaml` boundary `10.10.10.0/24`.
 
-Import existing objects before managing them. This preserves their identity and
-avoids replacing a working network while establishing reproducible configuration.
+This procedure does not manage peers, router groups, routers, policies, DNS,
+setup keys, OPNsense, or Scarborough. Stop if a plan includes any of them.
 
-## Before you start
+## Prepare external state
 
-**Draft: the OpenTofu root and secret adapter do not exist yet.** Complete
-[secret custody](network-secret-operations.md) first. Confirm read-only API access.
+Run commands from the repository root. State, working data, and the encrypted
+saved plan stay outside Git.
 
-Implementation must provide:
+```sh
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}/homelab-config/netbird"
+install -d -m 700 "$state_root" "$state_root/data"
+export TF_DATA_DIR="$state_root/data"
 
-- `infra/netbird/` and its `modules/site-network/` module.
-- An exact official NetBird provider version and platform lock entries.
-- A reviewed secret adapter and native state and plan encryption.
-- External state at `${XDG_STATE_HOME:-$HOME/.local/state}/homelab-config/netbird/terraform.tfstate`.
-- `TF_DATA_DIR` and encrypted backups outside the repository.
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird init -input=false -lockfile=readonly \
+  -backend-config="path=$state_root/terraform.tfstate"
+```
 
-Do not run bare OpenTofu commands with guessed import addresses or default local
-state paths. The implementation must supply the final adapter and import commands.
+Do not export resolved SecretSpec values into the parent shell or enable command
+tracing.
 
-## 1. Inspect before importing
+## Inspect before import
 
-### 1.1 Record existing objects and ownership
+Use read-only NetBird inspection to identify exact IDs for the three named
+objects and confirm:
 
-Use the NetBird dashboard and read-only API access to record:
+- There is at most one exact name match for each object.
+- The LAN address is `10.10.10.0/24`.
+- The resource group has no peers.
+- The Network has no router and no effective routed-LAN policy.
 
-- The North York Network ID and ownership.
-- Its existing resources, groups, router assignments, and effective access.
-- Which objects belong to Scarborough or another owner and must remain untouched.
+Stop on duplicate ownership, a different address, an existing router, or active
+routed access. Ignore and do not import unrelated account objects.
 
-### 1.2 Check the LAN and routing baseline
+## Import exact matches
 
-Compare the LAN resource with `estate.yaml`: North York is `10.10.10.0/24`.
-Stop if ownership is ambiguous or existing routing conflicts with this deliberately
-unrouted baseline. Do not silently disable an existing connection.
+Import only objects proven to exist. Omit the corresponding command for an
+object proven absent.
 
-## 2. Prepare state and imports
+```sh
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird import netbird_network.north_york NETWORK_ID
 
-### 2.1 Check provider and state safeguards
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird import \
+  netbird_group.north_york_lan_resources RESOURCE_GROUP_ID
 
-1. Review the provider pin and lock file.
-2. Confirm that state, backup state, saved plans, and working data stay outside Git.
-3. Confirm native state and plan encryption. Disk encryption alone is not enough.
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird import \
+  netbird_network_resource.north_york_lan NETWORK_ID/RESOURCE_ID
+```
 
-### 2.2 Initialize and import existing objects
+Imports change only external OpenTofu state; they do not change NetBird.
 
-1. Initialize through the reviewed adapter.
-2. Import the existing Network into its final resource address.
-3. Import matching resources and groups. Create an object only after proving it
-   does not already exist.
+## Plan and apply
 
-Do not import Scarborough, human identities, DNS, peers, or setup keys.
+```sh
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird plan -input=false -lock=false \
+  -out="$state_root/baseline.tfplan"
+```
 
-## 3. Review and apply the baseline
+Accept only creation of a proven-missing named baseline object or harmless
+metadata normalization. Stop on deletion, replacement, routing, policy, peer,
+DNS, setup-key, or unrelated-account changes.
 
-### 3.1 Validate and review the plans
+Apply the exact reviewed encrypted plan:
 
-Run the implemented static checks and `tofu validate` through the prepared tool
-context. Review a refresh-only plan, then a normal plan.
+```sh
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  tofu -chdir=infra/netbird apply -input=false "$state_root/baseline.tfplan"
+rm -f "$state_root/baseline.tfplan"
+```
 
-Accept only the intended North York baseline. Explain any harmless metadata
-normalization. Reject:
+Run a new normal plan. Success is `0 to add, 0 to change, 0 to destroy`.
 
-- Replacement or deletion of an existing Network, resource, or group.
-- A router assignment or effective policy that enables LAN access.
-- Unrelated-site changes, setup-key management, or secret-bearing output.
-- Unencrypted or repository-local state and plan files.
+## Recover lost state
 
-### 3.2 Apply the reviewed baseline
+Do not run `destroy`. If external state is lost:
 
-Apply only the reviewed plan through the secret adapter. Do not use the dashboard
-for routine changes after adoption.
+1. Recreate the external directories and initialize the backend.
+2. Repeat read-only inspection.
+3. Re-import the same three live object IDs.
+4. Accept the recovered state only after a no-change plan.
 
-## 4. Check
-
-Confirm that:
-
-- The original Network ID remains unchanged.
-- The North York LAN resource exists and the router group is empty.
-- No router assignment or effective routed access exists for this baseline.
-- Existing connectivity and Scarborough remain unchanged.
-- A new normal plan has no changes.
-
-Record object IDs and a sanitized plan summary. Do not record full state or tokens.
-
-## 5. Prove state recovery
-
-### 5.1 Back up and isolate the recovery copy
-
-Save an encrypted post-apply snapshot in independent encrypted backup storage.
-Restore a copy into an isolated external directory with a separate `TF_DATA_DIR`.
-Use the implemented recovery procedure; do not point it at the live state path or
-migrate a live backend.
-
-### 5.2 Verify read-only recovery
-
-With the approved recovery material, initialize the isolated copy and obtain an
-equivalent read-only refresh result. Do not apply from the recovery directory.
-Stop if the backup cannot be read or resolves different managed objects.
-
-## Stop or recover
-
-Do not run `destroy` to undo adoption. Remove only objects proven to have been
-created by this change. Leave imported objects live; after review, detach a
-mistaken import from state instead of deleting the remote object.
-
-Preserve encrypted state and recovery material. Reconcile any emergency dashboard
-edit before the next OpenTofu apply.
-
-## Sources
-
-- [Planned change](../../openspec/changes/adopt-north-york-netbird-control-plane/).
-- [OpenTofu state encryption](https://opentofu.org/docs/language/state/encryption/).
-- [NetBird provider](https://registry.terraform.io/providers/netbirdio/netbird/latest/docs).
+If an object was imported at the wrong address, review and use `tofu state rm`;
+do not delete the remote object.
