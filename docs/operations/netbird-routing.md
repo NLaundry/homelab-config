@@ -1,153 +1,44 @@
-# Enable North York LAN routing
+# North York LAN access
 
-## What
+## Scope
 
-Use the enrolled OPNsense peer to let an explicit administrator group reach
-North York LAN resources. Deny peers outside that group.
+`NY-Access` contains the approved iPhone and MacBook peers and permits administrator-initiated access to `10.10.10.0/24`. OPNsense is assigned directly as the Network router with masquerading. `SC-Access` is the naming convention for later Scarborough work; this change does not create it or change Scarborough.
 
-## Why
+No DNS, NetBird SSH, manual interface assignment, or persistent firewall rules are added. The official plugin handles forwarding. If this is insufficient, stop rather than adding firewall rules silently.
 
-Clientless LAN hosts need a routing peer. OPNsense provides that boundary;
-masquerading avoids adding return routes to every host.
+## Validate and review
 
-## Before you start
+Use normal `tofu fmt -check`, locked initialization, `tofu validate`, and Ansible syntax checking while editing. Review one normal plan before activation. Keep state and saved plans encrypted under `${XDG_STATE_HOME:-$HOME/.local/state}/homelab-config/netbird/`, not Git. Run OpenTofu through SecretSpec scope `opentofu` and Ansible through `opnsense`; do not export resolved secrets into the parent shell.
 
-**Draft: activation declarations, firewall tasks, and routing probes do not exist
-yet.** Complete the [unrouted enrollment](opnsense-netbird-enrollment.md) first.
+Before activation, confirm exact peer membership, the connected OPNsense identity, and effective policies/routes. The existing default peer-to-peer policy is not the LAN access policy; do not add the LAN resource to `All`.
 
-Require:
+## Quick connection checks
 
-- A no-change baseline plan before introducing activation changes.
-- A repeated enrollment run with no changes or new identity.
-- A current encrypted state backup and protected OPNsense backup.
-- One uniquely identified, connected OPNsense peer.
-- Working local administration and independent console recovery.
-- Two connected test peers: one administrator and one outside the allowed group.
-- A supported firewall savepoint with enough time for all checks.
+Run in the Nix shell from the repository root:
 
-Do not activate without the second test peer. A successful administrator probe
-cannot prove that other peers are denied.
+```sh
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  bats --filter 'NetBird API connection' tests/verify/iac-connectors.bats
 
-## 1. Review the access boundary
+secretspec --file secretspec.toml run --profile north_york --scope opnsense -- \
+  bats --filter 'OPNsense API connection' tests/verify/iac-connectors.bats
+```
 
-### 1.1 Review the intended traffic and configuration
+These are authenticated reads, not network changes. Each needs only its own credentials and network access. A failed API check is not interchangeable with a failed ping.
 
-Confirm the exact administrator members, destination resources, protocol/port
-list, overlay source alias, route metric, and probe timeouts.
+For the routed test, use the MacBook away from the North York LAN (for example, through a cellular hotspot). Confirm NetBird is connected and identify its actual tunnel interface. Select a known listening service on an approved Estate LAN address. Then set `ROUTED_TARGET`, `ROUTED_PORT`, and `NETBIRD_INTERFACE` and run:
 
-The planned configuration uses:
+```sh
+OFF_LAN_TEST=1 bats --filter 'North York routed service connection' \
+  tests/verify/iac-connectors.bats
+```
 
-- Destination `10.10.10.0/24`, confirmed against `estate.yaml`.
-- The dedicated router group through `netbird_network_router.peer_groups`.
-- An explicit metric and `masquerade = true`.
-- An explicit administrator source group and resource destination group.
-- One-way initiation from administrators, with stateful return traffic.
-- One Ansible-owned pass rule: ingress `wt0`, selected overlay source, North York
-  LAN destination. Limit it to the approved traffic.
+Export those three non-secret values before running. The check verifies the selected route interface and opens one short-timeout TCP connection. It does not log in or write data. Alternatively, use the iPhone on cellular with Wi-Fi off and open an approved LAN service. Record that as a manual test, not a Bats result.
 
-Reject catch-all source groups, any/any rules, WAN ingress, reverse initiation,
-second-site changes, DNS management, setup keys, or any unapproved replacement.
+A LAN-local connection is not proof of NetBird routing. A skipped test is not a pass. Positive access also does not prove unauthorized denial; review effective policies and report that limit honestly. No second test-device provisioning is required.
 
-### 1.2 Check existing policies and routes
+## Accept or withdraw
 
-Inspect all effective policies and routes, not only the new declarations. An
-existing route or policy could make a prepared firewall rule active earlier than
-expected. Resolve that conflict before proceeding.
+After approved activation, require a successful off-LAN service connection, retained local OPNsense management, and no-change OpenTofu/Ansible reconciliation. If validation fails, disable the access policy and router assignment, then restore the changed plugin routing settings. Keep the enrolled peer and baseline Network/resource/group; do not destroy or re-enroll them.
 
-## 2. Stage the activation
-
-### 2.1 Validate and review the activation plan
-
-Before any live change, pass the implemented static checks. The refresh-only
-baseline plan must show no changes before activation declarations are added.
-Then generate and review the normal activation plan. Do not enable the firewall
-rule until that plan contains only the approved changes.
-
-### 2.2 Enable the firewall rule and recheck management
-
-1. Confirm local management and arm the firewall savepoint.
-2. Enable the reviewed persistent pass rule through Ansible.
-3. Recheck local management. Stop and revert if it degrades.
-
-### 2.3 Apply routing and keep rollback active
-
-1. Apply the reviewed OpenTofu group membership, router assignment, metric,
-   masquerading, and access policy through the secret adapter.
-2. Keep the savepoint active while running the checks below.
-
-Ansible must not manage remote NetBird policy. OpenTofu must not manage the
-OPNsense firewall. If either step fails, use the rollback order below.
-
-Do not cancel automatic firewall rollback early merely to gain more test time.
-Choose a supported test window before starting.
-
-## 3. Check both allowed and denied access
-
-### 3.1 Select probes and expected results
-
-Use confirmed IP addresses, not DNS. Select bounded route, ICMP, and TCP probes;
-use read-only endpoints and perform no login or file write.
-
-| From | Check | Expected result |
-|---|---|---|
-| Administrator peer | Route and approved traffic to NASty at `10.10.10.11` | Succeeds |
-| Administrator peer | Approved safe OPNsense endpoint at `10.10.10.1` | Succeeds |
-| Non-administrator peer | The same North York destinations and ports | Denied |
-| Local LAN | Existing management and ordinary services | Still work |
-
-### 3.2 Verify test peers and run both checks
-
-Confirm both test peers are connected and otherwise functional. An offline peer
-or a dead endpoint is not proof of policy denial. Confirm that Scarborough and
-other unrelated access remain unchanged.
-
-The planned `tests/verify/netbird-routing.bats` must run on the selected
-administrator peer only after implementation. Do not add it blindly to the
-normal NAS post-deploy suite; it needs a specific network identity. Run the
-negative check from the separate non-administrator peer.
-
-### 3.3 Check the routing peer and logs
-
-Confirm that OPNsense remains the only routing peer. LAN hosts do not become
-NetBird peers automatically. Check the available sanitized policy/edge logs;
-masquerading hides the original overlay source address from destination hosts.
-
-## 4. Accept the activation
-
-Cancel the savepoint rollback only after every check passes. Save a new encrypted
-state backup. Require a no-change OpenTofu plan and Ansible run.
-
-Record non-secret peer/group IDs, approved traffic, savepoint identifier, and
-positive/negative results. Do not record credentials or full state.
-
-## Stop or recover
-
-Use the planned source-controlled toggles through OpenTofu and Ansible for normal
-activation and withdrawal. Do not use routine dashboard edits.
-
-### 1. Restore the unrouted boundary
-
-On failed checks or unexpected access, restore the unrouted boundary in order:
-
-1. Disable the NetBird access policy.
-2. Remove or disable the Network router assignment.
-3. Prove the routed path is gone.
-4. Disable or revert the persistent OPNsense pass rule.
-
-Preserve the connected peer, `wt0`, baseline Network/resource/group, and encrypted
-state. Do not re-enroll merely to undo routing. If a control plane is unavailable,
-use the independent local recovery path to close access; do not leave a known
-exposure open while waiting for normal automation. Reconcile emergency edits with
-source configuration before the next apply.
-
-### 2. Prove rollback and reactivation
-
-In an approved window, prove rollback and then reactivate with the same checks.
-Do not claim this drill occurred merely because the procedure exists.
-
-OPNsense is a single routing failure point. Its failure removes remote LAN access;
-local recovery must remain independent of that route.
-
-## Source
-
-[Planned change](../../openspec/changes/activate-north-york-netbird-routing/).
+No backup project, firewall savepoint framework, or rollback drill is required for this plugin-managed path.

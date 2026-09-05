@@ -18,15 +18,6 @@ The NetBird configuration SHALL declare one North York Network, one dedicated pe
 - **THEN** the North York Network, dedicated resource group, and `10.10.10.0/24` LAN resource resolve without a second-site declaration
 - **AND** the LAN resource belongs to that group and the group contains no peers
 
-### Requirement: North York routing remains unassigned
-**ID:** `north-york-routing-unassigned`
-The North York baseline SHALL contain no peer, router group, router assignment, or effective routed-LAN access policy; its resource group SHALL contain no peers.
-
-#### Scenario: Baseline is applied
-**ID:** `baseline-does-not-route-lan`
-- **WHEN** the North York baseline has been applied
-- **THEN** no NetBird peer can route traffic to the North York LAN through that Network
-
 ### Requirement: NetBird provider selection is pinned
 **ID:** `netbird-provider-pinned`
 The NetBird configuration SHALL constrain and lock its provider selection for every supported operator platform.
@@ -35,3 +26,21 @@ The NetBird configuration SHALL constrain and lock its provider selection for ev
 **ID:** `provider-selection-repeats`
 - **WHEN** initialization runs again without an approved upgrade
 - **THEN** it selects the committed provider version and checksums
+
+### Requirement: North York routing is assigned
+**ID:** `north-york-routing-assigned`
+The North York Network SHALL directly assign its uniquely identified connected OPNsense peer as an enabled router with an explicit metric and masquerading enabled.
+
+#### Scenario: North York router configuration is evaluated
+**ID:** `north-york-router-is-enabled`
+- **WHEN** the NetBird configuration is evaluated
+- **THEN** the North York Network resolves to the selected OPNsense peer with the selected metric and masquerading
+
+### Requirement: North York administrator policy is explicit
+**ID:** `north-york-admin-policy-explicit`
+The NetBird configuration SHALL grant North York LAN access from an explicit administrator source group to an explicit North York resource destination without granting reverse initiation.
+
+#### Scenario: North York access policy is evaluated
+**ID:** `policy-has-bounded-groups`
+- **WHEN** the managed North York policy is evaluated
+- **THEN** its source and destination are the selected groups and its direction permits administrator initiation only

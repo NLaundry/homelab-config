@@ -1,0 +1,113 @@
+---
+- name: Configure North York NetBird forwarding
+  hosts: opnsense
+  connection: local
+  gather_facts: false
+  no_log: true
+  vars:
+    ansible_pipelining: true
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    opnsense_url: "{{ lookup('ansible.builtin.env', 'OPNSENSE_URL') }}"
+    # No write unless explicitly requested; the same desired state is safe to repeat.
+    apply_routing: false
+    routing_enabled: true
+    desired_settings:
+      firewall:
+        allowConfig: "1"
+        blockInboundConnection: "{{ '0' if routing_enabled | bool else '1' }}"
+      routing:
+        accessLan: "{{ '1' if routing_enabled | bool else '0' }}"
+        acceptServerRoutes: "{{ '1' if routing_enabled | bool else '0' }}"
+        acceptClientRoutes: "0"
+      dns:
+        enable: "0"
+      ssh:
+        enable: "0"
+        enableRoot: "0"
+        enableSFTP: "0"
+        enableLocalPortForwarding: "0"
+        enableRemotePortForwarding: "0"
+  module_defaults:
+    group/oxlorg.opnsense.all:
+      firewall: "{{ opnsense_url | regex_replace('^https://', '') }}"
+      api_key: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_KEY') }}"
+      api_secret: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_SECRET') }}"
+      ssl_verify: true
+      ssl_ca_file: "{{ playbook_dir }}/../certificates/north-york-opnsense-web.pem"
+      debug: false
+  tasks:
+    - name: Check inputs
+      ansible.builtin.assert:
+        that:
+          - opnsense_url is match('^https://[^/]+$')
+          - lookup('ansible.builtin.env', 'OPNSENSE_API_KEY') | length > 0
+          - lookup('ansible.builtin.env', 'OPNSENSE_API_SECRET') | length > 0
+
+    - name: Read current settings
+      oxlorg.opnsense.raw:
+        url: netbird/settings/get
+        action: get
+      register: current
+      changed_when: false
+
+    - name: Read connected peer status
+      oxlorg.opnsense.raw:
+        url: netbird/status/status
+        action: get
+      register: peer
+      changed_when: false
+
+    - name: Require a connected compatible plugin
+      ansible.builtin.assert:
+        that:
+          - peer.response.management.connected | default(false) | bool
+          - current.response.settings is mapping
+          - current.response.settings.general.enable == '1'
+
+    - name: Compare only managed settings
+      ansible.builtin.set_fact:
+        settings_differ: "{{ current.response.settings != (current.response.settings | combine(desired_settings, recursive=true)) }}"
+
+    - name: Apply changed forwarding settings
+      when:
+        - apply_routing | bool
+        - settings_differ | bool
+        - not ansible_check_mode
+      block:
+        - name: Update forwarding settings
+          oxlorg.opnsense.raw:
+            url: netbird/settings/set
+            action: post
+            data:
+              settings: "{{ desired_settings }}"
+          register: saved
+
+        - name: Require successful save
+          ansible.builtin.assert:
+            that: saved.response.result == 'saved'
+
+        - name: Sync changed settings
+          oxlorg.opnsense.raw:
+            url: netbird/settings/sync
+            action: post
+            timeout: 120
+          register: synced
+
+        - name: Require successful sync
+          ansible.builtin.assert:
+            that: synced.response.result == 'synced'
+
+    - name: Read settings back
+      oxlorg.opnsense.raw:
+        url: netbird/settings/get
+        action: get
+      register: verified
+      changed_when: false
+
+    - name: Verify applied settings
+      ansible.builtin.assert:
+        that:
+          - verified.response.settings == (verified.response.settings | combine(desired_settings, recursive=true))
+      when:
+        - apply_routing | bool
+        - not ansible_check_mode

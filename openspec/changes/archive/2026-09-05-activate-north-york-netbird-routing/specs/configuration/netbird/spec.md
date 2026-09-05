@@ -6,12 +6,12 @@ id: configuration.netbird
 
 ### Requirement: North York routing is assigned
 **ID:** `north-york-routing-assigned`
-The North York Network SHALL assign its dedicated OPNsense router group as an enabled routing peer with an explicit metric and masquerading enabled.
+The North York Network SHALL directly assign its uniquely identified connected OPNsense peer as an enabled router with an explicit metric and masquerading enabled.
 
 #### Scenario: North York router configuration is evaluated
 **ID:** `north-york-router-is-enabled`
 - **WHEN** the NetBird configuration is evaluated
-- **THEN** the North York Network resolves to the dedicated router group with the selected metric and masquerading
+- **THEN** the North York Network resolves to the selected OPNsense peer with the selected metric and masquerading
 
 ### Requirement: North York administrator policy is explicit
 **ID:** `north-york-admin-policy-explicit`
@@ -27,4 +27,4 @@ The NetBird configuration SHALL grant North York LAN access from an explicit adm
 ### Requirement: North York routing remains unassigned
 **ID:** `north-york-routing-unassigned`
 **Reason:** The enrolled North York OPNsense peer is now ready to provide the intended routed access.
-**Migration:** Assign the dedicated router group, enable masquerading, and activate the explicit administrator-to-resource policy through the staged routing procedure.
+**Migration:** Directly assign the OPNsense peer, enable masquerading, and activate the approved administrator-to-resource policy.
