@@ -16,19 +16,32 @@ VERIFY = env HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
 	nix run .\#verify --
 
 .DEFAULT_GOAL := help
-.PHONY: help lint test verify build dry try boot deploy
+.PHONY: help check test-vm verify build preview try boot deploy
 
 help:
 	@printf '%s\n' \
-		'Checks:      lint (evaluate)  test (remote VM)  verify (live NAS)' \
-		'Deployment:  build  dry  try  boot  deploy' \
-		'See README.md for behavior, prerequisites, and overrides.'
+		'Usage: make <command> [VARIABLE=value]' \
+		'' \
+		'Checks:' \
+		'  check     Validate Nix configuration; no builds or live probes' \
+		'  test-vm   Run Samba tests in disposable VMs on TEST_STORE' \
+		'  verify    Check the live NAS; create and remove SMB test files' \
+		'' \
+		'Deployment:' \
+		'  build     Build the NAS configuration without activation' \
+		'  preview   Show activation changes without applying them' \
+		'  try       Activate temporarily, then verify; keep the boot default' \
+		'  boot      Select a configuration for the next boot; do not activate' \
+		'  deploy    Activate now, make persistent, then verify' \
+		'' \
+		'Failed verification does not roll back an activation.' \
+		'See README.md for prerequisites and overrides.'
 
-lint:
+check:
 	nix flake check --no-update-lock-file --all-systems --no-build
 
 # Runs disposable guests on TEST_STORE, not the live NAS configuration.
-test: lint
+test-vm: check
 	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
 verify:
@@ -37,7 +50,7 @@ verify:
 build:
 	$(REBUILD) build
 
-dry:
+preview:
 	$(ACTIVATE) dry-activate
 
 boot:

@@ -17,11 +17,11 @@ The shell supports macOS ARM and Linux x86-64. Full live SMB checks need macOS.
 
 | Command | Action |
 |---|---|
-| `make lint` | Evaluate Nix configuration without building or deploying |
-| `make test` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
+| `make check` | Evaluate Nix configuration without building or deploying |
+| `make test-vm` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
 | `make verify` | Check live NAS health and guest SMB file access |
 | `make build` | Build the NAS configuration without activation |
-| `make dry` | Preview activation without applying it |
+| `make preview` | Preview activation without applying it |
 | `make try` | Activate temporarily, then verify |
 | `make boot` | Select a configuration for the next boot |
 | `make deploy` | Activate persistently, then verify |
