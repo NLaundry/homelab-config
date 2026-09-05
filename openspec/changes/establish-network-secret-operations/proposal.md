@@ -4,7 +4,7 @@ NetBird and OPNsense automation require long-lived API credentials, but the repo
 
 ## What Changes
 
-- Extend the existing reproducible operator environment with SOPS, age, Nano, and OpenTofu while retaining its existing Ansible and SSH tooling.
+- Extend the existing reproducible operator environment with SOPS, age, Neovim, and OpenTofu while retaining its existing Ansible and SSH tooling.
 - Establish one repository `.sops.yaml` convention and an encrypted `secrets/network.yaml` document for the NetBird management credential, North York OPNsense API credential, and OpenTofu state-encryption input.
 - Add wrappers that decrypt credentials only into a child process environment or a mode-`0600` temporary file with guaranteed cleanup.
 - Add an operator runbook covering age identity creation and backup, restricted OPNsense API-key creation, NetBird PAT creation, encrypted-file editing, validation, rotation, recovery, and revocation.
@@ -29,7 +29,7 @@ NetBird and OPNsense automation require long-lived API credentials, but the repo
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|
-| `secret-tools-available` | manual | `command -v sops age age-keygen nano tofu ansible ssh` in each supported Nix development shell | Required secret-operation commands resolve; this does not prove remote authentication. |
+| `secret-tools-available` | manual | `command -v sops age age-keygen nvim tofu ansible ssh` in each supported Nix development shell | Required secret-operation commands resolve; this does not prove remote authentication. |
 | `plaintext-secret-exclusion` | test | `tests/secrets/contracts.bats` | Tracked network secret material is SOPS ciphertext and generated OpenTofu/Ansible inputs contain references rather than credential values. |
 | `single-sops-convention` | test | `tests/secrets/contracts.bats` | Repository secret paths match one root SOPS policy and no competing tracked recipient policy is introduced. |
 | `network-credentials-process-local` | test | `tests/secrets/contracts.bats` | Dummy credentials enter only a bounded child environment or private temporary file and cleanup occurs on success and failure. |

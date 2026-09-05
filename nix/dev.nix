@@ -24,7 +24,7 @@ in
     git
     gnumake
     jq
-    nano
+    neovim
     nixos-rebuild
     opentofu
     shellcheck

@@ -1,6 +1,6 @@
 ## 1. Extend the reproducible operator tool set
 
-- [x] 1.1 Add SOPS, age, Nano, and OpenTofu to the single `nix/dev.nix` package list; retain Ansible and SSH.
+- [x] 1.1 Add SOPS, age, Neovim, and OpenTofu to the single `nix/dev.nix` package list; retain Ansible and SSH.
 - [x] 1.3 Build and enter each supported operator environment available to CI and record the commands and results in change progress.
 
 ## 2. Establish the shared SOPS policy and custody runbook

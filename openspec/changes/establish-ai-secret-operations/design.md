@@ -17,7 +17,7 @@ The repository currently has no SOPS configuration, age identity convention, enc
 
 ## Decisions
 
-- Add `sops`, `age`, `ssh-to-age`, Nano, and OpenSSH's host-key tools to the existing selected tool set rather than requiring global installations.
+- Add `sops`, `age`, `ssh-to-age`, Neovim, and OpenSSH's host-key tools to the existing selected tool set rather than requiring global installations.
 - Use one operator-controlled age identity for editing/recovery and NASty's persistent Ed25519 SSH host identity for deployment decryption.
 - Keep ciphertext in `secrets/ai.yaml` and public recipient metadata in Git; keep both private identities out of the repository. Follow `docs/NAS/ai-secret-bootstrap.md` for identity backup, host-key verification, interactive credential entry, deployment checks, rotation, and rollback.
 - Use sops-nix to render `/run/secrets-rendered/ai.env` on NASty, owned by `root:root` with mode `0400`. Later stack members may consume service-specific views, but this member does not expose it to a guest.
@@ -27,7 +27,7 @@ The repository currently has no SOPS configuration, age identity convention, enc
 
 ### Manual shell availability check
 
-- In each supported Nix development shell, run `command -v sops age age-keygen ssh-to-age nano ssh-keygen ssh-keyscan` before following the secret runbook.
+- In each supported Nix development shell, run `command -v sops age age-keygen ssh-to-age nvim ssh-keygen ssh-keyscan` before following the secret runbook.
 - Stop if a required command is missing; no tool-inventory test is required.
 - This checks availability, not safe handling.
 

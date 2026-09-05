@@ -26,7 +26,11 @@ command arguments, shell history, screenshots, or clipboard managers.
 nix develop --no-update-lock-file
 set +x
 umask 077
+export SOPS_EDITOR='nvim -u NONE -i NONE -n --cmd "set noswapfile nobackup nowritebackup noundofile"'
 ```
+
+These editor flags disable user configuration, history, swap, backup, and undo files.
+If Neovim is unavailable, replace `nvim` with `vim` in that command.
 
 Use SOPS for secret editing. Do not first create a plaintext file in the repository.
 SOPS uses temporary plaintext while editing; keep that workspace private and
@@ -62,53 +66,144 @@ recipient. Lock the recovery location when finished.
 
 ### 3.1 Check the policy and recipients
 
-After implementation, inspect the public policy:
+1. From the repository root, open `.sops.yaml` with `nvim .sops.yaml`.
+2. Add this rule, replacing the example recipient with the public value from step 2:
 
-```sh
-yq eval '.creation_rules' .sops.yaml
-```
+   ```yaml
+   creation_rules:
+     - path_regex: ^secrets/network\.yaml$
+       age: age1_REPLACE_WITH_YOUR_PUBLIC_RECIPIENT
+   ```
 
-Confirm that one root policy selects `secrets/network.yaml` and only the approved
-custody recipients. If you use a separate recovery identity, include its approved
-public recipient too. Do not add a second policy in a subdirectory.
+3. If a separate recovery key exists, put both full public recipients in `age`,
+   separated by a comma; a backup of the same key needs no second recipient.
+4. Keep other valid rules, but put this exact-path rule before any broader match.
+5. Save, then inspect:
+
+   ```sh
+   find . -name .sops.yaml -print
+   yq eval '.creation_rules' .sops.yaml
+   ```
+
+**Expected:** one policy file, `./.sops.yaml`, with only the intended public
+recipients on the network rule; no private `AGE-SECRET-KEY-...` value.
 
 ### 3.2 Test with dummy values
 
-First encrypt dummy values. Prove that intended identities can decrypt them and
-an unrelated identity cannot. Keep dummy ciphertext for the recovery drill.
-Do not introduce production values until these checks pass.
+Run this from the repository root after step 2, with `AGE_KEY_FILE` still set.
+It uses the real policy but creates no live credentials or `secrets/network.yaml`.
+
+```sh
+(
+  set -eu
+  umask 077
+  CHECK_DIR=$(mktemp -d "${TMPDIR:-/tmp}/homelab-sops-check.XXXXXX")
+  mkdir "$CHECK_DIR/empty-home"
+  printf 'check: dummy-only\n' > "$CHECK_DIR/plain.yaml"
+
+  sops --encrypt --config "$PWD/.sops.yaml" \
+    --filename-override "$PWD/secrets/network.yaml" \
+    "$CHECK_DIR/plain.yaml" > "$CHECK_DIR/network.enc.yaml"
+  yq '.sops.age[].recipient' "$CHECK_DIR/network.enc.yaml"
+
+  env -i PATH="$PATH" HOME="$CHECK_DIR/empty-home" \
+    XDG_CONFIG_HOME="$CHECK_DIR/empty-home" SOPS_AGE_KEY_FILE="$AGE_KEY_FILE" \
+    sops --decrypt "$CHECK_DIR/network.enc.yaml" > "$CHECK_DIR/decrypted.yaml"
+  cmp "$CHECK_DIR/plain.yaml" "$CHECK_DIR/decrypted.yaml"
+
+  age-keygen -o "$CHECK_DIR/unrelated.age" 2>/dev/null
+  if env -i PATH="$PATH" HOME="$CHECK_DIR/empty-home" \
+    XDG_CONFIG_HOME="$CHECK_DIR/empty-home" SOPS_AGE_KEY_FILE="$CHECK_DIR/unrelated.age" \
+    sops --decrypt "$CHECK_DIR/network.enc.yaml" >/dev/null 2>&1; then
+    printf 'FAIL: unrelated key decrypted the fixture\n' >&2
+    exit 1
+  fi
+
+  rm "$CHECK_DIR/plain.yaml" "$CHECK_DIR/decrypted.yaml" "$CHECK_DIR/unrelated.age"
+  printf 'PASS: intended key works; unrelated key is denied\nRecovery fixture: %s\n' \
+    "$CHECK_DIR/network.enc.yaml"
+)
+```
+
+**Expected:** the recipient list matches step 3.1, followed by `PASS` and a fixture
+path; any earlier error or different recipient means stop.
+
+The empty home and cleared environment prevent SOPS from silently using another
+installed key. Copy the encrypted fixture into the recovery storage from step 2;
+if you added a separate recovery key, test it with the [recovery command](#recovery-drill).
+Do not add production values until these checks pass.
 
 ## 4. Approve the remote permissions
 
 ### 4.1 Bound OPNsense permissions
 
-From local OPNsense, record the installed release and available API/plugin
-privilege names. Review the operations required for package installation, NetBird
-settings and service control, interfaces, firewall rules, backup, and reload.
+1. Sign in locally at `https://10.10.10.1` with your administrator account.
+2. Open **System → Firmware → Status** and record the OPNsense version.
+3. Open **System → Firmware → Plugins**, search for `os-netbird`, and record
+   whether it is installed or available; do not install it during this step.
+4. In **System → Access → Groups**, inspect the available privileges for
+   NetBird, interfaces, firewall, firmware, configuration backup, and reload.
+   Match each privilege to an operation required by the enrollment role.
 
-Create a dedicated automation user only if those permissions can be bounded.
-Do not grant `admins` or **All pages** to work around missing API support.
-Stop if the installed release cannot support the planned operations safely.
+**Stop here until the enrollment implementation supplies the exact privilege
+list for this release.** That list does not exist yet; selecting every matching
+privilege is not a substitute, and missing plugin privileges are a blocker.
+
+Once that list is approved:
+
+5. Create group `netbird-automation` with only those privileges.
+6. Under **System → Access → Users**, create this account:
+
+   | Field | Value |
+   |---|---|
+   | Username | `svc-netbird` |
+   | Description / full name | North York NetBird automation |
+   | Disabled | Unchecked, so API authentication works |
+   | Password | Use **Scrambled Password** to prevent password login |
+   | Group membership | `netbird-automation` only |
+   | Login shell / SSH keys | No shell access and no authorized keys |
+
+7. Save and inspect group membership and **Effective Privileges**; stop if you
+   find `admins`, **All pages**, or unrelated access.
+
+Do not generate its API key until step 5, when SOPS is ready to receive it.
 
 ### 4.2 Bound NetBird permissions
 
-For NetBird, use a dedicated account with the least privilege needed for the
-planned objects and enrollment API. PATs inherit their user's permissions; they
-do not have separate per-token scopes. Choose an expiry and a rotation date.
+1. Sign in to the NetBird dashboard as an administrator.
+2. Open **Team → Service Users** and create `homelab-opentofu`.
+3. Select **Admin** for the planned OpenTofu writes; **User** is read-only.
+4. Confirm it is a service user, not a personal user or an invited human account.
+
+**Admin access covers the NetBird account, not just North York.** The OpenTofu
+plan limits which objects we manage; it does not narrow the token's permissions.
+Do not use your personal account's token.
+
+Create its token in step 5; use `north-york-opentofu` as the name, a suggested
+90-day expiry, and a rotation reminder seven days before expiry.
 
 ## 5. Enter the live credentials through SOPS
 
 ### 5.1 Create and enter the credentials
 
-Create the NetBird PAT and OPNsense API key only after the permission review.
-Then open the encrypted target directly:
+First open the encrypted target using the editor settings from step 1:
 
 ```sh
 export SOPS_AGE_KEY_FILE="$AGE_KEY_FILE"
 install -d -m 700 secrets
-EDITOR='nano --ignorercfiles --tempfile --nonewlines --nohelp' \
-  sops secrets/network.yaml
+sops secrets/network.yaml
 ```
+
+With the editor open, create the credentials one at a time:
+
+1. In NetBird, open `homelab-opentofu` under **Team → Service Users** and add an
+   access token with the name and expiry from step 4.2.
+2. Transfer the token directly into the SOPS editor before closing the token
+   dialog; NetBird will not show the value again.
+3. In OPNsense, edit `svc-netbird` under **System → Access → Users** and add a
+   key in its **API keys / ApiKeys** section.
+4. Save the one-time download in a private location outside the repository;
+   transfer its `key` and `secret` into the SOPS editor.
 
 Enter these fields in the editor, not in the shell:
 
@@ -142,10 +237,26 @@ an environment dump or a later stack's apply operation for this check.
 
 ## Recovery drill
 
-Use an isolated environment that has the recovery identity but not the primary
-identity. Decrypt the retained dummy ciphertext with the recovery copy and discard
-the plaintext output. Do not move or delete the working primary identity merely
-to perform the drill. Stop if the backup cannot decrypt the fixture.
+1. Restore the backed-up key and dummy fixture into a private folder outside the
+   repository; do not move or delete the working primary key.
+2. Replace the two paths below with those restored files, then run:
+
+```sh
+RECOVERY_KEY_FILE='/absolute/path/to/restored/keys.txt'
+RECOVERY_FIXTURE='/absolute/path/to/restored/network.enc.yaml'
+(
+  set -eu
+  RECOVERY_HOME=$(mktemp -d "${TMPDIR:-/tmp}/homelab-sops-recovery.XXXXXX")
+  trap 'rmdir "$RECOVERY_HOME"' EXIT
+  env -i PATH="$PATH" HOME="$RECOVERY_HOME" XDG_CONFIG_HOME="$RECOVERY_HOME" \
+    SOPS_AGE_KEY_FILE="$RECOVERY_KEY_FILE" \
+    sops --decrypt "$RECOVERY_FIXTURE" >/dev/null
+  printf 'PASS: recovery key decrypts the dummy fixture\n'
+)
+```
+
+**Expected:** `PASS`; otherwise stop and fix the backup before adding or rotating
+live credentials. Lock the restored private key away again when finished.
 
 ## Rotate or revoke
 
@@ -178,3 +289,4 @@ approved privileges, and results. Do not store secret values or decrypted output
 - [age](https://age-encryption.org/).
 - [NetBird API access](https://docs.netbird.io/how-to/access-netbird-public-api).
 - [OPNsense users and privileges](https://docs.opnsense.org/manual/users.html).
+- [OPNsense API key creation](https://docs.opnsense.org/development/how-tos/api.html#creating-keys).

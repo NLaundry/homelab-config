@@ -13,7 +13,7 @@ is `nix/dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
 | OpenTofu | Network infrastructure plans and configuration |
 | SOPS | Encrypt secret documents and decrypt them for consumers |
 | age / age-keygen | Create and use encryption identities |
-| Nano | Edit secrets through SOPS |
+| Neovim | Edit files and secrets through SOPS |
 | jq / yq | Inspect JSON and YAML |
 | Bats | Run shell tests |
 | ShellCheck / shfmt | Check and format shell code |
@@ -22,6 +22,9 @@ On macOS, `ssh` is a small Nix-packaged adapter to `/usr/bin/ssh`. This avoids
 local-network permission problems observed with Nix-packaged OpenSSH. Linux
 uses nixpkgs OpenSSH directly. Live SMB checks also use macOS's `smbutil` and
 `mount_smbfs`; the complete live suite requires a Mac.
+
+Prefer Neovim, then Vim; use Nano only when neither is available.
+For secrets, disable editor backup, swap, undo, and history files as shown in the runbook.
 
 The live verification app supplies its own runtime tools.
 The Samba VM test supplies its NixOS driver and QEMU dependencies. Its execution
