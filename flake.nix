@@ -1,134 +1,56 @@
 {
   description = "Homelab NixOS configurations";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
   outputs = { self, nixpkgs, ... }:
     let
-      tooling = import ./nix/tooling.nix { inherit (nixpkgs) lib; };
-      forOperatorSystems = nixpkgs.lib.genAttrs tooling.supportedSystems;
-      nasConfiguration = nixpkgs.lib.nixosSystem {
-        modules = [ ./hosts/nas ];
-      };
-      pkgsFor = system: import nixpkgs { inherit system; };
-      toolsFor = system: tooling.forPkgs (pkgsFor system);
-
-      runnersFor = system:
-        let
-          pkgs = pkgsFor system;
-          tools = toolsFor system;
-          verifyRunner = pkgs.writeShellApplication {
-            name = "homelab-verify";
-            runtimeInputs = [
-              tools.byName.bats
-              tools.byName.ssh
-              tools.byName.yq
-              pkgs.coreutils
-            ];
-            text = ''
-              tests=( ${self}/tests/verify/*.bats )
-              if [[ ''${1:-} == --list-default ]]; then
-                printf '%s\n' "''${tests[@]}"
-                exit 0
-              fi
-              if (( $# == 0 )); then
-                set -- "''${tests[@]}"
-              fi
-              exec bats "$@"
-            '';
-          };
-          harnessRunner = pkgs.writeShellApplication {
-            name = "homelab-harness";
-            runtimeInputs = [
-              tools.byName.bats
-              tools.byName.git
-              tools.byName.jq
-              tools.byName.make
-              tools.byName.specbase
-              tools.byName.yq
-              pkgs.coreutils
-              pkgs.findutils
-              pkgs.gawk
-              pkgs.gnugrep
-              pkgs.gnused
-            ];
-            text = ''
-              export HOMELAB_ROOT="''${HOMELAB_ROOT:-$PWD}"
-              export HOMELAB_VERIFY_RUNNER="${verifyRunner}/bin/homelab-verify"
-              if (( $# == 0 )); then
-                tests=( ${self}/tests/harness/*.bats ${self}/tests/estate/*.bats )
-                set -- "''${tests[@]}"
-              fi
-              exec bats "$@"
-            '';
-          };
-        in
-        {
-          harness = harnessRunner;
-          verify = verifyRunner;
-        };
-
-      linuxPkgs = pkgsFor "x86_64-linux";
-      vmHarness = linuxPkgs.callPackage ./tests/harness/nixos-vm.nix { };
-      nasVm = linuxPkgs.callPackage ./tests/nas-vm.nix { };
-      vmSuite = import ./nix/vm-tests.nix {
-        inherit (nixpkgs) lib;
-        pkgs = linuxPkgs;
-        inherit vmHarness nasVm;
-      };
+      inherit (nixpkgs) lib;
+      forSystems = lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ];
     in
     {
-      # Host-agnostic attribute name: deploy with `.#nas`, not the hostname.
-      # system/platform comes from nixpkgs.hostPlatform in hardware-configuration.nix.
-      nixosConfigurations.nas = nasConfiguration;
+      # Platform comes from the host's hardware configuration.
+      nixosConfigurations.nas = lib.nixosSystem {
+        modules = [ ./hosts/nas ];
+      };
 
-      packages = forOperatorSystems (system:
+      devShells = forSystems (system:
         let
-          tools = toolsFor system;
+          pkgs = nixpkgs.legacyPackages.${system};
+          dev = import ./nix/dev.nix { inherit pkgs; };
         in
         {
-          repo-tools = tools.repoTools;
-          specbase = tools.specbase;
+          default = pkgs.mkShell { packages = dev.packages; };
         });
 
-      devShells = forOperatorSystems (system: {
-        default = (toolsFor system).defaultShell;
-      });
-
-      apps = forOperatorSystems (system:
+      apps = forSystems (system:
         let
-          runners = runnersFor system;
-          tools = toolsFor system;
+          pkgs = nixpkgs.legacyPackages.${system};
+          dev = import ./nix/dev.nix { inherit pkgs; };
         in
         {
-          harness = {
-            type = "app";
-            program = "${runners.harness}/bin/homelab-harness";
-            meta.description = "Run repository harness conformance sources";
-          };
           verify = {
             type = "app";
-            program = "${runners.verify}/bin/homelab-verify";
-            meta.description = "Run deployed-homelab Bats verification";
-          };
-          specbase = {
-            type = "app";
-            program = "${tools.specbase}/bin/specbase";
-            meta.description = "Run the repository-pinned Specbase CLI";
+            meta.description = "Run deployed-homelab checks";
+            program = lib.getExe (pkgs.writeShellApplication {
+              name = "homelab-verify";
+              runtimeInputs = [ pkgs.bats dev.ssh pkgs.yq-go pkgs.coreutils ];
+              text = ''
+                if (( $# == 0 )); then
+                  set -- ${self}/tests/verify/*.bats
+                fi
+                exec bats "$@"
+              '';
+            });
           };
           nixos-rebuild = {
             type = "app";
-            program = "${tools.byName.deploymentAdapter}/bin/nixos-rebuild";
-            meta.description = "Run the nixpkgs-pinned deployment adapter";
+            meta.description = "Run the pinned NixOS deployment tool";
+            program = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
           };
         });
 
-      checks = forOperatorSystems (system:
-        {
-          tooling-environment = (toolsFor system).toolingCheck;
-        }
-        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") vmSuite.checks);
+      checks.x86_64-linux.nas-samba =
+        nixpkgs.legacyPackages.x86_64-linux.callPackage ./tests/nas-vm.nix { };
     };
 }

@@ -1,43 +1,32 @@
-# Human-maintained homelab inventory.
-# Update this file with topology, address, or service changes.
-# Add practical details such as service URLs when they become useful.
-version: 1
-
-sites:
-  north-york:
-    name: North York
-    networks:
-      lan:
-        cidr: 10.10.10.0/24
-
-hosts:
-  opnsense:
-    site: north-york
-    hostname: OPNsense
-    addresses:
-      lan: 10.10.10.1
-  ax23:
-    site: north-york
-    hostname: AX23
-    addresses:
-      lan: 10.10.10.2
-  proxbox:
-    site: north-york
-    hostname: proxbox
-    addresses:
-      lan: 10.10.10.10
-  nas:
-    site: north-york
-    hostname: NASty
-    addresses:
-      lan: 10.10.10.11
-    storage:
-      pools:
-        - mediaBin
-        - smolBoy
-
-services:
-  file-sharing:
-    host: nas
-    kind: samba
-    protocol: smb
+# Human-maintained inventory, grouped by where things run.
+# A host can have services, vms, or both; each VM can have its own services.
+north-york:
+  name: North York
+  networks:
+    lan:
+      cidr: 10.10.10.0/24
+  hosts:
+    opnsense:
+      hostname: OPNsense
+      addresses:
+        lan: 10.10.10.1
+    ax23:
+      hostname: AX23
+      addresses:
+        lan: 10.10.10.2
+    proxbox:
+      hostname: proxbox
+      addresses:
+        lan: 10.10.10.10
+    nas:
+      hostname: NASty
+      addresses:
+        lan: 10.10.10.11
+      storage:
+        pools:
+          - mediaBin
+          - smolBoy
+      services:
+        file-sharing:
+          kind: samba
+          protocol: smb
