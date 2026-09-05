@@ -55,13 +55,13 @@ Use Estate-derived North York addresses rather than DNS. The live Bats probe run
 
 Disable the NetBird policy, then remove/disable the Network router assignment, verify the routed path is gone, and finally revert/disable the OPNsense pass rule. Preserve the enrolled peer, `wt0`, baseline Network/resource/group, and encrypted state so activation can be retried without re-enrollment.
 
-## Enforcement design
+## Verification design
 
 - `tests/iac/netbird-static-check` evaluates module fixtures and sanitized plan JSON. It asserts one North York router group, the uniquely selected peer, enabled router assignment, explicit metric, masquerading, explicit admin/resource groups, and a one-way policy. It rejects catch-all sources, reverse initiation, second-site data, setup keys, and DNS resources. It does not prove live packet flow.
 - `tests/ansible/opnsense-netbird-contracts.bats` asserts the active persistent rule is role-owned and limited to `wt0`, the selected overlay alias, and the Estate-derived North York destination. It rejects any/any and WAN-facing rules. It does not evaluate live pf state.
-- `tests/verify/netbird-routing.bats` runs through the repository deployed-verification harness on an explicitly selected authorized NetBird peer. It uses bounded route, ICMP, and TCP probes and fails on timeout or wrong endpoint. It does not prove unauthorized denial.
+- `tests/verify/netbird-routing.bats` runs with Bats on an explicitly selected authorized NetBird peer. It uses bounded route, ICMP, and TCP probes and fails on timeout or wrong endpoint. It does not prove unauthorized denial.
 - `docs/operations/netbird-routing.md` carries activation, negative-access, and rollback procedures. Sanitized evidence records peer/group identifiers, plan summaries, savepoint revision, and probe results without credentials or full state.
-- Estate review confirms the routing boundary and failure-domain meaning; it does not substitute for packet probes.
+- Manually inspect the declared topology to confirm OPNsense is the single routing failure boundary and no second-site path or independent client peers are implied; this does not substitute for packet probes.
 
 ## Risks / Trade-offs
 

@@ -18,11 +18,10 @@
 
 ## 3. Deliver OpenMemory evidence
 
-- [ ] 3.1 Implement and register `tests/openmemory-vm.nix` with exact repository isolation declarations, the pinned Nix package, generated dummy-only memory/LiteLLM keys, production-secret-path rejection, native LiteLLM, a fake OpenRouter-compatible upstream, a disposable persistent volume, and an egress trap.
+- [ ] 3.1 Implement `tests/openmemory-vm.nix` as a native NixOS test exposed through the flake with exact repository isolation declarations, the pinned Nix package, generated dummy-only memory/LiteLLM keys, production-secret-path rejection, native LiteLLM, a fake OpenRouter-compatible upstream, a disposable persistent volume, and an egress trap.
 - [ ] 3.2 Assert the read-only OpenMemory key allowlist; runtime pin; health; dashboard endpoint rejection; evaluated 32 GiB volume and live SQLite path beneath `/var/lib/openmemory`; HTTP/MCP store/retrieve; denied reads expose no stored content; denied writes leave state unchanged; authenticated embedding routing; shared namespace; provenance; dependency ordering; schema fingerprint persistence across guest restart and drift rejection; port/egress policy; injected LongMemory process failure and bounded automatic recovery; and service/guest restart survival.
-- [ ] 3.3 Confirm bindings `openmemory-secret-mount`, `ai-gateway-vm-configuration`, `openmemory-embedding-configuration`, `openmemory-embedding-route`, `openmemory-service-recovery`, `deployed-ai-health`, `openmemory-guest-configuration`, `openmemory-transitions`, and `openmemory-protocols`.
-- [ ] 3.4 Execute the updated gateway VM, OpenMemory VM, and default deployed health source through the registered harnesses; record the immutable revision and evidence boundary.
-- [ ] 3.5 Add direct requirement observations for automated bindings, run enforcement-quality with this change's projected spec root, and validate the complete stack strictly after sources exist.
+- [ ] 3.4 Build and execute the updated native gateway and OpenMemory NixOS VM tests on an explicitly selected KVM-capable test store, and execute the default deployed health check separately; record the immutable revision and evidence boundary.
+- [ ] 3.5 Run `make check` for Nix evaluation and separately run strict OpenSpec validation for each active AI stack change after sources exist. `make check` does not execute VM tests, OpenSpec, or shell tests.
 
 ## 4. Deploy and verify memory
 

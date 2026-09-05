@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 
 remote() {
-  "$SSH_COMMAND" -o BatchMode=yes -o ConnectTimeout=5 \
-    -i "$SSH_IDENTITY" "$TARGET" "$@"
+  local status
+  timeout --signal=KILL "${REMOTE_TIMEOUT_SECONDS:-$SSH_DEADLINE_SECONDS}s" \
+    "$SSH_COMMAND" -o BatchMode=yes -o ConnectTimeout=5 \
+    -i "$SSH_IDENTITY" "$TARGET" "$@" && return 0
+  status=$?
+  if (( status == 124 || status == 137 )); then
+    printf 'SSH command timed out or was killed for %s\n' "$TARGET" >&2
+  fi
+  return "$status"
 }
 
 wait_for_ssh() {
-  local deadline=$(( SECONDS + SSH_DEADLINE_SECONDS )) last_diagnostic=''
+  local deadline=$(( SECONDS + SSH_DEADLINE_SECONDS )) last_diagnostic='' remaining
   while (( SECONDS < deadline )); do
-    if last_diagnostic=$(remote true 2>&1); then
+    remaining=$(( deadline - SECONDS ))
+    (( remaining > 0 )) || break
+    if last_diagnostic=$(REMOTE_TIMEOUT_SECONDS=$remaining remote true 2>&1); then
       return 0
     fi
-    sleep 1
+    if (( SECONDS < deadline )); then sleep 1; fi
   done
   printf 'deployment reachability was not established for %s within %ss\nlast SSH diagnostic: %s\n' \
     "$TARGET" "$SSH_DEADLINE_SECONDS" "$last_diagnostic" >&2

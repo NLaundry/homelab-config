@@ -10,12 +10,12 @@ The repository keeps one small, human-maintained YAML inventory for finding home
 
 ### Requirement: Repository has one simple Estate inventory
 **ID:** `single-estate-inventory`
-The repository SHALL keep the operator Estate inventory as a valid `estate.yaml` file with site, host, and service maps.
+The repository SHALL keep one valid `estate.yaml` file with hosts nested under sites and services listed on their host or VM.
 
 #### Scenario: Inventory is checked after editing
 **ID:** `inventory-parses`
-- **WHEN** the focused Estate check runs
-- **THEN** the inventory parses and exposes the expected top-level maps
+- **WHEN** an operator checks the inventory after editing
+- **THEN** it parses as YAML and its nested entries identify each host and service location
 
 ### Requirement: Estate inventory changes with catalogued facts
 **ID:** `inventory-maintained-with-change`

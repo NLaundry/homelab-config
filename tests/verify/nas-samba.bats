@@ -4,6 +4,10 @@
 # shellcheck source=tests/verify/lib/nas-samba-safety.sh
 source "$BATS_TEST_DIRNAME/lib/nas-samba-safety.sh"
 
+setup_file() {
+  require_smb_tools
+}
+
 setup() {
   ROOT=${HOMELAB_ROOT:-"$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"}
   SERVER=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/ansible/inventory.yml")"}
@@ -28,6 +32,7 @@ guest_share_round_trip() {
     "//guest@$SERVER/$share" "$GUEST_MOUNTPOINT"; then
     cleanup_guest_resources || true
     printf 'guest mount failed for %s/%s\n' "$SERVER" "$share" >&2
+    [[ -z $GUEST_CLEANUP_ERROR ]] || printf 'cleanup also failed: %s\n' "$GUEST_CLEANUP_ERROR" >&2
     return 1
   fi
 

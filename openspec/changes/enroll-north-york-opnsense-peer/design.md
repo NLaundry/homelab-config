@@ -48,7 +48,7 @@ Before creating a key, the role reads local plugin status and the NetBird peer l
 
 Enrollment does not add the peer to the OpenTofu-managed router group or declare `netbird_network_router`. Interface rules remain absent or disabled. The next stack member discovers the uniquely named peer, activates the persistent firewall path, and assigns the route in a separate reviewed transition.
 
-## Enforcement design
+## Verification design
 
 - `tests/ansible/opnsense-static-check` installs the pinned collection in an isolated path, runs inventory parsing, role argument validation where available, and `ansible-playbook --syntax-check` with dummy credential-file paths. It compares North York host/address data with `estate.yaml`. It does not contact the router.
 - `tests/ansible/opnsense-netbird-contracts.bats` checks role ownership, approved module/raw endpoint use, bounded plugin settings, no plaintext/setup-key persistence, trap-based retirement, no OPNsense Terraform provider, no Scarborough data, and no effective routing rule. It proves declared structure, not live API behavior.

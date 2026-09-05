@@ -6,10 +6,10 @@
 
 ## 2. Deliver MicroVM evidence
 
-- [ ] 2.1 Implement `tests/ai-gateway-vm.nix`, register it through `flake.nix` and `nix/vm-tests.nix`, and include exact `qemu.networkingOptions = lib.mkForce [ ];` and `restrictNetwork = true;` declarations.
+- [ ] 2.1 Implement `tests/ai-gateway-vm.nix` as a native NixOS test exposed through `flake.nix`, and include exact `qemu.networkingOptions = lib.mkForce [ ];` and `restrictNetwork = true;` declarations.
 - [ ] 2.2 Assert runtime selection, boot, resource limits, static values, default-deny firewall, and guest autostart in the private forced-KVM topology.
-- [ ] 2.3 Confirm bindings `ai-gateway-vm-configuration` and `ai-gateway-transitions`; execute the VM source through its native harness.
-- [ ] 2.4 Add direct requirement observations for automated bindings, run enforcement-quality with this change's spec root, and validate this change strictly after sources exist.
+- [ ] 2.3 Build and execute the native NixOS VM test on an explicitly selected KVM-capable test store and record results.
+- [ ] 2.4 Run `make check` for Nix evaluation and separately run `openspec validate launch-ai-gateway-microvm --strict` after sources exist. `make check` does not execute VM tests, OpenSpec, or shell tests.
 
 ## 3. Activate and verify the empty guest
 

@@ -10,7 +10,7 @@ With the guest reachable, the homelab needs one authenticated model gateway that
 - Open only TCP 4000 through the guest firewall.
 - Add deterministic fake-upstream tests, non-billable default health verification, and one opt-in real OpenRouter request.
 
-## Planes
+## Capabilities
 
 ### Configuration
 
@@ -26,7 +26,7 @@ With the guest reachable, the homelab needs one authenticated model gateway that
 
 - `service.ai-gateway`: authenticated health and OpenAI-compatible chat routing with unauthorized rejection (new).
 
-## Enforcement intent
+## Verification intent
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|

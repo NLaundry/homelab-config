@@ -45,7 +45,7 @@ This avoids bootstrapping a remote backend for a two-admin homelab while preserv
 
 After adoption, routine writes to managed objects use OpenTofu. The NetBird dashboard remains useful for inspection and emergency diagnosis; any emergency edit must be imported/reconciled before the next apply.
 
-## Enforcement design
+## Verification design
 
 - `tests/iac/netbird-contracts.bats` inspects tracked IaC and Git state. It rejects state/plan/working files, setup-key resources, Scarborough declarations, router resources, and enabled routed-access policies in this prefix. It also checks one root/module ownership path. It proves repository structure, not remote state.
 - `tests/iac/netbird-static-check` runs formatting, disposable-backend initialization, provider lock verification, `tofu validate`, and module tests using non-secret North York fixture data. A non-zero child result fails the command. It does not authenticate to NetBird.

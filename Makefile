@@ -1,7 +1,7 @@
 HOST   ?= nas
 TARGET ?= operator@10.10.10.11
 KEY    ?= $(HOME)/.ssh/id_ed25519
-# Escape '#' because Make treats it as a comment delimiter.
+# Escape '#' so Make does not treat it as a comment.
 FLAKE  ?= .\#$(HOST)
 
 export NIX_SSHOPTS ?= -i $(KEY)
@@ -40,7 +40,7 @@ help:
 check:
 	nix flake check --no-update-lock-file --all-systems --no-build
 
-# Runs disposable guests on TEST_STORE, not the live NAS configuration.
+# Use separate test guests to avoid changing the live NAS.
 test-vm: check
 	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
@@ -56,11 +56,13 @@ preview:
 boot:
 	$(ACTIVATE) boot
 
-# Both activations verify afterwards. A failed check leaves the candidate active.
+# Keep a failed candidate active so the operator can inspect it.
 try:
+	$(VERIFY) --preflight $(VERIFY_ARGS)
 	$(ACTIVATE) test
-	@$(VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }
+	@$(VERIFY) $(VERIFY_ARGS) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }
 
 deploy:
+	$(VERIFY) --preflight $(VERIFY_ARGS)
 	$(ACTIVATE) switch
-	@$(VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }
+	@$(VERIFY) $(VERIFY_ARGS) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }

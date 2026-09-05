@@ -10,6 +10,10 @@ setup() {
   SSH_COMMAND=${HOMELAB_DEPLOYMENT_SSH_COMMAND:-ssh}
   SSH_IDENTITY=${HOMELAB_DEPLOYMENT_SSH_IDENTITY:-"$HOME/.ssh/id_ed25519"}
   SSH_DEADLINE_SECONDS=${HOMELAB_DEPLOYMENT_SSH_DEADLINE_SECONDS:-60}
+  [[ $SSH_DEADLINE_SECONDS =~ ^[1-9][0-9]*$ ]] || {
+    printf 'SSH deadline must be a positive whole number of seconds.\n' >&2
+    return 1
+  }
   TARGET=${HOMELAB_DEPLOYMENT_TARGET:-"operator@$NAS_ADDRESS"}
 }
 

@@ -44,10 +44,10 @@ No setup key field exists in `secrets/network.yaml`, and this member creates no 
 
 `docs/operations/network-secret-operations.md` is the human boundary. It covers identity creation and backup, obtaining restricted remote credentials without recording them in shell history, initial encryption, dummy decryption checks, recovery, rotation, and revocation. Examples use placeholders or dummy values only.
 
-## Enforcement design
+## Verification design
 
-- `tests/tooling/environment.bats` evaluates and builds the development shell on every supported system and fails when `sops`, `age`, `nano`, `tofu`, or retained commands are absent from the current Nix shell. It proves reproducible command availability, not remote authentication.
-- `tests/secrets/contracts.bats` runs through the native Bats harness with generated dummy age identities and ciphertext. It checks one root policy, SOPS metadata on the tracked network file, absence of forbidden plaintext-shaped fixture markers, and success/failure cleanup of both consumer adapters. The harness explicitly supplies every command it invokes. It never requires or reads production credentials.
+- In each supported Nix development shell, manually run `command -v sops age age-keygen nano tofu ansible ssh` before following the secret runbook. This checks required command availability, not remote authentication; no tool-inventory test is required.
+- Run `bats tests/secrets/contracts.bats` in the Nix development shell with generated dummy age identities and ciphertext. It checks one root policy, SOPS metadata on the tracked network file, absence of forbidden plaintext-shaped fixture markers, and success/failure cleanup of both consumer adapters. Required commands come from the development shell. It never requires or reads production credentials.
 - The recovery drill in `docs/operations/network-secret-operations.md` is manual because custody of an offline identity backup cannot honestly be proven in CI. The operator records sanitized fingerprints and a dummy-ciphertext result; no key or plaintext value enters the evidence.
 - The rotation procedure is manual because it crosses live NetBird/OPNsense control planes. Evidence records credential identifiers, timestamps, and successful consumer checks but excludes values.
 
@@ -61,7 +61,7 @@ No setup key field exists in `secrets/network.yaml`, and this member creates no 
 
 ## Migration Plan
 
-1. Extend the `nix/dev.nix` package list, `tooling.md`, native harness runtime inputs/default Bats list, and focused environment test.
+1. Extend the `nix/dev.nix` package list and manually confirm required secret-operation commands resolve in supported development shells.
 2. Create the operator age identity and recovery backup by following the runbook.
 3. Add the root SOPS policy and encrypt a dummy network document first.
 4. Implement and test the OpenTofu and Ansible secret adapters with dummy values.

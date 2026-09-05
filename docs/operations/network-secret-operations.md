@@ -1,22 +1,26 @@
-# Network secret operations
+# Prepare network secret custody
 
-This runbook creates the encrypted credentials for NetBird and OPNsense automation. SOPS encrypts the credential file. `age` supplies the encryption key.
+## What
 
-The encrypted file contains:
+Keep NetBird and OPNsense credentials in `secrets/network.yaml`, encrypted with
+SOPS and age. Keep private decryption identities outside Git and the Nix store.
 
-- the NetBird management URL and personal access token (PAT)
-- the North York OPNsense API key and secret
-- the OpenTofu state-encryption passphrase
+## Why
 
-Do not store a NetBird peer setup key in this file. The enrollment process creates and deletes that key when it needs it.
+Automation needs credentials. It must not leave plaintext files, logs, or shared
+shell variables behind. A separate recovery copy prevents permanent loss of access.
 
-## 1. Open the development shell
+## Before you start
 
-The Nix shell supplies the tested tools. You do not need Homebrew or another installer.
+**This runbook is a draft.** The tools exist, but `.sops.yaml`, the encrypted
+network file, consumer adapters, and secret tests do not yet exist. Review their
+implementation before creating live credentials or running consumers.
 
-Install Nix first if `nix --version` fails: <https://nixos.org/download/>
+You need local OPNsense access, NetBird administrator access, and an encrypted
+recovery location independent of this workstation. Do not paste secrets into chat,
+command arguments, shell history, screenshots, or clipboard managers.
 
-Run these commands from the repository root:
+## 1. Open the tool environment
 
 ```sh
 nix develop --no-update-lock-file
@@ -24,130 +28,80 @@ set +x
 umask 077
 ```
 
-Confirm the required tools:
+Use SOPS for secret editing. Do not first create a plaintext file in the repository.
+SOPS uses temporary plaintext while editing; keep that workspace private and
+outside the repository. Do not record the editor session.
 
-```sh
-for name in sops age-keygen nano tofu ansible-playbook; do
-  command -v "$name"
-done
-```
+## 2. Create and back up the age identity
 
-Each path must start with `/nix/store/`.
+### 2.1 Create the identity
 
-## 2. Create the age identity
-
-The public age recipient encrypts files. The private identity decrypts them and must stay outside this repository.
+Use the conventional user-private location. Do not replace an existing identity.
 
 ```sh
 AGE_KEY_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sops/age"
 AGE_KEY_FILE="$AGE_KEY_DIR/keys.txt"
 install -d -m 700 "$AGE_KEY_DIR"
-
-if test -e "$AGE_KEY_FILE"; then
-  echo "Using existing key: $AGE_KEY_FILE"
-else
+if test ! -e "$AGE_KEY_FILE"; then
   age-keygen -o "$AGE_KEY_FILE"
 fi
-
 chmod 600 "$AGE_KEY_FILE"
 age-keygen -y "$AGE_KEY_FILE"
 ```
 
-The last command must print one public value that starts with `age1`.
+The last command prints a public `age1...` recipient. Only that public value may
+enter `.sops.yaml`. Never share the `AGE-SECRET-KEY-...` line.
 
-It is safe to add the `age1...` value to `.sops.yaml`. Never copy a line that starts with `AGE-SECRET-KEY-` into Git, chat, or documentation.
+### 2.2 Back up the identity
 
-## 3. Back up the age identity
+Copy the private identity to an encrypted password-manager attachment or separate
+encrypted volume. Confirm that the recovery copy produces the same public
+recipient. Lock the recovery location when finished.
 
-Without the private identity, you cannot decrypt the SOPS file. Store one copy in an encrypted password manager or encrypted volume.
+## 3. Review the root SOPS policy
 
-For an encrypted volume, replace the example path:
+### 3.1 Check the policy and recipients
 
-```sh
-RECOVERY_DIR='/Volumes/REPLACE-WITH-ENCRYPTED-VOLUME/homelab-config'
-install -d -m 700 "$RECOVERY_DIR"
-install -m 600 "$AGE_KEY_FILE" "$RECOVERY_DIR/sops-age-keys.txt"
-
-test "$(age-keygen -y "$AGE_KEY_FILE")" = \
-  "$(age-keygen -y "$RECOVERY_DIR/sops-age-keys.txt")"
-```
-
-The `test` command succeeds without output. Lock or unmount the recovery location.
-
-## 4. Register the public recipient
-
-When Task 2.3 starts, provide the output from this command:
-
-```sh
-age-keygen -y "$AGE_KEY_FILE"
-```
-
-The implementation adds this public value to the root `.sops.yaml`. The rule must select `secrets/network.yaml`. Do not create a second `.sops.yaml`.
-
-After the policy exists, inspect it:
+After implementation, inspect the public policy:
 
 ```sh
 yq eval '.creation_rules' .sops.yaml
 ```
 
-## 5. Create the remote credentials
+Confirm that one root policy selects `secrets/network.yaml` and only the approved
+custody recipients. If you use a separate recovery identity, include its approved
+public recipient too. Do not add a second policy in a subdirectory.
 
-### NetBird PAT
+### 3.2 Test with dummy values
 
-The PAT lets OpenTofu manage NetBird without your interactive login.
+First encrypt dummy values. Prove that intended identities can decrypt them and
+an unrelated identity cannot. Keep dummy ciphertext for the recovery drill.
+Do not introduce production values until these checks pass.
 
-Open the NetBird dashboard and select:
+## 4. Approve the remote permissions
 
-**User menu → Personal Access Token → Create Token**
+### 4.1 Bound OPNsense permissions
 
-Use the name `homelab-config-network-foundation`. Choose a practical expiry date.
+From local OPNsense, record the installed release and available API/plugin
+privilege names. Review the operations required for package installation, NetBird
+settings and service control, interfaces, firewall rules, backup, and reload.
 
-NetBird PATs inherit their user's permissions. The PAT form does not provide separate scopes. Use the least-privileged user that can manage the required network objects.
+Create a dedicated automation user only if those permissions can be bounded.
+Do not grant `admins` or **All pages** to work around missing API support.
+Stop if the installed release cannot support the planned operations safely.
 
-For NetBird Cloud, the management URL is:
+### 4.2 Bound NetBird permissions
 
-```text
-https://api.netbird.io
-```
+For NetBird, use a dedicated account with the least privilege needed for the
+planned objects and enrollment API. PATs inherit their user's permissions; they
+do not have separate per-token scopes. Choose an expiry and a rotation date.
 
-Keep the new token page open until you enter the token through SOPS.
+## 5. Enter the live credentials through SOPS
 
-Documentation: <https://docs.netbird.io/how-to/access-netbird-public-api>
+### 5.1 Create and enter the credentials
 
-### OPNsense API key
-
-The dedicated user keeps Ansible separate from your personal administrator account.
-
-Do this only after Task 2.4 confirms the required privileges on the installed OPNsense version.
-
-Open `https://10.10.10.1`, then create this group:
-
-**System → Access → Groups → Add**
-
-- Name: `homelab-automation`
-- Privileges: only the privileges approved by Task 2.4
-
-Create this user:
-
-**System → Access → Users → Add**
-
-- Username: `homelab-automation`
-- Group: `homelab-automation`
-- Do not add the user to `admins`
-
-Open the saved user. Confirm its **Effective Privileges**. Create one credential pair in the **API keys** section.
-
-OPNsense shows the API secret once. Keep the downloaded credential file only until the next step. Do not grant **All pages** to bypass a missing privilege.
-
-Documentation:
-
-- <https://docs.opnsense.org/manual/users.html>
-- <https://docs.opnsense.org/development/api.html>
-- <https://github.com/opnsense/plugins/tree/master/security/netbird>
-
-## 6. Create the encrypted file
-
-Open the target directly through SOPS. This prevents a plaintext credential file from existing in the repository.
+Create the NetBird PAT and OPNsense API key only after the permission review.
+Then open the encrypted target directly:
 
 ```sh
 export SOPS_AGE_KEY_FILE="$AGE_KEY_FILE"
@@ -156,127 +110,71 @@ EDITOR='nano --ignorercfiles --tempfile --nonewlines --nohelp' \
   sops secrets/network.yaml
 ```
 
-Enter this YAML in Nano:
+Enter these fields in the editor, not in the shell:
 
-```yaml
-netbird:
-  management_url: "https://api.netbird.io"
-  pat: "PASTE-IN-EDITOR"
-opnsense:
-  url: "https://10.10.10.1"
-  api_key: "PASTE-IN-EDITOR"
-  api_secret: "PASTE-IN-EDITOR"
-opentofu:
-  state_encryption_passphrase: "PASTE-IN-EDITOR"
-```
+- `netbird.management_url` and `netbird.pat`.
+- `opnsense.url`, `opnsense.api_key`, and `opnsense.api_secret`.
+- `opentofu.state_encryption_passphrase`: a unique random password-manager value
+  of at least 32 characters.
 
-Use your password manager to generate a unique state passphrase of at least 32 random characters.
+The North York OPNsense URL is `https://10.10.10.1`. NetBird Cloud uses
+`https://api.netbird.io`; confirm the endpoint if using another deployment.
 
-Save and close Nano. SOPS encrypts each value before it writes the file. Delete the downloaded OPNsense credential file.
+### 5.2 Check ciphertext and remove the download
 
-## 7. Verify the result
+Save and close SOPS. Inspect the file and Git diff for ciphertext and public
+metadata only. Remove the downloaded OPNsense credential file. Never store a
+NetBird peer setup key in this document or in OpenTofu state.
 
-These checks confirm encryption without printing secret values:
+## 6. Check the consumers
 
-```sh
-grep -Eq '^  pat: ENC\[AES256_GCM,' secrets/network.yaml
-grep -Eq '^  api_key: ENC\[AES256_GCM,' secrets/network.yaml
-grep -Eq '^  api_secret: ENC\[AES256_GCM,' secrets/network.yaml
-grep -Eq '^  state_encryption_passphrase: ENC\[AES256_GCM,' secrets/network.yaml
-grep -Eq '^sops:' secrets/network.yaml
-```
+After the adapters and their dummy-data tests exist:
 
-Confirm that SOPS can decrypt the expected fields. Discard the output:
+1. Check process-local OpenTofu environment delivery and private volatile Ansible
+   credential files with mode `0600`.
+2. Check cleanup on success, failure, and interruption. Reject tracing, unsafe
+   temporary paths, and leftover decrypted files.
+3. Run each adapter's documented read-only authentication check. Confirm that
+   output contains no secrets and neither remote system changes.
 
-```sh
-sops --decrypt --output-type json secrets/network.yaml \
-  | jq -e '
-      (.netbird.management_url | length > 0) and
-      (.netbird.pat | length > 0) and
-      (.opnsense.url | length > 0) and
-      (.opnsense.api_key | length > 0) and
-      (.opnsense.api_secret | length > 0) and
-      (.opentofu.state_encryption_passphrase | length >= 32)
-    ' >/dev/null
-```
-
-Inspect the Git diff. It must contain only ciphertext and public recipients:
-
-```sh
-git diff -- .sops.yaml secrets/network.yaml
-! git diff -- .sops.yaml secrets/network.yaml | grep -q 'AGE-SECRET-KEY-'
-```
-
-Run the repository checks after the adapters exist:
-
-```sh
-nix develop --command bats tests/secrets/contracts.bats
-```
-
-## 8. Check live authentication
-
-These read-only checks prove that the credentials work before configuration changes start:
-
-```sh
-./scripts/network-tofu -chdir=infra/netbird plan -refresh-only
-./scripts/network-ansible ansible-playbook \
-  ansible/playbooks/opnsense-netbird.yml \
-  --check --tags preflight
-```
-
-Run them only after the adapters and IaC files exist. Neither command may propose a remote change.
+The current repository has no consumer command to run yet. Do not substitute
+an environment dump or a later stack's apply operation for this check.
 
 ## Recovery drill
 
-The drill proves that the backup can decrypt dummy ciphertext. It does not expose production values.
+Use an isolated environment that has the recovery identity but not the primary
+identity. Decrypt the retained dummy ciphertext with the recovery copy and discard
+the plaintext output. Do not move or delete the working primary identity merely
+to perform the drill. Stop if the backup cannot decrypt the fixture.
 
-```sh
-RECOVERY_KEY_FILE="$RECOVERY_DIR/sops-age-keys.txt"
-test -f "$RECOVERY_KEY_FILE"
-test "$(age-keygen -y "$RECOVERY_KEY_FILE")" = \
-  "$(age-keygen -y "$AGE_KEY_FILE")"
-SOPS_AGE_KEY_FILE="$RECOVERY_KEY_FILE" \
-  sops --decrypt tests/secrets/fixtures/recovery-dummy.enc.yaml >/dev/null
-```
+## Rotate or revoke
 
-Record the date, public recipient, fixture name, and result. Do not record the private key or decrypted output.
+### 1. Rotate a credential
 
-## Credential rotation
+For a credential rotation, create the replacement, edit it through SOPS, prove
+read-only authentication, then revoke the predecessor. Do not revoke the working
+credential before the replacement passes.
 
-Replace one credential at a time:
+### 2. Rotate an age key
 
-1. Create the replacement PAT or API key.
-2. Edit only that value with `sops secrets/network.yaml`.
-3. Run its read-only authentication check.
-4. Revoke the old credential after the check succeeds.
+For an age-key rotation, add and verify the replacement public recipient, run
+`sops updatekeys secrets/network.yaml`, and prove recovery before removing an old
+recipient. If a decryption key was exposed, also rotate the underlying credentials;
+changing recipients cannot protect copies of old ciphertext.
 
-For an age-key change, add the new public recipient first. Then run:
+### 3. Revoke remote access and record results
 
-```sh
-sops updatekeys secrets/network.yaml
-```
+Delete a revoked PAT in NetBird and an API key in OPNsense. Deleting the local
+encrypted file does not revoke remote access. Revoke and replace exposed values;
+do not treat editing Git history as sufficient recovery.
 
-Prove that the new key can decrypt the file before you remove the old recipient.
+Record only dates, public fingerprints, non-secret credential identifiers,
+approved privileges, and results. Do not store secret values or decrypted output.
 
-## Revoke access
+## Sources
 
-- Delete the PAT from NetBird **Personal Access Token** settings.
-- Delete the API key from the `homelab-automation` OPNsense user.
-- Disable the OPNsense user if no automation needs it.
-- Re-encrypt all managed SOPS files if an age identity is lost or exposed.
-
-Deleting the encrypted file does not revoke a remote credential.
-
-## Safe evidence
-
-Record only dates, public `age1...` recipients, non-secret credential identifiers, OPNsense privilege names, and pass/fail results.
-
-Do not record tokens, API secrets, private age identities, decrypted output, credential downloads, or editor screenshots.
-
-## References
-
-- SOPS: <https://getsops.io/docs/>
-- age: <https://age-encryption.org/>
-- OpenTofu state encryption: <https://opentofu.org/docs/language/state/encryption/>
-- NetBird provider: <https://registry.terraform.io/providers/netbirdio/netbird/latest/docs>
-- OPNsense NetBird API controllers: <https://github.com/opnsense/plugins/tree/master/security/netbird/src/opnsense/mvc/app/controllers/OPNsense/Netbird/Api>
+- [Planned change](../../openspec/changes/establish-network-secret-operations/).
+- [SOPS](https://getsops.io/docs/).
+- [age](https://age-encryption.org/).
+- [NetBird API access](https://docs.netbird.io/how-to/access-netbird-public-api).
+- [OPNsense users and privileges](https://docs.opnsense.org/manual/users.html).

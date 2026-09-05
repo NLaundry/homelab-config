@@ -12,11 +12,10 @@
 ## 3. Deliver deterministic and live evidence
 
 - [ ] 3.1 Extend `tests/ai-gateway-vm.nix` with generated dummy-only LiteLLM/OpenRouter keys, rejection of production secret paths, a fake chat upstream, and assertions for read-only scope, readiness, auth denial without upstream traffic, default routing, response propagation, port policy, and restart recovery.
-- [ ] 3.2 Implement root-level `tests/verify/ai-gateway-health.bats` as a default non-billable health check; add an `AI_GATEWAY_ADDRESS` Make variable exported as `HOMELAB_AI_GATEWAY_ADDRESS` to health and live-profile sources; add `curl` to the verify closure and update source-count contracts.
+- [ ] 3.2 Implement root-level `tests/verify/ai-gateway-health.bats` as a default non-billable health check; add an `AI_GATEWAY_ADDRESS` Make variable exported as `HOMELAB_AI_GATEWAY_ADDRESS` to health and live-profile sources; add `curl` to the verify closure.
 - [ ] 3.3 Implement `tests/verify/profiles/ai-gateway-live.bats` with a runtime key-file contract, strict timeout, bounded retries, one tiny-token chat request, response-schema checks, and redaction.
-- [ ] 3.4 Confirm bindings `guest-secret-mount`, `ai-gateway-vm-configuration`, `ai-gateway-transitions`, `deployed-ai-health`, `litellm-guest-configuration`, `isolated-gateway-protocols`, and `live-openrouter-probe`.
 - [ ] 3.5 Execute the deterministic KVM and default verification sources; prove routine tests and deployment checks make no billable request.
-- [ ] 3.6 Add direct requirement observations for automated bindings, run enforcement-quality with this change's projected spec root, and validate the stack prefix strictly after sources exist.
+- [ ] 3.6 Run `make check` for Nix evaluation and separately run strict OpenSpec validation for this change and its preceding AI stack members after sources exist. `make check` does not execute VM tests, OpenSpec, or shell tests.
 
 ## 4. Deploy and verify OpenRouter
 

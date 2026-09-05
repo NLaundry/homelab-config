@@ -12,7 +12,7 @@ After model routing is stable, coding clients need one shared durable memory nam
 - Extend default deployed health and process-recovery behavior to OpenMemory.
 - Add native-LiteLLM fake-upstream namespace, provenance, restart, egress, and schema-drift tests.
 
-## Planes
+## Capabilities
 
 ### Configuration
 
@@ -31,7 +31,7 @@ After model routing is stable, coding clients need one shared durable memory nam
 - `service.ai-gateway`: add authenticated embedding routing (modified).
 - `service.openmemory`: authenticated HTTP/MCP health, store/retrieve, shared stable user namespace, and provenance (new).
 
-## Enforcement intent
+## Verification intent
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|

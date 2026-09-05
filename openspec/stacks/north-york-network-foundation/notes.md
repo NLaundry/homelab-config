@@ -32,6 +32,9 @@ Clientless North York LAN hosts become reachable routed resources, not NetBird p
 
 `establish-network-secret-operations` intentionally takes ownership of the shared SOPS/tooling foundation. The unapplied `establish-ai-secret-operations` change must be revised later to consume this foundation rather than creating another root SOPS policy or operator identity convention.
 
-## Validation lifecycle
+## Runbooks
 
-Every member passes normal planning validation. Projected stack validation is expected to report missing planned enforcement sources until implementation creates the named commands, Bats tests, and runbooks. Strict projected validation is an implementation gate, not a pre-implementation planning claim.
+Follow the [North York runbooks](../../../docs/operations/README.md) in stack order.
+The later procedures are drafts, not proof of implemented or deployed controls.
+OpenSpec validates plan structure; live checks and recovery drills establish
+operational results. Retired enforcement bookkeeping is not an implementation gate.

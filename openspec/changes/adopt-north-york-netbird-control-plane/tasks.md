@@ -10,8 +10,7 @@
 
 - [ ] 2.1 Implement `tests/iac/netbird-static-check` to run formatting, disposable-backend initialization, provider lock checks, `tofu validate`, and module tests with non-secret North York fixtures.
 - [ ] 2.2 Implement `tests/iac/netbird-contracts.bats` to verify single-root ownership, Git state exclusion, North York-only scope, and absence of router, routed-policy, DNS, and setup-key resources.
-- [ ] 2.3 Link `governance.network-iac` and `configuration.netbird` bindings to the static command and contract source, and add direct per-requirement entries for every new automated binding to `tests/specbase/enforcement-observations.json`.
-- [ ] 2.4 Execute both sources through their native harnesses and record commands and results in change progress.
+- [ ] 2.4 Run `tests/iac/netbird-static-check` and `bats tests/iac/netbird-contracts.bats` in the Nix development shell and record commands and results in change progress.
 
 ## 3. Adopt the live North York baseline
 
@@ -24,6 +23,6 @@
 ## 4. Prove state recovery and validate the prefix
 
 - [ ] 4.1 Copy the encrypted post-apply state into the operator's external encrypted backup set and perform the documented isolated recovery drill.
-- [ ] 4.2 Link `lifecycle.netbird-control` bindings to the import review and recovery-drill procedures, then record their manual results without state or credential contents.
+- [ ] 4.2 Record the manual import-review and recovery-drill results without state or credential contents.
 - [ ] 4.3 Run a final no-change OpenTofu plan through the bounded secret adapter and record its summary.
-- [ ] 4.4 Run normal repository and strict Specbase validation and record the results before OPNsense enrollment begins.
+- [ ] 4.4 Run `make check` for Nix evaluation and separately run `openspec validate adopt-north-york-netbird-control-plane --strict`; record the results before OPNsense enrollment begins. `make check` does not run OpenSpec or shell tests.

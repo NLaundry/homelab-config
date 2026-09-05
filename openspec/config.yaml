@@ -7,6 +7,6 @@ context: |
   Use concise Simplified Technical English. Test real behavior and concrete failure risks.
   Do not add evidence registries, paired enforcement, review panels, or tests of documentation.
   ideas/ and stacks/ are manual planning folders. Follow stack member order; OpenSpec does not enforce it.
-  Imported plans retain historical commands and enforcement tasks. Reconcile them with today's
-  Makefile and agent guidance before applying; do not recreate removed machinery.
+  Progress records, archives, and older ideas are historical; they may describe removed tools.
+  Use current specs, active tasks, the Makefile, and agent guidance for implementation.
   Live activation and state-changing probes need explicit user authorization.

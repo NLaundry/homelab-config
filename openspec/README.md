@@ -24,12 +24,12 @@ Follow each `stack.yaml` member list from top to bottom. Match member IDs to
 change `.openspec.yaml` files. Completed members live in `changes/archive/`.
 Do not apply or archive a later member before its prerequisites exist.
 
-## Imported plans
+## History and limits
 
-The migration preserved spec text, ideas, stacks, and change plans. It removed
-active enforcement manifests. Archived files remain unchanged.
+Current specs and active plans no longer require the retired Specbase workflow,
+enforcement manifests, or test registries. Archived changes remain unchanged.
 
-Some imported text describes retired Specbase commands, old paths, or deleted
-checks. Treat that material as historical context. Reconcile a plan with the
-current Makefile and agent guidance before applying it. Do not recreate the
-removed machinery or treat old evidence as proof of current behavior.
+Old progress records and ideas may still describe removed commands or checks.
+Treat them as history, not current instructions or proof of working behavior.
+The network secret foundation must be reconciled with the deferred AI secret
+plan before that plan is implemented.

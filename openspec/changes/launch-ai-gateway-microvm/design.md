@@ -24,13 +24,13 @@ NASty is the only production NixOS host. It has KVM, four CPUs, 31 GiB RAM, and 
 - Accept macvtap's NASty-to-guest limitation; verify production reachability from another LAN client.
 - Keep the guest definition workload-specific until a second MicroVM proves a reusable abstraction is needed.
 
-## Enforcement design
+## Verification design
 
 ### `tests/ai-gateway-vm.nix`
 
-- Register a forced-KVM private NixOS test with exact repository-required network-isolation declarations.
+- Use a native forced-KVM private NixOS test with exact repository-required network-isolation declarations.
 - Assert boot, runtime selection, resource limits, static values, default-deny firewall, and autostart behavior.
-- Wire the source through `flake.nix` and `nix/vm-tests.nix`.
+- Expose the native NixOS test through `flake.nix`; no custom test registry or runner is required.
 - Fail on assertion or timeout.
 - This does not exercise macvtap, OPNsense, or the physical LAN.
 
@@ -44,7 +44,7 @@ NASty is the only production NixOS host. It has KVM, four CPUs, 31 GiB RAM, and 
 ## Migration Plan
 
 1. Add and lock microvm.nix, then build the full NASty closure.
-2. Register and pass the isolated empty-guest KVM test.
+2. Build and pass the native isolated empty-guest KVM test.
 3. Confirm `.20` is unused and reserve/exclude it in OPNsense.
 4. Activate temporarily and verify from another LAN client.
 5. Rollback removes the guest unit without modifying NASty's NIC profile.

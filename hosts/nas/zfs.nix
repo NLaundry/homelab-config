@@ -1,8 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Pick the newest kernel that still ships a non-broken ZFS module, so ZFS
-  # never blocks on a too-new kernel (the 6.18-vs-ZFS trap).
+  # Keep ZFS working by choosing a compatible kernel.
   zfsCompatibleKernelPackages = lib.filterAttrs (
     name: kernelPackages:
     (builtins.match "linux_[0-9]+_[0-9]+" name) != null
@@ -16,15 +15,14 @@ let
   );
 in
 {
-  # Note: this might jump back and forth as kernels are added or removed upstream.
   boot.kernelPackages = latestKernelPackage;
 
   boot.supportedFilesystems = [ "zfs" ];
   networking.hostId = "007f0200";
 
-  # Data pools already exist on disk — import only, NEVER create.
+  # Import existing pools without creating or replacing data.
   boot.zfs.extraPools = [ "smolBoy" "mediaBin" ];
 
-  # Safer default (becomes the default in 26.11); also silences the eval warning.
+  # Avoid taking a root pool that another host may still use.
   boot.zfs.forceImportRoot = false;
 }

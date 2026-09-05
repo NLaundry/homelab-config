@@ -5,6 +5,8 @@ north-york:
   networks:
     lan:
       cidr: 10.10.10.0/24
+    GuestWifi:
+      cidr: 10.10.20.0/24
   hosts:
     opnsense:
       hostname: OPNsense

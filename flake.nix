@@ -36,8 +36,33 @@
               name = "homelab-verify";
               runtimeInputs = [ pkgs.bats dev.ssh pkgs.yq-go pkgs.coreutils ];
               text = ''
+                preflight=false
+                if [[ ''${1:-} == --preflight ]]; then
+                  preflight=true
+                  shift
+                fi
                 if (( $# == 0 )); then
                   set -- ${self}/tests/verify/*.bats
+                fi
+                if [[ $preflight == true ]]; then
+                  for test_file in "$@"; do
+                    if [[ ! -f $test_file ]]; then
+                      printf 'Activation verification needs explicit test files, not Bats options: %s\n' "$test_file" >&2
+                      exit 1
+                    fi
+                    case "$test_file" in
+                      */deployment.bats) ;;
+                      */nas-samba.bats)
+                        # shellcheck source=/dev/null
+                        source ${self}/tests/verify/lib/nas-samba-safety.sh
+                        require_smb_tools
+                        ;;
+                      *) printf 'Unknown activation verification suite: %s\n' "$test_file" >&2; exit 1 ;;
+                    esac
+                  done
+                  printf 'Post-activation verification files:\n'
+                  printf '  %s\n' "$@"
+                  exit 0
                 fi
                 exec bats "$@"
               '';

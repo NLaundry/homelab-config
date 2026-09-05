@@ -11,7 +11,7 @@ NetBird and OPNsense automation require long-lived API credentials, but the repo
 - Define setup keys as one-use enrollment material that is generated just in time and never committed to encrypted files or retained in OpenTofu state.
 - Establish the shared repository secret-operation foundation now; reconcile the overlapping unapplied AI secret proposal later rather than introducing a second SOPS convention.
 
-## Planes
+## Capabilities
 
 ### Governance
 
@@ -25,16 +25,16 @@ NetBird and OPNsense automation require long-lived API credentials, but the repo
 
 - `lifecycle.secret-operations`: operator recovery, credential rotation, and revocation procedures preserve access without retaining plaintext repository state (new).
 
-## Enforcement intent
+## Verification intent
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|
-| `secret-tools-available` | test | `tests/tooling/environment.bats` | Every command named by the secret runbook resolves in each supported operator shell. |
+| `secret-tools-available` | manual | `command -v sops age age-keygen nano tofu ansible ssh` in each supported Nix development shell | Required secret-operation commands resolve; this does not prove remote authentication. |
 | `plaintext-secret-exclusion` | test | `tests/secrets/contracts.bats` | Tracked network secret material is SOPS ciphertext and generated OpenTofu/Ansible inputs contain references rather than credential values. |
 | `single-sops-convention` | test | `tests/secrets/contracts.bats` | Repository secret paths match one root SOPS policy and no competing tracked recipient policy is introduced. |
 | `network-credentials-process-local` | test | `tests/secrets/contracts.bats` | Dummy credentials enter only a bounded child environment or private temporary file and cleanup occurs on success and failure. |
 | `operator-secret-recovery` | manual | `docs/operations/network-secret-operations.md#recovery-drill` | An operator restores a test identity from the documented backup and decrypts only dummy ciphertext. |
-| `network-credential-rotation` | manual | `docs/operations/network-secret-operations.md#credential-rotation` | The runbook replaces a credential, validates its consumer, and revokes the predecessor without exposing either value. |
+| `network-credential-rotation` | manual | `docs/operations/network-secret-operations.md#rotate-or-revoke` | The runbook replaces a credential, validates its consumer, and revokes the predecessor without exposing either value. |
 
 ## Impact
 

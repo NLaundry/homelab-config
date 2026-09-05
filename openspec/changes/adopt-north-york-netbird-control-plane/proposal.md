@@ -13,7 +13,7 @@ North York NetBird objects currently exist outside repository authority, and lat
 - Keep encrypted local state outside Git, back it up through the operator's encrypted backup boundary, and document import/recovery operations.
 - Leave every Scarborough object unmanaged and unchanged.
 
-## Planes
+## Capabilities
 
 ### Governance
 
@@ -27,7 +27,7 @@ North York NetBird objects currently exist outside repository authority, and lat
 
 - `lifecycle.netbird-control`: adoption/import and state recovery preserve remote NetBird behavior and avoid destructive recreation (new).
 
-## Enforcement intent
+## Verification intent
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|
@@ -37,8 +37,8 @@ North York NetBird objects currently exist outside repository authority, and lat
 | `north-york-network-declared` | command | `tests/iac/netbird-static-check` | The reusable module resolves exactly the North York Network, LAN resource, and router group from test data. |
 | `north-york-routing-unassigned` | test | `tests/iac/netbird-contracts.bats` | The baseline contains no Network router resource and no enabled policy granting routed LAN access. |
 | `netbird-provider-pinned` | command | `tests/iac/netbird-static-check` | The provider constraint and lock selection are present and `tofu validate` accepts the root. |
-| `netbird-adoption-preserves-service` | manual | `docs/operations/netbird-opentofu.md#import-existing-north-york` | The reviewed adoption plan contains no destroy/recreate, routing assignment, or unrelated-site change before apply. |
-| `netbird-state-recoverable` | manual | `docs/operations/netbird-opentofu.md#state-recovery-drill` | An encrypted state backup restores into an isolated path and produces the same read-only refresh result. |
+| `netbird-adoption-preserves-service` | manual | `docs/operations/netbird-opentofu.md#3-review-and-apply-the-baseline` | The reviewed adoption plan contains no destroy/recreate, routing assignment, or unrelated-site change before apply. |
+| `netbird-state-recoverable` | manual | `docs/operations/netbird-opentofu.md#5-prove-state-recovery` | An encrypted state backup restores into an isolated path and produces the same read-only refresh result. |
 
 ## Impact
 

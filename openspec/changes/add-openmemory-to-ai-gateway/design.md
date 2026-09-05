@@ -28,11 +28,11 @@ This final stack member assumes authenticated LiteLLM chat routing is deployed. 
 - Prove the caller-supplied identity contract with simulated `pi` and `claude-code` callers that share one generated opaque `user_id` while supplying distinct provenance metadata; real client adapter configuration remains out of scope.
 - Extend the default deployed health source and generic process-recovery contract to enabled LongMemory.
 
-## Enforcement design
+## Verification design
 
 ### `tests/openmemory-vm.nix`
 
-- Register a forced-KVM private test with repository-required isolation declarations.
+- Expose a native forced-KVM private NixOS test through the flake with repository-required isolation declarations.
 - Build the pinned Nix package, run native LiteLLM, use generated dummy-only memory/LiteLLM keys, fake only the OpenRouter-compatible upstream, attach a disposable persistent volume, and install an outbound egress trap.
 - Assert the exact runtime pin, read-only key allowlist, health, auth denial, HTTP/MCP store/retrieve, stable cross-harness namespace, provenance, embedding alias/routing, port policy, dependency order, schema fingerprint/drift rejection, automatic process recovery, and service/guest restart survival.
 - Reject production secret paths and unexpected network destinations.

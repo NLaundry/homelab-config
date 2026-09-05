@@ -27,10 +27,10 @@
 - [ ] 4.4 Verify `wt0`, NetBird service health, management connectivity, unique remote peer identity, absence of a North York Network router assignment, and a bounded negative probe proving selected LAN targets are still unreachable through NetBird.
 - [ ] 4.5 Run the same playbook again and require no new setup key, peer, package, interface, or managed-setting change.
 
-## 5. Deliver enforcement and validate rollback
+## 5. Deliver verification and validate rollback
 
 - [ ] 5.1 Implement `tests/ansible/opnsense-static-check` for collection installation, inventory parsing, role validation, syntax checking, and Estate consistency with dummy credential paths.
 - [ ] 5.2 Implement `tests/ansible/opnsense-netbird-contracts.bats` for Ansible-only OPNsense ownership, approved endpoint use, bounded plugin settings, secret suppression, setup-key retirement, North York-only scope, and no effective routed-LAN rule.
-- [ ] 5.3 Link the governance, configuration, and lifecycle bindings to the static sources and enrollment runbook; add direct per-requirement entries for every new automated binding to `tests/specbase/enforcement-observations.json`; execute each source through its native harness and record results.
+- [ ] 5.3 Run `tests/ansible/opnsense-static-check`, `bats tests/ansible/opnsense-netbird-contracts.bats`, and `bats tests/secrets/contracts.bats` in the Nix development shell; record results and the enrollment runbook's manual observations without secret values.
 - [ ] 5.4 Execute or dry-run the documented rollback far enough to prove NetBird can be disconnected and role-owned state removed without losing local management; restore the intended enrolled prefix afterward if exercised live.
-- [ ] 5.5 Run normal repository and strict Specbase validation and record the results before routing activation.
+- [ ] 5.5 Run `make check` for Nix evaluation and separately run `openspec validate enroll-north-york-opnsense-peer --strict`; record the results before routing activation. `make check` does not run OpenSpec or shell tests.

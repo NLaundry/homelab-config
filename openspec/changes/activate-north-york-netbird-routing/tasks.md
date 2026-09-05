@@ -15,9 +15,9 @@
 
 - [ ] 3.1 Extend `tests/iac/netbird-static-check` and the inherited `tests/iac/netbird-contracts.bats` from baseline-only assertions to phase-aware fixtures that accept the declared activated router/policy while still rejecting unrelated resources.
 - [ ] 3.2 Extend `tests/ansible/opnsense-netbird-contracts.bats` to verify the active rule's interface, source, destination, ownership, and absence of broader exposure.
-- [ ] 3.3 Implement `tests/verify/netbird-routing.bats` with bounded route, ICMP, and TCP probes from an explicitly selected authorized NetBird peer to safe Estate-derived North York targets, and add explicit cross-platform probe tools/adapters to the deployed verification runner runtime.
+- [ ] 3.3 Implement `tests/verify/netbird-routing.bats` with bounded route, ICMP, and TCP probes from an explicitly selected authorized NetBird peer to safe Estate-derived North York targets, and ensure the selected peer's execution environment supplies the required cross-platform probe tools/adapters.
 - [ ] 3.4 Write `docs/operations/netbird-routing.md` with activation, non-admin negative-access, savepoint commitment, rollback, and sanitized evidence procedures.
-- [ ] 3.5 Link all Service, Estate, Configuration, and Lifecycle bindings to their native sources; update `tests/specbase/enforcement-observations.json` atomically for every added, replaced, and removed automated binding; execute static sources and Estate review before live activation and record results.
+- [ ] 3.5 Execute the static IaC and Bats contract checks in the Nix development shell before live activation; manually confirm the declared topology has only the North York OPNsense routing failure boundary, without implied independent client peers or a second-site path; record results.
 
 ## 4. Activate and verify North York routing
 
@@ -31,5 +31,5 @@
 
 - [ ] 5.1 Exercise the rollback order through the declared source-controlled toggles: disable policy, remove or disable router assignment, prove routed access is gone, then disable the OPNsense pass rule while preserving peer enrollment, OPNsense administration, and ordinary local-LAN operation.
 - [ ] 5.2 Reapply the accepted activation after the rollback drill, repeat positive/negative checks, and record only sanitized results.
-- [ ] 5.3 Run normal repository and strict projected-stack Specbase validation and record the results.
+- [ ] 5.3 Run `make check` for Nix evaluation and separately run strict OpenSpec validation for each active North York network-foundation change; record the results. `make check` does not run OpenSpec or shell tests.
 - [ ] 5.4 Confirm Stack 1 leaves DNS, DHCP, PKI, Scarborough, application identity, and public ingress unchanged.

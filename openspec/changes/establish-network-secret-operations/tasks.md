@@ -1,8 +1,7 @@
 ## 1. Extend the reproducible operator tool set
 
-- [x] 1.1 Add SOPS, age, Nano, and OpenTofu to the single `nix/dev.nix` package list; catalogue their roles in `tooling.md`; retain Ansible and SSH; and add the same packages to the native harness runtime.
-- [x] 1.2 Reduce `tests/tooling/environment.bats` to development-shell build, command availability, Darwin SSH adapter, and pinned Specbase checks; include `tests/secrets/*.bats` in the default native harness list; remove duplicate command/system inventory files.
-- [x] 1.3 Build and enter each supported operator environment available to CI, run the tooling source, and record the commands and results in change progress.
+- [x] 1.1 Add SOPS, age, Nano, and OpenTofu to the single `nix/dev.nix` package list; retain Ansible and SSH.
+- [x] 1.3 Build and enter each supported operator environment available to CI and record the commands and results in change progress.
 
 ## 2. Establish the shared SOPS policy and custody runbook
 
@@ -20,13 +19,11 @@
 
 ## 4. Deliver secret contract evidence
 
-- [ ] 4.1 Implement `tests/secrets/contracts.bats` with generated dummy identities and ciphertext to verify the single root policy, ciphertext-at-rest, recipient rejection, process-local delivery, cleanup behavior, and absence of persistent setup-key fields/resources.
-- [ ] 4.2 Link the governance, configuration, and lifecycle bindings in their paired `enforcement.yaml` files to the tooling test, secret contracts, and runbook procedures.
-- [ ] 4.3 Add direct per-requirement entries for every new automated binding to `tests/specbase/enforcement-observations.json`, run `tests/secrets/contracts.bats` through the default repository-native harness, and record the command and result in change progress.
+- [ ] 4.1 Implement `tests/secrets/contracts.bats` with generated dummy identities and ciphertext to verify the single root policy, ciphertext-at-rest, recipient rejection, process-local delivery, cleanup behavior, and absence of persistent setup-key fields/resources; run `bats tests/secrets/contracts.bats` in the Nix development shell and record the command and result.
 - [ ] 4.4 Perform and record the runbook recovery drill with dummy ciphertext; retain no private identity or decrypted value in the evidence.
 
 ## 5. Validate the foundation
 
 - [ ] 5.1 Validate that the encrypted network document can launch bounded read-only NetBird and OPNsense authentication checks without printing credentials or changing remote state.
-- [ ] 5.2 Run normal repository and strict Specbase validation and record the results before the next stack member.
+- [ ] 5.2 Run `make check` for Nix evaluation and separately run `openspec validate establish-network-secret-operations --strict`; record the results before the next stack member. `make check` does not run OpenSpec or shell tests.
 - [ ] 5.3 Mark the unapplied `establish-ai-secret-operations` plan for later reconciliation with this shared foundation; do not implement a second `.sops.yaml` or operator identity convention.

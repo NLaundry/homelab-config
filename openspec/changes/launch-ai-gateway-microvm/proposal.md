@@ -9,7 +9,7 @@ The AI workloads need a distinct, bounded LAN identity before application config
 - Start the guest with NASty while leaving application services for later stack members.
 - Verify the selected address is unoccupied and reserve or exclude it in OPNsense before activation; do not update the Estate inventory in this change.
 
-## Planes
+## Capabilities
 
 ### Configuration
 
@@ -19,7 +19,7 @@ The AI workloads need a distinct, bounded LAN identity before application config
 
 - `lifecycle.ai-gateway`: guest autostart after its network prerequisite (new).
 
-## Enforcement intent
+## Verification intent
 
 | Covered truth | Planned type | Planned source | Intended proof |
 |---|---|---|---|
@@ -28,7 +28,7 @@ The AI workloads need a distinct, bounded LAN identity before application config
 ## Impact
 
 - Adds microvm.nix to the flake and NASty composition.
-- Adds the `ai-gateway` guest and KVM test registration.
+- Adds the `ai-gateway` guest and a native NixOS KVM test exposed by the flake.
 - Uses `10.10.10.20` and MAC `02:00:00:10:10:20` after a router-side collision check and reservation/exclusion.
 - Does not change `estate.yaml`, Estate specs/tests, or site/address-allocation governance.
 - Does not install LiteLLM or expose a guest application port.

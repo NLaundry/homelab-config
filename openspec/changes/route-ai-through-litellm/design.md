@@ -24,11 +24,11 @@ This stack member assumes the previous prefixes provide host-side SOPS decryptio
 - Test with generated dummy keys and a fake OpenRouter-compatible upstream inside the private VM topology.
 - Keep a non-billable root-level health check in default deployment verification; keep the real tiny-token chat request in an explicit profile.
 
-## Enforcement design
+## Verification design
 
 ### `tests/ai-gateway-vm.nix`
 
-- Extend the existing registered KVM source with generated dummy-only keys and a fake chat upstream.
+- Extend the existing native NixOS KVM test with generated dummy-only keys and a fake chat upstream.
 - Assert read-only scoped delivery, readiness, auth rejection without upstream traffic, successful `default` routing, response propagation, port 4000 policy, and restart recovery.
 - Reject production secret paths and physical-LAN routes.
 - Fail on assertion or timeout.
@@ -36,7 +36,7 @@ This stack member assumes the previous prefixes provide host-side SOPS decryptio
 ### `tests/verify/ai-gateway-health.bats`
 
 - Probe enabled guest health from a LAN client without making a provider request.
-- Include it in the default packaged verification app and update source-count contracts.
+- Include it in the default packaged verification app without a source-count or registry test.
 - Fail deployment verification on unreachable or unhealthy enabled services.
 
 ### `tests/verify/profiles/ai-gateway-live.bats`

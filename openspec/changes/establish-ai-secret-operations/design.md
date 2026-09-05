@@ -23,23 +23,22 @@ The repository currently has no SOPS configuration, age identity convention, enc
 - Use sops-nix to render `/run/secrets-rendered/ai.env` on NASty, owned by `root:root` with mode `0400`. Later stack members may consume service-specific views, but this member does not expose it to a guest.
 - Fail dependent configuration when recipient metadata, output path, ownership, or mode is unsafe.
 
-## Enforcement design
+## Verification design
 
-### `tests/tooling/environment.bats`
+### Manual shell availability check
 
-- Assert that supported operator shells resolve `sops`, `age`, `age-keygen`, `ssh-to-age`, `nano`, `ssh-keygen`, and `ssh-keyscan` from the selected Nix tool set.
-- Run through the existing Bats/Nix tooling harness.
-- Fail on a missing command, divergent role, or unmanaged exception.
-- This proves availability, not safe handling.
+- In each supported Nix development shell, run `command -v sops age age-keygen ssh-to-age nano ssh-keygen ssh-keyscan` before following the secret runbook.
+- Stop if a required command is missing; no tool-inventory test is required.
+- This checks availability, not safe handling.
 
 ### `tests/secrets/contracts.bats`
 
-- Generate dummy identities and ciphertext only.
+- Run `bats tests/secrets/contracts.bats` in the Nix development shell with generated dummy identities and ciphertext only.
 - Assert both recipient classes exist, decryption targets are volatile, and tracked/evaluated inputs contain no plaintext or private identity.
 - Fail on plaintext markers, missing recipients, persistent targets, store interpolation, or unsafe mode.
 - This cannot prove private-key backup, production recipient provenance, or absence of host compromise.
 
-### `tests/specbase/manual-verification.md#ai-secret-recipient-provenance`
+### Production recipient provenance in `docs/NAS/ai-secret-bootstrap.md`
 
 - Record the independently observed NASty Ed25519 fingerprint and its derived public age recipient with revision, generation, persona, UTC time, freshness, limitations, blast radius, and cleanup/result.
 - Never record a private identity or credential value.
@@ -49,7 +48,7 @@ The repository currently has no SOPS configuration, age identity convention, enc
 
 - **[Operator identity is lost]** -> Require an operator-controlled recovery recipient and document off-repository backup as an evidence boundary.
 - **[NASty SSH key rotates]** -> Update SOPS recipients before rotation; do not remove the old recipient until re-encryption succeeds.
-- **[Tests touch production material]** -> Generate dummy fixtures and reject production secret paths in the test harness.
+- **[Tests touch production material]** -> Generate dummy fixtures and reject production secret paths in the secret-contract checks.
 
 ## Migration Plan
 
