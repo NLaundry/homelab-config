@@ -28,9 +28,9 @@ A repeated enrollment operation SHALL reuse the existing intended peer without r
 
 ### Requirement: Enrollment setup keys are ephemeral
 **ID:** `setup-key-ephemeral`
-A NetBird setup key SHALL be one-use, have no automatic group assignment, enter the enrollment process only through volatile runtime state, and be deleted after the result is known.
+A NetBird setup key SHALL be one-use, have no automatic group assignment, be entered only through the official OPNsense authentication interface, and be deleted from NetBird after the result is known. Any value retained by the official plugin SHALL be unusable after one-use consumption or remote deletion.
 
 #### Scenario: Enrollment attempt completes
 **ID:** `setup-key-is-retired`
 - **WHEN** an OPNsense peer enrollment succeeds or fails
-- **THEN** its setup key is absent from Git, SOPS, OpenTofu state, command arguments, and logs and is deleted from NetBird
+- **THEN** its setup key is absent from Git, SOPS, OpenTofu state, command arguments, and logs, is deleted from NetBird, and cannot authorize another enrollment

@@ -21,7 +21,7 @@ The current NetBird automation token cannot create setup keys. A human administr
 
 ### Use one bounded playbook
 
-Extend the existing credential preflight into one North York playbook. The default run is read-only. A boolean gate enables enrollment only after the operator supplies a setup key. Keep site values in play variables and use the existing inventory host; a reusable role is premature for one router.
+Extend the existing credential preflight into one North York playbook. The default run is read-only. A boolean gate prepares bounded settings before the operator completes enrollment in the official OPNsense UI. Keep site values in play variables and use the existing inventory host; a reusable role is premature for one router.
 
 Use `oxlorg.opnsense.raw` only for the installed plugin's official API because the pinned collection has no dedicated NetBird module. Keep HTTPS verification and `no_log` enabled.
 
@@ -31,17 +31,17 @@ Use the recorded OPNsense 26.7.3 inspection and read NetBird settings, authentic
 
 ### Keep enrollment settings minimal
 
-Configure the plugin with NetBird DNS and NetBird SSH capabilities disabled, authenticate using the management URL and one-use key, and bring the service up. Do not assign `wt0` or create persistent firewall objects; the later routing change owns that work.
+Configure the plugin with NetBird DNS, NetBird SSH capabilities, and all route acceptance disabled. The operator then authenticates using the management URL and one-use key through the official OPNsense UI. Do not assign `wt0` or create persistent firewall objects; the later routing change owns that work.
 
 ### Keep the setup key human-controlled and ephemeral
 
-The operator creates one no-auto-group, one-use setup key in NetBird using an authorized administrator account. A hidden shell read places it in `NETBIRD_SETUP_KEY` only for the SecretSpec-launched Ansible process. Tasks that access it use `no_log`. The operator deletes the setup key in NetBird after success or failure.
+The operator creates one no-auto-group, one-use setup key in NetBird using an authorized administrator account. The operator enters the key only in the official OPNsense Authentication form and deletes it from NetBird after success or failure.
 
-Do not add the key to SecretSpec, SOPS, OpenTofu, files, command arguments, or repository scripts. Automated key creation would require broadening the current NetBird credential and is unnecessary for one router.
+The official plugin persists the submitted value in its local configuration model and exposes no supported clear operation. The operator accepts this limitation because one-use consumption and remote deletion make the retained value invalid. Do not add the key to SecretSpec, SOPS, OpenTofu, repository files, command arguments, logs, or scripts. Automated key creation would require broadening the current NetBird credential and is unnecessary for one router.
 
 ### Detect prior enrollment
 
-Read local plugin status before requesting a key. If OPNsense is already connected as the intended peer, skip authentication and reconcile only bounded settings. Stop when local and remote identities are duplicate or ambiguous.
+Read local plugin status before requesting a key. If OPNsense is already connected as the intended peer, do not request another key or rerun settings preparation. Stop when local and remote identities are duplicate or ambiguous.
 
 ## Risks / Trade-offs
 
@@ -52,8 +52,8 @@ Read local plugin status before requesting a key. If OPNsense is already connect
 
 ## Migration Plan
 
-1. Implement and statically validate the read-only and gated enrollment paths.
+1. Implement and statically validate the read-only preflight and gated settings preparation.
 2. Run live read-only preflight and stop if the plugin or endpoint contract differs.
 3. Ask the operator to create one no-auto-group, one-use setup key.
-4. Run the gated enrollment, verify one connected peer, and delete the setup key.
+4. Connect through the official OPNsense UI, verify one connected peer, and delete the setup key.
 5. Run the playbook again without a key and require no enrollment change.

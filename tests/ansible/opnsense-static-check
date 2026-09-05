@@ -19,12 +19,32 @@ ansible-playbook --syntax-check \
   -i "$repo_root/ansible/inventory.yml" \
   "$playbook" >/dev/null
 
-for endpoint in settings/get authentication/get service/status status/status; do
-  grep -q "url: netbird/$endpoint" "$playbook"
-done
+python3 - "$playbook" <<'PY'
+import sys, yaml
+play = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))[0]
+assert play.get("no_log") is True
+posts = []
+for task in play["tasks"]:
+    raw = task.get("oxlorg.opnsense.raw")
+    if raw and raw.get("action", "get") == "post":
+        posts.append(task)
+        assert task.get("when") == "opnsense_netbird_prepare | bool"
+assert [task["oxlorg.opnsense.raw"]["url"] for task in posts] == [
+    "netbird/settings/set",
+    "netbird/settings/sync",
+]
+settings = posts[0]["oxlorg.opnsense.raw"]["data"]["settings"]
+assert settings["dns"]["enable"] == "0"
+assert settings["ssh"]["enable"] == "0"
+assert settings["routing"] == {
+    "accessLan": "0",
+    "acceptClientRoutes": "0",
+    "acceptServerRoutes": "0",
+}
+PY
 
-if grep -Eq 'action:[[:space:]]+post|interfaces/|firewall/' "$playbook"; then
-  printf 'preflight contains a mutating or out-of-scope endpoint\n' >&2
+if grep -Eq 'NETBIRD_SETUP_KEY|netbird/authentication/(set|up)|url:[[:space:]]+(interfaces|firewall)/|netbird_network_router|[Ss]carborough' "$playbook"; then
+  printf 'out-of-scope interface, firewall, routing, or site declaration found\n' >&2
   exit 1
 fi
 
@@ -33,4 +53,4 @@ if grep -R -i -E 'setup[_ -]?key' "$repo_root/secrets" >/dev/null; then
   exit 1
 fi
 
-printf 'OPNsense NetBird preflight static check passed\n'
+printf 'OPNsense NetBird static check passed\n'

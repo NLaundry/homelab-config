@@ -34,7 +34,12 @@ Stop if any endpoint fails. The separately scoped NetBird inventory must also
 show one North York Network, no assigned router, and at most one intended
 OPNsense peer.
 
-## Setup-key checkpoint
+## Prepare and connect manually
+
+Before enrollment, run the same scoped playbook once with
+`-e opnsense_netbird_prepare=true`. This enables the plugin while disabling
+NetBird DNS, NetBird SSH, and all client/server route acceptance. Do not use this
+flag after the peer is connected.
 
 The current NetBird automation token cannot create setup keys. In the NetBird
 administrator dashboard, create one key with:
@@ -44,33 +49,14 @@ administrator dashboard, create one key with:
 - Automatic group assignment: none
 - Expiry: the shortest practical interval
 
-Do not paste the key into chat, save it in SOPS, write it to a file, or put it in
-a command argument.
+In OPNsense, open **VPN → NetBird → Authentication**, enter the management URL
+and setup key, and select **Connect**. Do not paste the key into chat, save it in
+SOPS, write it to a file, or put it in a command argument.
 
-The official OPNsense plugin API stores a submitted setup key in its configuration
-model before running `netbird up`. It masks the key on API reads but exposes no
-supported clear operation. A consumed one-use key is no longer valid, yet its old
-value may remain in OPNsense configuration history.
-
-Enrollment is paused until the operator explicitly accepts that plugin behavior.
-
-## Planned hidden input
-
-After approval and implementation, enter the key without terminal echo and pass
-it only to the bounded Ansible process:
-
-```sh
-set +x
-IFS= read -r -s -p 'One-use NetBird setup key: ' NETBIRD_SETUP_KEY
-printf '\n'
-export NETBIRD_SETUP_KEY
-# Run the documented gated playbook here after the checkpoint is cleared.
-unset NETBIRD_SETUP_KEY
-```
-
-The enrollment tasks must use `no_log`, configure NetBird DNS and SSH off, keep
-all routing options off, authenticate, and start the peer. Delete the setup key
-from NetBird after success or failure.
+The official plugin retains the submitted value in its local configuration and
+exposes no supported clear operation. The operator accepted this behavior because
+one-use consumption and immediate deletion from NetBird make the retained value
+invalid. Delete the setup key from NetBird after success or failure.
 
 ## Verify after enrollment
 

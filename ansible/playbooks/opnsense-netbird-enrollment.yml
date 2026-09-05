@@ -11,6 +11,7 @@
     opnsense_api_key: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_KEY') }}"
     opnsense_api_secret: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_SECRET') }}"
     opnsense_ca_file: "{{ playbook_dir }}/../certificates/north-york-opnsense-web.pem"
+    opnsense_netbird_prepare: false
   module_defaults:
     group/oxlorg.opnsense.all:
       firewall: "{{ opnsense_url | regex_replace('^https://', '') }}"
@@ -67,3 +68,42 @@
           - netbird_authentication.response is mapping
           - netbird_service.response is mapping
           - netbird_status.response is mapping or netbird_status.response == []
+
+    - name: Prepare bounded NetBird settings
+      oxlorg.opnsense.raw:
+        url: netbird/settings/set
+        action: post
+        data:
+          settings:
+            general:
+              enable: "1"
+              wireguardPort: "51820"
+              ipmapping: ""
+            firewall:
+              allowConfig: "1"
+              blockInboundConnection: "1"
+            ssh:
+              enable: "0"
+              enableRoot: "0"
+              enableSFTP: "0"
+              enableLocalPortForwarding: "0"
+              enableRemotePortForwarding: "0"
+              enableAuth: "1"
+            dns:
+              enable: "0"
+            routing:
+              accessLan: "0"
+              acceptClientRoutes: "0"
+              acceptServerRoutes: "0"
+            postquantum:
+              enableRosenpass: "0"
+              rosenpassPermissive: "0"
+            syslog:
+              logLevel: info
+      when: opnsense_netbird_prepare | bool
+
+    - name: Render bounded NetBird settings
+      oxlorg.opnsense.raw:
+        url: netbird/settings/sync
+        action: post
+      when: opnsense_netbird_prepare | bool
