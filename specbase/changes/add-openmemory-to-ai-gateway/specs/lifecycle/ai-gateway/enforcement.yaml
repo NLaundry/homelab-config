@@ -1,9 +1,0 @@
-bindings:
-  openmemory-service-recovery:
-    type: test
-    covers: failed-service-restart
-    source: tests/openmemory-vm.nix
-  deployed-ai-health:
-    type: test
-    covers: activation-health
-    source: tests/verify/ai-gateway-health.bats

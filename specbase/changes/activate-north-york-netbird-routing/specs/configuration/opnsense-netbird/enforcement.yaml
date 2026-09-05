@@ -1,7 +1,0 @@
-remove:
-  - enrolled-peer-verification
-bindings:
-  opnsense-routed-rule-contract:
-    type: test
-    covers: opnsense-wt0-assigned
-    source: tests/ansible/opnsense-netbird-contracts.bats

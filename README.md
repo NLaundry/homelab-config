@@ -43,6 +43,6 @@ The test store needs Linux, Nix, SSH access, and KVM.
 - `estate.yaml`: sites, hosts, optional VMs, and their services.
 - `nix/dev.nix`: operator tools. See [tooling.md](tooling.md).
 - `docs/`: operational runbooks, including [ZFS import](docs/NAS/zpool-first-import.md).
-- `specbase/`: retained plans and specs. Some references to removed checks are stale.
+- `openspec/`: specs, changes, ideas, and stack order. See [planning](openspec/README.md).
 
 Commit `flake.lock` with dependency updates to keep builds reproducible.

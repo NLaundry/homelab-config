@@ -48,7 +48,7 @@
   };
 
   # SSH plus SMB (139/445) for the guest-open mediaBin/smolBoy shares — see
-  # ./samba.nix and specbase `behavior.storage.nas-samba`.
+  # ./samba.nix.
   networking.firewall.allowedTCPPorts = [
     22
     139

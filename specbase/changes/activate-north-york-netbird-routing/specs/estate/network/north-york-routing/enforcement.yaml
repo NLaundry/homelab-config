@@ -1,9 +1,0 @@
-bindings:
-  north-york-routing-topology:
-    type: command
-    covers: north-york-opnsense-routes-overlay
-    source: tests/iac/netbird-static-check
-  north-york-routing-boundary-review:
-    type: review
-    covers: north-york-routing-failure-boundary
-    source: estate

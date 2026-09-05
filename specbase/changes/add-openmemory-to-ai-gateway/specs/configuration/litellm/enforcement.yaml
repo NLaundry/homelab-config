@@ -1,5 +1,0 @@
-bindings:
-  openmemory-embedding-configuration:
-    type: test
-    covers: openrouter-memory-embedding
-    source: tests/openmemory-vm.nix

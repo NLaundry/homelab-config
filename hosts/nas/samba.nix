@@ -1,5 +1,5 @@
 # Guest-open, mDNS-discoverable SMB shares for the mediaBin and smolBoy ZFS
-# pools. Behavioral truth: specbase `behavior.storage.nas-samba`.
+# pools. See openspec/specs/service/nas-capabilities/spec.md.
 #
 # Both pools are owner by `operator` (uid 1000); guest connections are forced
 # to operator's filesystem identity so guest read-write actually holds against

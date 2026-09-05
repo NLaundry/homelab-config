@@ -1,9 +1,0 @@
-bindings:
-  routing-activation-procedure:
-    type: manual
-    covers: netbird-routing-activation-safe
-    source: docs/operations/netbird-routing.md#activation
-  routing-rollback-procedure:
-    type: manual
-    covers: netbird-routing-rollback-safe
-    source: docs/operations/netbird-routing.md#rollback

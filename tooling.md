@@ -31,7 +31,6 @@ Private age identities, recovery copies, decrypted credentials, and OpenTofu
 state stay outside Git and the Nix store. Installing tools does not create or
 configure these values. Follow the relevant runbook before using them.
 
-Pi is optional and installed separately. Specbase is no longer packaged or run
-by the normal checks; existing specifications and planning instructions remain
-available as reference. Using the optional Specbase workflows requires a
-separately installed CLI.
+Pi and the OpenSpec CLI are optional and installed separately. OpenSpec manages
+planned changes under `openspec/`; it is not part of the Nix shell or normal
+checks. See [the planning guide](openspec/README.md).

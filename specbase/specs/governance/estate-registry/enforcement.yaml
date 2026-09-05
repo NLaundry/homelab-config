@@ -1,9 +1,0 @@
-bindings:
-  estate-inventory-shape:
-    type: test
-    covers: single-estate-inventory
-    source: tests/estate/inventory.bats
-  estate-inventory-maintenance-review:
-    type: review
-    covers: inventory-maintained-with-change
-    source: governance

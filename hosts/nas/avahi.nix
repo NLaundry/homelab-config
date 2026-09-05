@@ -10,7 +10,6 @@
 # `_smb._tcp` service record for port 445 under the host name (NASty →
 # NASty.local).
 #
-# Behavioral truth: specbase `behavior.storage.nas-samba` (smb-multicast-discovery).
 { config, lib, pkgs, ... }:
 
 {

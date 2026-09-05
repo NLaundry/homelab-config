@@ -1,9 +1,0 @@
-bindings:
-  authorized-routing-probe:
-    type: test
-    covers: authorized-north-york-access
-    source: tests/verify/netbird-routing.bats
-  unauthorized-routing-check:
-    type: manual
-    covers: unauthorized-north-york-access-denied
-    source: docs/operations/netbird-routing.md#negative-access-check

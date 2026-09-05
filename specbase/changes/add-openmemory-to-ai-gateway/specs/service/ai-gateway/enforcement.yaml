@@ -1,5 +1,0 @@
-bindings:
-  openmemory-embedding-route:
-    type: test
-    covers: authenticated-embedding-routing
-    source: tests/openmemory-vm.nix
