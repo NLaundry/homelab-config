@@ -1,0 +1,5 @@
+---
+collections:
+  - name: https://github.com/O-X-L/ansible-opnsense.git
+    type: git
+    version: 7de29c528f9326b10ba74184e64a214d961c4811

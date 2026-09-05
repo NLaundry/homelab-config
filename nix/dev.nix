@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, secretspec }:
 
 let
   darwinSsh = pkgs.writeShellApplication {
@@ -13,6 +13,10 @@ let
   };
 
   ssh = if pkgs.stdenv.hostPlatform.isDarwin then darwinSsh else pkgs.openssh;
+
+  ansible = pkgs.ansible.override {
+    extraPackages = pythonPackages: [ pythonPackages.httpx ];
+  };
 in
 {
   inherit ssh;
@@ -30,6 +34,7 @@ in
     shellcheck
     shfmt
     sops
+    secretspec
     ssh
     yq-go
   ];

@@ -26,6 +26,11 @@ The repository SHALL exclude plaintext managed credentials from tracked files an
 - **WHEN** tracked files and evaluated inputs are checked
 - **THEN** managed credential material is represented only by ciphertext, references, or dummy test values
 
+#### Scenario: Network secrets are delivered
+**ID:** `network-delivery-does-not-print-values`
+- **WHEN** scoped network secret resolution succeeds or fails
+- **THEN** delivery output and diagnostics do not print resolved credential values
+
 ### Requirement: Secret policy is singular
 **ID:** `single-sops-convention`
 The repository SHALL govern managed encrypted documents through one root secret policy.
@@ -34,3 +39,4 @@ The repository SHALL govern managed encrypted documents through one root secret 
 **ID:** `managed-document-uses-root-policy`
 - **WHEN** a managed encrypted document is introduced
 - **THEN** its path and recipients are resolved by the repository root policy without a competing nested policy
+- **AND** the delivery manifest references that policy and the existing nested document instead of defining a second custody convention

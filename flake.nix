@@ -2,8 +2,10 @@
   description = "Homelab NixOS configurations";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  # SecretSpec 0.20 includes SOPS and scoped extraction; leave host packages unchanged.
+  inputs.secretTools.url = "github:NixOS/nixpkgs/801bef6abd86b91e51083066b83fb354a11fc640";
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, secretTools, ... }:
     let
       inherit (nixpkgs) lib;
       forSystems = lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ];
@@ -17,7 +19,10 @@
       devShells = forSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          dev = import ./nix/dev.nix { inherit pkgs; };
+          dev = import ./nix/dev.nix {
+            inherit pkgs;
+            secretspec = secretTools.legacyPackages.${system}.secretspec;
+          };
         in
         {
           default = pkgs.mkShell { packages = dev.packages; };
@@ -26,7 +31,10 @@
       apps = forSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          dev = import ./nix/dev.nix { inherit pkgs; };
+          dev = import ./nix/dev.nix {
+            inherit pkgs;
+            secretspec = secretTools.legacyPackages.${system}.secretspec;
+          };
         in
         {
           verify = {
