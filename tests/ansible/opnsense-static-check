@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+playbook="$repo_root/ansible/playbooks/opnsense-netbird-enrollment.yml"
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+ansible-galaxy collection install \
+  -r "$repo_root/ansible/requirements.yml" \
+  -p "$work/collections" >/dev/null 2>&1
+
+export ANSIBLE_COLLECTIONS_PATH="$work/collections"
+export OPNSENSE_URL=https://OPNsense.localdomain
+export OPNSENSE_API_KEY=dummy-key
+export OPNSENSE_API_SECRET=dummy-secret
+
+ansible-playbook --syntax-check \
+  -i "$repo_root/ansible/inventory.yml" \
+  "$playbook" >/dev/null
+
+for endpoint in settings/get authentication/get service/status status/status; do
+  grep -q "url: netbird/$endpoint" "$playbook"
+done
+
+if grep -Eq 'action:[[:space:]]+post|interfaces/|firewall/' "$playbook"; then
+  printf 'preflight contains a mutating or out-of-scope endpoint\n' >&2
+  exit 1
+fi
+
+if grep -R -i -E 'setup[_ -]?key' "$repo_root/secrets" >/dev/null; then
+  printf 'setup-key field found in managed secret storage\n' >&2
+  exit 1
+fi
+
+printf 'OPNsense NetBird preflight static check passed\n'

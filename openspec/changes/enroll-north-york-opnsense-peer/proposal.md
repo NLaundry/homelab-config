@@ -1,46 +1,39 @@
 ## Why
 
-The North York NetBird Network cannot route until OPNsense is a healthy enrolled peer, but router mutation and one-use credential handling belong outside OpenTofu state. This change establishes the reusable Ansible-managed router side while keeping the LAN unrouted until a separately reviewed activation.
+North York OPNsense must become a NetBird peer before it can later act as the Network router. Enroll the already-installed official plugin without enabling LAN routing or building unrelated router automation.
 
 ## What Changes
 
-- Restructure Ansible inventory and variables around a reusable site/router role while adding only the North York OPNsense host.
-- Pin `oxlorg.opnsense` and establish authenticated API preflight against the installed firmware.
-- Require a supported OPNsense release and official `os-netbird` package before mutation.
-- Install and configure `os-netbird`, disable NetBird-managed DNS and NetBird SSH for this prefix, assign `wt0`, and keep persistent OPNsense settings under Ansible ownership.
-- Generate a one-use NetBird setup key outside OpenTofu, enroll the router, verify peer health, and revoke/delete the key.
-- Prepare narrowly scoped dormant OPNsense aliases/rules required by later routed traffic using firewall savepoints, without assigning a NetBird Network router.
-- Preserve existing LAN administration and provide an explicit uninstall/disconnect rollback.
+- Reuse the existing North York inventory, pinned OPNsense collection, SecretSpec credentials, and trusted TLS certificate.
+- Add one North York playbook with a read-only compatibility/status preflight and a separately gated enrollment path.
+- Configure only essential NetBird peer settings, with NetBird DNS and NetBird SSH disabled.
+- Require the operator to create one one-use setup key with an account authorized for setup-key management.
+- Pass the key through a hidden local environment variable, never Git, SOPS, OpenTofu state, command arguments, or logs; delete it from NetBird after the result is known.
+- Add no interface assignment, firewall object, Network router assignment, access policy, DNS distribution, setup-key automation, or Scarborough configuration.
 
 ## Capabilities
 
-### Governance
+### New Capabilities
 
-- `governance.network-iac`: Ansible is the exclusive repository authority for managed OPNsense package, interface, firewall, and service configuration while OpenTofu remains the NetBird control-plane authority (modified from the preceding stack member).
+- `configuration/opnsense-netbird`: North York OPNsense runs the official NetBird plugin as a bounded, unrouted peer.
+- `lifecycle/netbird-enrollment`: enrollment is preflighted, idempotent, and consumes one ephemeral setup key.
 
-### Configuration
+### Modified Capabilities
 
-- `configuration.opnsense-netbird`: North York OPNsense runs the supported official NetBird plugin as an enrolled peer with bounded settings and interface realization (new).
-
-### Lifecycle
-
-- `lifecycle.netbird-enrollment`: enrollment is preflighted, idempotent, consumes one ephemeral setup key, and can be disconnected or uninstalled without activating LAN routing (new).
+- `governance/network-iac`: Ansible is the repository change path for managed OPNsense NetBird settings while OpenTofu remains the NetBird cloud-control path.
 
 ## Verification intent
 
-| Covered truth | Planned type | Planned source | Intended proof |
-|---|---|---|---|
-| `opnsense-configuration-authority` | test | `tests/ansible/opnsense-netbird-contracts.bats` | OPNsense resources occur only in the Ansible role and no OpenTofu OPNsense provider/resource is introduced. |
-| `opnsense-automation-reusable` | command | `tests/ansible/opnsense-static-check` | Inventory, site variables, role defaults, collection lock, and syntax resolve for North York without embedding a second site. |
-| `opnsense-netbird-plugin-supported` | manual | `docs/operations/opnsense-netbird-enrollment.md#1-run-read-only-preflight` | Live firmware/package/API observations satisfy the supported-version gate before mutation. |
-| `opnsense-netbird-peer-bounded` | test | `tests/ansible/opnsense-netbird-contracts.bats` | Desired plugin settings enable the peer while disabling DNS, SSH, and undeclared broad firewall access. |
-| `opnsense-wt0-assigned` | manual | `docs/operations/opnsense-netbird-enrollment.md#5-check-the-unrouted-peer` | The live router reports assigned `wt0`, a running NetBird service, and connected management status. |
-| `netbird-enrollment-preflighted` | manual | `docs/operations/opnsense-netbird-enrollment.md#1-run-read-only-preflight` | Read-only checks establish compatibility and a recoverable management path before changes. |
-| `netbird-enrollment-idempotent` | manual | `docs/operations/opnsense-netbird-enrollment.md#5-check-the-unrouted-peer` | A second Ansible run reports no change and does not create another peer or setup key. |
-| `opnsense-peer-rollback` | manual | `docs/operations/opnsense-netbird-enrollment.md#stop-or-recover` | The router can disconnect/remove the peer configuration while retaining verified LAN administration. |
+| Covered truth | Planned proof |
+|---|---|
+| Plugin and API compatibility | The default playbook run reads version, settings, service, authentication, and status endpoints without mutation. |
+| Enrollment remains bounded | Static syntax/structure checks reject interface, firewall, routing, DNS takeover, and setup-key persistence. |
+| Setup key remains ephemeral | The operator enters it through a hidden environment variable; Ansible suppresses task values; the key is deleted after the result. |
+| Enrollment is idempotent | A connected intended peer skips authentication and a repeated play reports no enrollment change. |
+| Routing remains disabled | NetBird still reports no router on the North York Network after enrollment. |
 
 ## Impact
 
-- Adds a pinned Ansible collection manifest, North York site variables, reusable OPNsense NetBird role/playbook, static checks, and an enrollment runbook.
-- Mutates the live North York OPNsense package, plugin settings, interface assignment, and bounded dormant firewall preparation.
-- Creates one NetBird peer identity, but no `netbird_network_router`, routed policy, DNS distribution, Scarborough configuration, or LAN reachability change.
+- Adds one bounded Ansible playbook, one small static check, and concise operating instructions.
+- Later enrollment mutates only OPNsense NetBird plugin settings/service state and creates one NetBird peer identity.
+- Makes no interface, firewall, routed-LAN, DNS-distribution, or Scarborough change.
