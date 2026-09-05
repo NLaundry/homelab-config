@@ -1,0 +1,9 @@
+.serena
+
+# Local OpenTofu and Ansible working data.
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+.ansible/

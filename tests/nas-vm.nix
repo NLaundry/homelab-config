@@ -43,7 +43,6 @@ pkgs.testers.runNixOSTest {
         "d /srv/mediaBin 0700 operator users -"
         "d /srv/smolBoy 0700 operator users -"
       ];
-      networking.firewall.allowedTCPPorts = [ 139 445 ];
       environment.systemPackages = [ pkgs.samba ];
     };
 

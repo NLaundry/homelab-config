@@ -1,247 +1,89 @@
 {
   description = "Homelab NixOS configurations";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  # SecretSpec 0.20 includes SOPS and scoped extraction; leave host packages unchanged.
+  inputs.secretTools.url = "github:NixOS/nixpkgs/801bef6abd86b91e51083066b83fb354a11fc640";
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, secretTools, ... }:
     let
-      tooling = import ./nix/tooling.nix { inherit (nixpkgs) lib; };
-      forOperatorSystems = nixpkgs.lib.genAttrs tooling.supportedSystems;
-      nasConfiguration = nixpkgs.lib.nixosSystem {
-        modules = [ ./hosts/nas ];
-      };
-      estate = import ./nix/estate { lib = nixpkgs.lib; };
-      estateFixtures = import ./nix/estate/fixtures.nix { lib = nixpkgs.lib; };
-      estateObserved = import ./nix/estate/observe.nix {
-        lib = nixpkgs.lib;
-        inherit nasConfiguration;
-      };
-      estateReconciliation = import ./nix/estate/reconcile.nix {
-        lib = nixpkgs.lib;
-        model = estate.model;
-        observed = estateObserved;
-      };
-      estateMutantConfiguration = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./hosts/nas
-          ({ lib, ... }: {
-            services.samba.enable = lib.mkForce false;
-            boot.zfs.extraPools = lib.mkForce [ "smolBoy" ];
-          })
-        ];
-      };
-      estateMutantObserved = import ./nix/estate/observe.nix {
-        lib = nixpkgs.lib;
-        nasConfiguration = estateMutantConfiguration;
-      };
-      estateReconciliationMutant = import ./nix/estate/reconcile.nix {
-        lib = nixpkgs.lib;
-        model = estate.model;
-        observed = estateMutantObserved;
-      };
-      estateObservedOnlyModel = estate.model // {
-        workloads = builtins.removeAttrs estate.model.workloads [ "file-sharing" ];
-        states = builtins.removeAttrs estate.model.states [ "mediaBin" ];
-      };
-      estateObservedOnlyMutant = import ./nix/estate/reconcile.nix {
-        lib = nixpkgs.lib;
-        model = estateObservedOnlyModel;
-        observed = estateObserved;
-      };
-      reconciliationMutantDetected =
-        builtins.any (item:
-          item.code == "workload-reconciliation-mismatch"
-          && item.subject == "workload:file-sharing"
-        ) estateReconciliationMutant.violations
-        && builtins.any (item:
-          item.code == "state-reconciliation-mismatch"
-          && item.subject == "state:mediaBin"
-        ) estateReconciliationMutant.violations
-        && builtins.any (item:
-          item.code == "unexpected-observed-workload"
-          && item.subject == "workload:file-sharing"
-        ) estateObservedOnlyMutant.violations
-        && builtins.any (item:
-          item.code == "unexpected-observed-state"
-          && item.subject == "state:mediaBin"
-        ) estateObservedOnlyMutant.violations;
-      estateFailedFixtureChecks = nixpkgs.lib.filterAttrs (_: value: !value)
-        estateFixtures.checks;
-      estateFailureSummary = {
-        productionGraph = estate.graph;
-        productionViolations = estate.violations;
-        failedFixtureChecks = estateFailedFixtureChecks;
-        fixtureViolations = estateFixtures.violations;
-        fixtureExpectedViolations = estateFixtures.expectedViolations;
-        fixtureDiffs = estateFixtures.diffs;
-        reconciliation = estateReconciliation;
-        missingObservationMutant = estateReconciliationMutant;
-        observedOnlyMutant = estateObservedOnlyMutant;
-      };
-      estateChecksPassed = estate.valid && estateFixtures.all
-        && estateReconciliation.valid && reconciliationMutantDetected;
-      pkgsFor = system: import nixpkgs { inherit system; };
-      toolsFor = system: tooling.forPkgs (pkgsFor system);
-
-      runnersFor = system:
-        let
-          pkgs = pkgsFor system;
-          tools = toolsFor system;
-          verifyRunner = pkgs.writeShellApplication {
-            name = "homelab-verify";
-            runtimeInputs = [
-              tools.byName.bats
-              tools.byName.ssh
-              tools.byName.yq
-              pkgs.coreutils
-            ];
-            text = ''
-              tests=( ${self}/tests/verify/*.bats )
-              if [[ ''${1:-} == --list-default ]]; then
-                printf '%s\n' "''${tests[@]}"
-                exit 0
-              fi
-              if (( $# == 0 )); then
-                set -- "''${tests[@]}"
-              fi
-              exec bats "$@"
-            '';
-          };
-          harnessRunner = pkgs.writeShellApplication {
-            name = "homelab-harness";
-            runtimeInputs = [
-              tools.byName.bats
-              tools.byName.git
-              tools.byName.jq
-              tools.byName.make
-              tools.byName.specbase
-              pkgs.coreutils
-              pkgs.findutils
-              pkgs.gawk
-              pkgs.gnugrep
-              pkgs.gnused
-            ];
-            text = ''
-              export HOMELAB_ROOT="''${HOMELAB_ROOT:-$PWD}"
-              export HOMELAB_VERIFY_RUNNER="${verifyRunner}/bin/homelab-verify"
-              if (( $# == 0 )); then
-                tests=( ${self}/tests/harness/*.bats ${self}/tests/estate/*.bats )
-                set -- "''${tests[@]}"
-              fi
-              exec bats "$@"
-            '';
-          };
-        in
-        {
-          harness = harnessRunner;
-          verify = verifyRunner;
-        };
-
-      linuxPkgs = pkgsFor "x86_64-linux";
-      vmHarness = linuxPkgs.callPackage ./tests/harness/nixos-vm.nix { };
-      nasVm = linuxPkgs.callPackage ./tests/nas-vm.nix { };
-      vmSuite = import ./nix/vm-tests.nix {
-        inherit (nixpkgs) lib;
-        pkgs = linuxPkgs;
-        inherit vmHarness nasVm;
-      };
-      estateCheckFor = system:
-        let
-          pkgs = pkgsFor system;
-        in
-        pkgs.runCommand "homelab-estate-registry" { } ''
-          mkdir -p "$out"
-          cat >"$out/graph.json" <<'EOF'
-          ${builtins.toJSON estate.graph}
-          EOF
-          cat >"$out/production-violations.json" <<'EOF'
-          ${builtins.toJSON estate.violations}
-          EOF
-          cat >"$out/fixture-checks.json" <<'EOF'
-          ${builtins.toJSON estateFixtures.checks}
-          EOF
-          cat >"$out/reconciliation.json" <<'EOF'
-          ${builtins.toJSON estateReconciliation}
-          EOF
-          cat >"$out/failure-summary.json" <<'EOF'
-          ${builtins.toJSON estateFailureSummary}
-          EOF
-          if [ "${if estateChecksPassed then "1" else "0"}" != 1 ]; then
-            printf '%s\n' 'Estate registry check failed:' >&2
-            cat "$out/failure-summary.json" >&2
-            exit 1
-          fi
-        '';
+      inherit (nixpkgs) lib;
+      forSystems = lib.genAttrs [ "aarch64-darwin" "x86_64-linux" ];
     in
     {
-      # Host-agnostic attribute name: deploy with `.#nas`, not the hostname.
-      # system/platform comes from nixpkgs.hostPlatform in hardware-configuration.nix.
-      nixosConfigurations.nas = nasConfiguration;
-
-      lib = {
-        estateGraph = estate.graph;
-        estateRegistry = {
-          productionViolations = estate.violations;
-          checkFailureSummary = estateFailureSummary;
-          fixtureGraphs = estateFixtures.graphs;
-          fixtureViolations = estateFixtures.violations;
-          fixtureExpectedViolations = estateFixtures.expectedViolations;
-          fixtureChecks = estateFixtures.checks;
-          fixtureDiffs = estateFixtures.diffs;
-          reconciliation = estateReconciliation;
-          reconciliationMutant = estateReconciliationMutant;
-          reconciliationObservedOnlyMutant = estateObservedOnlyMutant;
-        };
+      # Platform comes from the host's hardware configuration.
+      nixosConfigurations.nas = lib.nixosSystem {
+        modules = [ ./hosts/nas ];
       };
 
-      packages = forOperatorSystems (system:
+      devShells = forSystems (system:
         let
-          tools = toolsFor system;
+          pkgs = nixpkgs.legacyPackages.${system};
+          dev = import ./nix/dev.nix {
+            inherit pkgs;
+            secretspec = secretTools.legacyPackages.${system}.secretspec;
+          };
         in
         {
-          repo-tools = tools.repoTools;
-          specbase = tools.specbase;
+          default = pkgs.mkShell { packages = dev.packages; };
         });
 
-      devShells = forOperatorSystems (system: {
-        default = (toolsFor system).defaultShell;
-      });
-
-      apps = forOperatorSystems (system:
+      apps = forSystems (system:
         let
-          runners = runnersFor system;
-          tools = toolsFor system;
+          pkgs = nixpkgs.legacyPackages.${system};
+          dev = import ./nix/dev.nix {
+            inherit pkgs;
+            secretspec = secretTools.legacyPackages.${system}.secretspec;
+          };
         in
         {
-          harness = {
-            type = "app";
-            program = "${runners.harness}/bin/homelab-harness";
-            meta.description = "Run repository harness conformance sources";
-          };
           verify = {
             type = "app";
-            program = "${runners.verify}/bin/homelab-verify";
-            meta.description = "Run deployed-homelab Bats verification";
-          };
-          specbase = {
-            type = "app";
-            program = "${tools.specbase}/bin/specbase";
-            meta.description = "Run the repository-pinned Specbase CLI";
+            meta.description = "Run deployed-homelab checks";
+            program = lib.getExe (pkgs.writeShellApplication {
+              name = "homelab-verify";
+              runtimeInputs = [ pkgs.bats dev.ssh pkgs.yq-go pkgs.coreutils ];
+              text = ''
+                preflight=false
+                if [[ ''${1:-} == --preflight ]]; then
+                  preflight=true
+                  shift
+                fi
+                if (( $# == 0 )); then
+                  set -- ${self}/tests/verify/*.bats
+                fi
+                if [[ $preflight == true ]]; then
+                  for test_file in "$@"; do
+                    if [[ ! -f $test_file ]]; then
+                      printf 'Activation verification needs explicit test files, not Bats options: %s\n' "$test_file" >&2
+                      exit 1
+                    fi
+                    case "$test_file" in
+                      */deployment.bats) ;;
+                      */nas-samba.bats)
+                        # shellcheck source=/dev/null
+                        source ${self}/tests/verify/lib/nas-samba-safety.sh
+                        require_smb_tools
+                        ;;
+                      *) printf 'Unknown activation verification suite: %s\n' "$test_file" >&2; exit 1 ;;
+                    esac
+                  done
+                  printf 'Post-activation verification files:\n'
+                  printf '  %s\n' "$@"
+                  exit 0
+                fi
+                exec bats "$@"
+              '';
+            });
           };
           nixos-rebuild = {
             type = "app";
-            program = "${tools.byName.deploymentAdapter}/bin/nixos-rebuild";
-            meta.description = "Run the nixpkgs-pinned deployment adapter";
+            meta.description = "Run the pinned NixOS deployment tool";
+            program = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
           };
         });
 
-      checks = forOperatorSystems (system:
-        {
-          tooling-environment = (toolsFor system).toolingCheck;
-          estate-registry = estateCheckFor system;
-        }
-        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") vmSuite.checks);
+      checks.x86_64-linux.nas-samba =
+        nixpkgs.legacyPackages.x86_64-linux.callPackage ./tests/nas-vm.nix { };
     };
 }

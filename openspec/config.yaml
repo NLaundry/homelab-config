@@ -1,0 +1,12 @@
+schema: spec-driven
+
+context: |
+  This repository manages a NixOS NAS and an Ansible fleet.
+  Prefer the smallest useful change. Use OpenSpec for substantial planned work, not every edit.
+  Specs describe important behavior and constraints, not copies of configuration values.
+  Use concise Simplified Technical English. Test real behavior and concrete failure risks.
+  Do not add evidence registries, paired enforcement, review panels, or tests of documentation.
+  ideas/ and stacks/ are manual planning folders. Follow stack member order; OpenSpec does not enforce it.
+  Progress records, archives, and older ideas are historical; they may describe removed tools.
+  Use current specs, active tasks, the Makefile, and agent guidance for implementation.
+  Live activation and state-changing probes need explicit user authorization.

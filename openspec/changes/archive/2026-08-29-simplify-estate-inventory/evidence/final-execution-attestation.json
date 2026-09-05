@@ -1,0 +1,48 @@
+{
+  "implementationDigest": "implementation-sha256:da398b32b3b22eafd700e61fe55d89bf09b0ed70ae75e3d398837da2e7018e7b",
+  "createdAt": "2026-08-29T05:00:23Z",
+  "runs": {
+    "operator-access": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T04:58:01Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/operator-access-final.log",
+      "logSha256": "0fb192a7cae688bcb6f4c7c5beee28e70e4a0e0a13aa3452becbe38f38a6ad46"
+    },
+    "estate-inventory-review": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T04:57:57Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/estate-inventory-review-final.log",
+      "logSha256": "7419e20c73ae94330aeb5d494f0dd3a24a7a8b7dd8c3b875baae163f51b78d76"
+    },
+    "kvm-vm-suite": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T05:00:02Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/vm-tests-final.log",
+      "logSha256": "a3e789bacb1dbfdf5aa816fc737053626d122b0ae0f418405ef8703c86406ac2"
+    },
+    "live-samba": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T04:58:03Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/live-verify-final.log",
+      "logSha256": "51e93dd94dbb95d2c97981389454f00e3a951d26e7d1343f98d5c674ec071308"
+    },
+    "post-deploy-health": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T04:58:03Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/live-verify-final.log",
+      "logSha256": "51e93dd94dbb95d2c97981389454f00e3a951d26e7d1343f98d5c674ec071308"
+    },
+    "tooling-catalogue-review": {
+      "observedAt": "2026-08-29T04:57:57Z",
+      "finishedAt": "2026-08-29T04:57:57Z",
+      "exit": 0,
+      "log": "specbase/changes/archive/2026-08-29-simplify-estate-inventory/evidence/execution/tooling-review-final.log",
+      "logSha256": "87172d00bbbda5cb0c0f5628abc2f24c2cffea75a3fc2ff49b08f926c926bd2b"
+    }
+  }
+}

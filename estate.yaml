@@ -1,0 +1,34 @@
+# Human-maintained inventory, grouped by where things run.
+# A host can have services, vms, or both; each VM can have its own services.
+north-york:
+  name: North York
+  networks:
+    lan:
+      cidr: 10.10.10.0/24
+    GuestWifi:
+      cidr: 10.10.20.0/24
+  hosts:
+    opnsense:
+      hostname: OPNsense
+      addresses:
+        lan: 10.10.10.1
+    ax23:
+      hostname: AX23
+      addresses:
+        lan: 10.10.10.2
+    proxbox:
+      hostname: proxbox
+      addresses:
+        lan: 10.10.10.10
+    nas:
+      hostname: NASty
+      addresses:
+        lan: 10.10.10.11
+      storage:
+        pools:
+          - mediaBin
+          - smolBoy
+      services:
+        file-sharing:
+          kind: samba
+          protocol: smb

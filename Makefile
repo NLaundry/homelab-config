@@ -1,113 +1,68 @@
-# Homelab repository operations.
-#
-# Deployment operations build on and optionally activate the physical NAS.
-# Testing operations keep validation, disposable VM tests, and deployed checks
-# distinct. Run `make help` for the documented operation surface.
+HOST   ?= nas
+TARGET ?= operator@10.10.10.11
+KEY    ?= $(HOME)/.ssh/id_ed25519
+# Escape '#' so Make does not treat it as a comment.
+FLAKE  ?= .\#$(HOST)
 
-OPERATIONS := deploy boot try dry build lint test test-vm verify
-NON_LIVE_PHASES := harness tooling agents current-bindings
-
-HOST    ?= nas
-TARGET  ?= operator@10.10.10.11
-TARGET_ADDRESS = $(lastword $(subst @, ,$(TARGET)))
-# NOTE: the '#' must be escaped as '\#' — in Make a bare '#' starts a comment.
-FLAKE   ?= .\#$(HOST)
-
-# operator is non-root: escalate (passwordless sudo) for activation.
-# ng nixos-rebuild uses `--sudo`; legacy perl used `--use-remote-sudo`.
-SUDO    ?= --sudo
-
-# Nix is the bootstrap command. Repository-owned tools run through local,
-# lock-pinned flake apps unless a controlled fixture overrides them.
-NIX      ?= nix
-NRB      ?= $(NIX) run .\#nixos-rebuild --
-SPECBASE ?= $(NIX) run .\#specbase --
-
-# SSH identity used by deployment and by the default remote test store.
-KEY     ?= $(HOME)/.ssh/id_ed25519
 export NIX_SSHOPTS ?= -i $(KEY)
-# Enable flakes even when nix.conf does not enable them globally.
 export NIX_CONFIG = extra-experimental-features = nix-command flakes
 
-# The test command targets the remote store directly because macOS blocks
-# daemon-owned SSH connections used by --builders. Override this one URI to move
-# Linux/KVM execution; the selected derivations remain fixed.
 TEST_STORE ?= ssh-ng://operator@10.10.10.11?ssh-key=$(KEY)&system-features=kvm%20nixos-test
 
-# Optional Bats paths or flags forwarded after the packaged verify runner.
-VERIFY_ARGS ?=
-
-REBUILD = $(NRB) --flake $(FLAKE) --target-host $(TARGET) --build-host $(TARGET) $(SUDO)
-DEPLOYMENT_PLAN = @printf '%s\n' 'deployment-plan flake=$(FLAKE) build-host=$(TARGET) activation-host=$(TARGET) ssh-identity=$(KEY) privilege=$(SUDO)'
-RUN_VERIFY = env HOMELAB_NAS_ADDRESS="$(TARGET_ADDRESS)" HOMELAB_DEPLOYMENT_TARGET="$(TARGET)" HOMELAB_DEPLOYMENT_SSH_IDENTITY="$(KEY)" $(NIX) run .\#verify --
-RUN_SELECTED_VERIFY = $(RUN_VERIFY) $(VERIFY_ARGS)
+REBUILD = nix run .\#nixos-rebuild -- --flake $(FLAKE) --build-host $(TARGET)
+ACTIVATE = $(REBUILD) --target-host $(TARGET) --sudo
+VERIFY = env HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
+	HOMELAB_DEPLOYMENT_TARGET="$(TARGET)" HOMELAB_DEPLOYMENT_SSH_IDENTITY="$(KEY)" \
+	nix run .\#verify --
 
 .DEFAULT_GOAL := help
-.PHONY: help $(OPERATIONS) $(addprefix test-,$(NON_LIVE_PHASES))
+.PHONY: help check test-vm verify build preview try boot deploy
 
-help: ## List documented repository operations
+help:
 	@printf '%s\n' \
-		'Usage: make <operation> [VARIABLE=value]' \
+		'Usage: make <command> [VARIABLE=value]' \
 		'' \
-		'Operations:' \
-		'  deploy     Activate persistently, then verify the deployed homelab' \
-		'  boot       Build on NAS and select the next-boot generation' \
-		'  try        Activate temporarily, then verify the deployed homelab' \
-		'  dry        Preview activation without applying it' \
-		'  build      Build the NAS configuration without activation' \
-		'  lint       Validate current specs and evaluate flake checks' \
-		'  test       Run fast non-live repository checks' \
-		'  test-vm    Run the optional disposable NixOS VM integration suite' \
-		'  verify     Run checks against the deployed homelab'
+		'Checks:' \
+		'  check     Validate Nix configuration; no builds or live probes' \
+		'  test-vm   Run Samba tests in disposable VMs on TEST_STORE' \
+		'  verify    Check the live NAS; create and remove SMB test files' \
+		'' \
+		'Deployment:' \
+		'  build     Build the NAS configuration without activation' \
+		'  preview   Show activation changes without applying them' \
+		'  try       Activate temporarily, then verify; keep the boot default' \
+		'  boot      Select a configuration for the next boot; do not activate' \
+		'  deploy    Activate now, make persistent, then verify' \
+		'' \
+		'Failed verification does not roll back an activation.' \
+		'See README.md for prerequisites and overrides.'
 
-deploy: ## Build on NAS, activate persistently, then verify
-	$(DEPLOYMENT_PLAN)
-	$(REBUILD) switch
-	@printf '%s\n' 'Activation succeeded. Running deployed verification.'
-	@$(RUN_VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but deployed verification failed. No rollback was attempted.' >&2; exit $$status; }
+check:
+	nix flake check --no-update-lock-file --all-systems --no-build
 
-boot: ## Build on NAS and set the next-boot default without activating
-	$(DEPLOYMENT_PLAN)
-	$(REBUILD) boot
+# Use separate test guests to avoid changing the live NAS.
+test-vm: check
+	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
-try: ## Build on NAS, activate temporarily, then verify
-	$(DEPLOYMENT_PLAN)
-	$(REBUILD) test
-	@printf '%s\n' 'Activation succeeded. Running deployed verification.'
-	@$(RUN_VERIFY) || { status=$$?; printf '%s\n' 'Activation succeeded, but deployed verification failed. No rollback was attempted.' >&2; exit $$status; }
+verify:
+	$(VERIFY) $(VERIFY_ARGS)
 
-dry: ## Preview the NAS activation without applying it
-	$(DEPLOYMENT_PLAN)
-	$(REBUILD) dry-activate
+build:
+	$(REBUILD) build
 
-build: ## Build the NAS configuration without activating it
-	$(DEPLOYMENT_PLAN)
-	$(NRB) --flake $(FLAKE) --build-host $(TARGET) build
+preview:
+	$(ACTIVATE) dry-activate
 
-lint: ## Strictly validate current specs, then evaluate all flake checks
-	$(SPECBASE) validate --specs --strict
-	$(NIX) flake check --no-update-lock-file --all-systems --no-build
+boot:
+	$(ACTIVATE) boot
 
-test: lint ## Run every registered non-live phase
-	@for phase in $(NON_LIVE_PHASES); do \
-		printf 'test phase %s...\n' "$$phase"; \
-		$(MAKE) --no-print-directory "test-$$phase" || exit $$?; \
-	done
+# Keep a failed candidate active so the operator can inspect it.
+try:
+	$(VERIFY) --preflight $(VERIFY_ARGS)
+	$(ACTIVATE) test
+	@$(VERIFY) $(VERIFY_ARGS) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }
 
-test-harness:
-	$(NIX) run .\#harness
-
-test-tooling:
-	$(NIX) develop --no-update-lock-file --command env "TEST_STORE=$(TEST_STORE)" bats tests/tooling/environment.bats
-
-test-agents:
-	$(NIX) develop --no-update-lock-file --command tests/agents/specbase-instruments.sh all
-
-test-current-bindings:
-	$(NIX) develop --no-update-lock-file --command env "TEST_STORE=$(TEST_STORE)" tests/specbase/current-bindings.sh all-local
-
-test-vm:
-	$(NIX) build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.vm-tests
-
-verify: ## Run selected Bats checks against the deployed homelab
-	$(RUN_SELECTED_VERIFY)
+deploy:
+	$(VERIFY) --preflight $(VERIFY_ARGS)
+	$(ACTIVATE) switch
+	@$(VERIFY) $(VERIFY_ARGS) || { status=$$?; printf '%s\n' 'Activation succeeded, but verification failed. No rollback was attempted.' >&2; exit $$status; }

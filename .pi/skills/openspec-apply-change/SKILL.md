@@ -7,14 +7,14 @@ compatibility: Requires openspec CLI.
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.6.0"
+  generatedBy: "1.12.0"
 ---
 
 Implement tasks from an OpenSpec change.
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
-**Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: Optionally specify a change name (e.g., `/opsx-apply add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
 
@@ -23,9 +23,9 @@ Implement tasks from an OpenSpec change.
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
    - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes and use the **AskUserQuestion tool** to let the user select
+   - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/spcb-apply <other>`).
+   Always announce: "Using change: <name>" and how to override (e.g., `/opsx-apply <other>`).
 
 2. **Check status to understand the schema**
    ```bash
@@ -47,11 +47,28 @@ Implement tasks from an OpenSpec change.
    - Progress (total, complete, remaining)
    - Task list with status
    - Dynamic instruction based on current state
+   - Optional `context`: current required project instruction input from the selected root
+   - Optional `operationGuidance`: current advisory guidance for apply
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest using openspec-continue-change
+   - If `state: "blocked"` (missing artifacts): show message, suggest using `/opsx-continue` (if it is not installed, run `openspec status --change "<name>" --json` to see the next artifact and `openspec instructions <artifact-id> --change "<name>" --json` for how to create it)
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
+
+   Treat `context` as a required prompt-level input. Read and consider it, and
+   apply relevant project facts, conventions, and constraints while implementing.
+   Treat `operationGuidance` as optional additive advice. Read and consider every
+   entry, and follow entries that are applicable and compatible with the built-in
+   workflow.
+
+   Keep both fields separate from CLI-returned state, missing artifacts, tasks,
+   progress, `contextFiles`, and the built-in `instruction`. They are not
+   evidence of task completion, do not replace the built-in instruction, and do
+   not permit bypassing a blocked state. If context conflicts with the built-in
+   instruction, an explicit user choice, or a CLI-controlled value, report the
+   conflict and preserve the controlling value. If guidance is inapplicable or
+   conflicts with those controlling inputs, do not follow it and explain why.
+   These are prompt-level behavior contracts, not enforceable checks.
 
 4. **Read context files**
 
@@ -59,6 +76,9 @@ Implement tasks from an OpenSpec change.
    The files depend on the schema being used:
    - **spec-driven**: proposal, specs, design, tasks
    - Other schemas: follow the contextFiles from CLI output
+
+   Do not copy `context` or `operationGuidance` verbatim into implementation
+   files or planning artifacts unless the user separately asks for that content.
 
 5. **Show current progress**
 
@@ -80,6 +100,7 @@ Implement tasks from an OpenSpec change.
    **Pause if:**
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
+   - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
 
@@ -119,7 +140,7 @@ Working on task 4/7: <task description>
 - [x] Task 2
 ...
 
-All tasks complete! Ready to archive this change.
+All tasks complete! You can archive this change with `/opsx-archive`.
 ```
 
 **Output On Pause (Issue Encountered)**
@@ -150,7 +171,14 @@ What would you like to do?
 - Keep code changes minimal and scoped to each task
 - Update task checkbox immediately after completing each task
 - Pause on errors, blockers, or unclear requirements - don't guess
+- When a task needs work beyond what the spec describes, surface the added scope and pause - never silently narrow, defer, or simplify away specified behavior
+- Only mark a task `- [x]` when its specified behavior is fully implemented, not when it is partially done or deferred
 - Use contextFiles from CLI output, don't assume specific file names
+- Do not use context or operation guidance as proof that a task is complete
+- Apply relevant project context; report conflicts with controlling workflow inputs
+- Consider every guidance entry; explain any inapplicable or conflicting advice
+- Do not copy runtime context or operation guidance into implementation files or planning artifacts
+- Preserve CLI-controlled blocked/ready/all-done behavior and completion criteria
 
 **Fluid Workflow Integration**
 
@@ -158,56 +186,3 @@ This skill supports the "actions on a change" model:
 
 - **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
 - **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly
-
-## Governed spec model
-
-This project uses the governed spec model (2 permanent truth planes with paired enforcement). Do NOT assume the flat `specs/<capability>/spec.md` layout.
-
-**Confirm the model from the CLI, do not guess:**
-- Run `openspec status --change "<name>" --json` and read `specModel`.
-- The governed model reports `specModel.kind == "governed"` with
-  `planes: [behavior, architecture]` and `pairedEnforcement: true`.
-- If `specModel.kind` is `legacy` (or absent), follow the flat-spec guidance
-  above unchanged.
-
-**Under the governed model, derive concrete paths from CLI output** (`status`
-`artifactPaths` and `openspec instructions <artifact> --change ... --json`),
-never hardcode them. Durable truth lives in the declared planes:
-- behavior: User/client-visible outcomes (enforcement: tests / property tests) → `specs/behavior/<locator>/{spec.md,enforcement.md}`
-- architecture: Package responsibilities, boundaries, and structural invariants (enforcement: lint / static-analysis / conformance) → `specs/architecture/<locator>/{spec.md,enforcement.md}`
-
-Every governed `spec.md` is PAIRED with an `enforcement.md`. Stable identity is
-scoped narrowly: the frontmatter `id` (e.g. `behavior.<locator>`) is the only project-unique governed ID; requirement, scenario, and binding `**ID:**` slugs are unique only within their pair, and stay fixed when titles or locators move.
-
-**Plane classification:** match each proposed claim to the plane whose declared
-purpose best fits the claim's nature. The shipped defaults are behavior, architecture; a single initiative may touch several planes — list one spec per plane touched, never mix planes in one spec.
-
-**Structure conventions (governed):**
-- Locators may nest to arbitrary safe depth (e.g. `behavior/platforms/desktop`);
-  JSON reports normalized slash-separated locators, filesystem access is native.
-- A directory that only GROUPS child pairs is a **namespace** and needs no pair of
-  its own. Only a directory that contains `spec.md` must also contain
-  `enforcement.md`; ancestry provides navigation, never inherited requirements.
-- A change stores its `spec.md` and `enforcement.md` deltas under the SAME
-  plane-qualified locator as the target current pair, so both members move together.
-
-### Implementing truth and evidence (governed)
-
-Apply implements BOTH the product/architecture change and its declared evidence:
-
-- **Resolve planned bindings.** As each binding's target and command land, move it
-  from `status: planned` to `status: active`. If implementation finishes but a
-  mandatory binding is still `planned` (or stale, hanging, broken, or missing its
-  target), report the unresolved evidence and do **not** mark that spec's related
-  work complete.
-- **New enforcement mechanism.** If an architectural requirement needs a new lint
-  rule or conformance check, implement the rule AND its checks, and make the
-  binding name concrete `targets` and a runnable command. Any user-visible
-  behavior of that tooling is itself behavioral truth - capture it in the
-  appropriate behavioral spec pair.
-- **Assess retired-target cleanup safely.** When reconciliation reports a retired
-  test, rule, fixture, or review target, check surviving bindings and project usage
-  before removing it. Never auto-delete a shared or intentionally retained target.
-- **Consult `openspec coverage` (and `openspec coverage --json`) for the
-  aggregated coverage health signal** while resolving bindings - the same view
-  exploration and verification consume.

@@ -1,0 +1,10 @@
+remove:
+  - nas-estate-graph
+  - nas-estate-reconciliation
+bindings:
+  nas-estate-inventory:
+    type: test
+    covers:
+      - smb-workload-placement
+      - zfs-pool-placement
+    source: tests/estate/inventory.bats

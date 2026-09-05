@@ -1,0 +1,10 @@
+id: north-york-network-foundation
+summary: Establish North York network IaC, adopt NetBird, enroll OPNsense, and
+  activate bounded LAN routing
+created: 2026-09-04
+members:
+  - model-north-york-estate-b52c8dde
+  - establish-network-secret-operations-f9203837
+  - adopt-north-york-netbird-control-plane-f5d79f16
+  - enroll-north-york-opnsense-peer-5ce03d45
+  - activate-north-york-netbird-routing-aefc523d

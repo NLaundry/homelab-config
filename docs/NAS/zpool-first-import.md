@@ -21,11 +21,15 @@ nvme0n1  = boot / root / nix / swap  (NOT a pool member)
 
 ## 1. Inspect before touching anything (read-only)
 
+### 1.1 List importable pools
+
 List importable pools without importing them:
 
 ```bash
 zpool import
 ```
+
+### 1.2 Read labels and record pool details
 
 Read the on-disk ZFS label for each data partition (pool name, vdev membership, host that created it):
 
@@ -41,6 +45,8 @@ sudo zdb -l /dev/sdd1
 - `hostid` / `hostname` fields on the label — tells us whether this box created the pools.
 - vdev topology (mirror vs stripe) — sanity-check it matches the 2×2TB / 2×4TB expectation.
 
+### 1.3 Record the current host ID
+
 Also grab the box's current host ID — this is the value for `networking.hostId`:
 
 ```bash
@@ -53,6 +59,8 @@ hostid
 
 ## 2. Import (read-only trial first)
 
+### 2.1 Import read-only and check health
+
 Do a read-only import first to confirm the pool is healthy before mounting anything writable. Replace `<pool>` with the real name from step 1.
 
 ```bash
@@ -64,6 +72,8 @@ zfs list -r <pool>
 - `-N` = import without auto-mounting datasets yet.
 - Confirm `state: ONLINE` and no `DEGRADED` / `FAULTED` vdevs.
 
+### 2.2 Export the trial
+
 Export the read-only trial before the real import:
 
 ```bash
@@ -74,6 +84,8 @@ sudo zpool export <pool>
 
 ## 3. Real import
 
+### 3.1 Import the pool
+
 ```bash
 sudo zpool import <pool>
 ```
@@ -83,6 +95,8 @@ If — and only if — import is refused because the pool was last used by anoth
 ```bash
 sudo zpool import -f <pool>
 ```
+
+### 3.2 Verify the import
 
 Verify:
 
