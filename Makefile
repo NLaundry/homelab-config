@@ -16,32 +16,30 @@ VERIFY = env HOMELAB_ROOT="$(CURDIR)" HOMELAB_NAS_ADDRESS="$(lastword $(subst @,
 	nix run .\#verify --
 
 .DEFAULT_GOAL := help
-.PHONY: help check test-vm verify build preview try boot deploy
+.PHONY: help lint test-vm verify dry-run try deploy
 
 help:
 	@printf '%s\n' \
 		'Usage: make <command> [VARIABLE=value]' \
 		'' \
 		'Checks:' \
-		'  check     Validate Nix configuration; no builds or live probes' \
+		'  lint      Validate Nix configuration; no builds or live probes' \
 		'  test-vm   Run Samba tests in disposable VMs on TEST_STORE' \
 		'  verify    Run every live probe under tests/verify' \
 		'' \
 		'Deployment:' \
-		'  build     Build the NAS configuration without activation' \
-		'  preview   Show activation changes without applying them' \
+		'  dry-run   Show activation changes without applying them' \
 		'  try       Activate temporarily, then verify; keep the boot default' \
-		'  boot      Select a configuration for the next boot; do not activate' \
 		'  deploy    Activate now, make persistent, then verify' \
 		'' \
 		'Failed verification does not roll back an activation.' \
 		'See README.md for prerequisites and overrides.'
 
-check:
+lint:
 	nix flake check --no-update-lock-file --all-systems --no-build
 
 # Use separate test guests to avoid changing the live NAS.
-test-vm: check
+test-vm: lint
 	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
 XDG_CONFIG_HOME ?= $(HOME)/.config
@@ -58,14 +56,8 @@ verify:
 	  printf '%s\n' 'Connector probes skipped: secretspec not on PATH (run inside nix develop)'; \
 	fi
 
-build:
-	$(REBUILD) build
-
-preview:
+dry-run:
 	$(ACTIVATE) dry-activate
-
-boot:
-	$(ACTIVATE) boot
 
 # Keep a failed candidate active so the operator can inspect it.
 try:

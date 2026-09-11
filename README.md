@@ -21,13 +21,11 @@ The shell supports macOS ARM and Linux x86-64. Full live SMB checks need macOS.
 
 | Command | Action |
 |---|---|
-| `make check` | Evaluate Nix configuration without building or deploying |
+| `make lint` | Evaluate Nix configuration without building or deploying |
 | `make test-vm` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
 | `make verify` | Check live NAS, control-plane, DNS, and private-PKI health |
-| `make build` | Build the NAS configuration without activation |
-| `make preview` | Preview activation without applying it |
+| `make dry-run` | Preview activation without applying it |
 | `make try` | Activate temporarily, then verify |
-| `make boot` | Select a configuration for the next boot |
 | `make deploy` | Activate persistently, then verify |
 
 `try` changes the running NAS but leaves the previous boot default in place.
@@ -52,16 +50,17 @@ for the whole suite so the control-plane probes can authenticate. Without
 SecretSpec, those connector probes skip with a visible notice.
 
 If macOS reports an SSH Unix socket path is too long, use a shorter temporary
-path for the build: `TMPDIR=/tmp make build`. This changes no SSH trust setting
+path for the dry run: `TMPDIR=/tmp make dry-run`. This changes no SSH trust setting
 and does not activate the candidate.
 
 ## Files
 
-- `hosts/nas/`: NAS configuration.
+- `hosts/nas/`: NAS configuration and its guest configurations.
+- `hosts/nas/step-ca/`: step-ca microVM configuration and service files.
 - `estate.yaml`: sites, hosts, optional VMs, and their services.
 - `infra/ansible/`: Ansible inventory, playbooks, roles, and operations.
 - `infra/terraform/`: OpenTofu/Terraform infrastructure definitions.
-- `nix/dev.nix`: operator tools. See [tooling.md](tooling.md).
+- `dev.nix`: operator tools. See [tooling.md](tooling.md).
 - `docs/`: [operations and recovery runbooks](docs/operations/README.md).
 - `openspec/`: specs, changes, ideas, and stack order. See [planning](openspec/README.md).
 

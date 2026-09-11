@@ -1,7 +1,7 @@
 # Operator tools
 
 Install Nix with flakes enabled, then run `nix develop`. The shared package list
-is `nix/dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
+is `dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
 
 | Tool | Purpose |
 |---|---|

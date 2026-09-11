@@ -28,7 +28,7 @@
       devShells = forSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          dev = import ./nix/dev.nix {
+          dev = import ./dev.nix {
             inherit pkgs;
             secretspec = secretTools.legacyPackages.${system}.secretspec;
           };
@@ -42,7 +42,7 @@
       apps = forSystems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          dev = import ./nix/dev.nix {
+          dev = import ./dev.nix {
             inherit pkgs;
             secretspec = secretTools.legacyPackages.${system}.secretspec;
           };
