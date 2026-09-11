@@ -1,0 +1,70 @@
+---
+- name: Read current Dnsmasq settings
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/get
+    action: get
+  register: dns_current
+  changed_when: false
+
+- name: Compare only the managed Dnsmasq settings
+  ansible.builtin.set_fact:
+    dns_settings_differ: >-
+      {%- set ns = namespace(changed=false) -%}
+      {%- for key, wanted in opnsense_dns_settings.items() -%}
+      {%- set pairs = wanted.items() if key == 'dhcp' else [(key, wanted)] -%}
+      {%- set current = dns_current.response.dnsmasq.dhcp if key == 'dhcp' else dns_current.response.dnsmasq -%}
+      {%- for field, value in pairs -%}
+      {%- set actual = current[field] -%}
+      {%- if actual is mapping -%}
+      {%- set actual = actual | dict2items | selectattr('value.selected', 'in', [1, '1']) | map(attribute='key') | reject('equalto', '') | sort | join(',') -%}
+      {%- set value = value.split(',') | reject('equalto', '') | sort | join(',') -%}
+      {%- endif -%}
+      {%- if actual | string != value | string -%}{%- set ns.changed = true -%}{%- endif -%}
+      {%- endfor -%}{%- endfor -%}
+      {{ ns.changed }}
+
+- name: Record whether Dnsmasq settings need a write
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_settings_differ | bool }}"
+
+- name: Keep routine runs from changing service ownership
+  ansible.builtin.assert:
+    that: dns_current.response.dnsmasq.enable == opnsense_dns_settings.enable
+    fail_msg: Dnsmasq is not commissioned. Run opnsense-dns-bootstrap.yml for the initial handoff.
+
+- name: Save the managed Dnsmasq settings
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/set
+    action: post
+    data:
+      dnsmasq: "{{ opnsense_dns_settings }}"
+  register: dns_settings_saved
+  failed_when: not ansible_check_mode and dns_settings_saved.response.result | default('') != 'saved'
+  when:
+    - dns_settings_differ | bool
+
+- name: Manage static hosts and DHCP reservations
+  ansible.builtin.include_tasks: records.yml
+
+- name: Read domain override identities
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/search_domain
+    action: get
+  register: dns_domain_search
+  changed_when: false
+
+- name: Manage domain overrides
+  ansible.builtin.include_tasks: domain.yml
+  loop: "{{ opnsense_dns_domains }}"
+  loop_control:
+    loop_var: dns_domain
+
+- name: Reconfigure Dnsmasq after a configuration change
+  oxlorg.opnsense.raw:
+    url: dnsmasq/service/reconfigure
+    action: post
+    timeout: 120
+  register: dns_reconfigured
+  failed_when: not ansible_check_mode and dns_reconfigured.response.status | default('') | trim | lower != 'ok'
+  when:
+    - dns_configuration_changed | bool

@@ -11,19 +11,21 @@ nix develop
 make help
 ```
 
+The shell includes a colored prompt, modern terminal and Git tools, language
+servers, and an isolated LazyVim setup available with `lazyvim`. See
+[tooling.md](tooling.md) for the full list.
+
 The shell supports macOS ARM and Linux x86-64. Full live SMB checks need macOS.
 
 ## Makefile commands
 
 | Command | Action |
 |---|---|
-| `make check` | Evaluate Nix configuration without building or deploying |
+| `make lint` | Evaluate Nix configuration without building or deploying |
 | `make test-vm` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
-| `make verify` | Check live NAS health and guest SMB file access |
-| `make build` | Build the NAS configuration without activation |
-| `make preview` | Preview activation without applying it |
+| `make verify` | Check live NAS, control-plane, DNS, and private-PKI health |
+| `make dry-run` | Preview activation without applying it |
 | `make try` | Activate temporarily, then verify |
-| `make boot` | Select a configuration for the next boot |
 | `make deploy` | Activate persistently, then verify |
 
 `try` changes the running NAS but leaves the previous boot default in place.
@@ -36,16 +38,29 @@ files on the shares. They check current health, not every deployment outcome.
 
 Defaults target `operator@10.10.10.11`. Override `HOST`, `TARGET`, `KEY`, `FLAKE`,
 or `TEST_STORE` on the command line. Use `VERIFY_ARGS` to select live test files.
-For SSH-only verification on Linux, use `VERIFY_ARGS=tests/verify/deployment.bats`;
-this also works with `try` and `deploy`, but does not check SMB.
+For SSH-only verification on Linux, use `VERIFY_ARGS=tests/verify/nas.bats`;
+this also works with `try` and `deploy`, but then skips the other probes.
 Bats options are accepted by standalone `verify`, not activation preflight.
 The test store needs Linux, Nix, SSH access, and KVM.
 
+`make verify` runs every probe file under `tests/verify`; new `.bats` files
+are registered automatically. The runner supplies DNS and HTTPS context from
+`estate.yaml`. Inside `nix develop`, it loads the North York SecretSpec profile
+for the whole suite so the control-plane probes can authenticate. Without
+SecretSpec, those connector probes skip with a visible notice.
+
+If macOS reports an SSH Unix socket path is too long, use a shorter temporary
+path for the dry run: `TMPDIR=/tmp make dry-run`. This changes no SSH trust setting
+and does not activate the candidate.
+
 ## Files
 
-- `hosts/nas/`: NAS configuration.
+- `hosts/nas/`: NAS configuration and its guest configurations.
+- `hosts/nas/step-ca/`: step-ca microVM configuration and service files.
 - `estate.yaml`: sites, hosts, optional VMs, and their services.
-- `nix/dev.nix`: operator tools. See [tooling.md](tooling.md).
+- `infra/ansible/`: Ansible inventory, playbooks, roles, and operations.
+- `infra/terraform/`: OpenTofu/Terraform infrastructure definitions.
+- `dev.nix`: operator tools. See [tooling.md](tooling.md).
 - `docs/`: [operations and recovery runbooks](docs/operations/README.md).
 - `openspec/`: specs, changes, ideas, and stack order. See [planning](openspec/README.md).
 

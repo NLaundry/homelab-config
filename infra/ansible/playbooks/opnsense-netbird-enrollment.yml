@@ -1,0 +1,19 @@
+---
+- name: Bootstrap North York NetBird enrollment
+  hosts: opnsense
+  gather_facts: false
+  connection: local
+  vars_files:
+    - ../vars/north-york.yml
+  vars:
+    ansible_pipelining: true
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  module_defaults:
+    group/oxlorg.opnsense.all: "{{ opnsense_module_defaults }}"
+  pre_tasks:
+    - ansible.builtin.import_tasks: ../tasks/opnsense-connection.yml
+  tasks:
+    - name: Run the NetBird enrollment tasks
+      ansible.builtin.include_role:
+        name: ../roles/opnsense_netbird
+        tasks_from: bootstrap

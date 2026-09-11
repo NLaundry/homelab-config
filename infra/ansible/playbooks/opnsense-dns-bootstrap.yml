@@ -1,0 +1,17 @@
+---
+- name: Bootstrap North York Dnsmasq ownership
+  hosts: opnsense
+  connection: local
+  gather_facts: false
+  no_log: true
+  vars_files:
+    - ../vars/north-york.yml
+  module_defaults:
+    group/oxlorg.opnsense.all: "{{ opnsense_module_defaults }}"
+  pre_tasks:
+    - ansible.builtin.import_tasks: ../tasks/opnsense-connection.yml
+  tasks:
+    - name: Run the Dnsmasq bootstrap tasks
+      ansible.builtin.include_role:
+        name: ../roles/opnsense_dns
+        tasks_from: bootstrap

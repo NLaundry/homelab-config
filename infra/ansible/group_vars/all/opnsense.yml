@@ -1,0 +1,23 @@
+---
+# Select a verified profile explicitly; never fall back after a TLS failure.
+opnsense_profile: "{{ lookup('ansible.builtin.env', 'OPNSENSE_PROFILE') | default('private', true) }}"
+opnsense_profiles:
+  private:
+    hostname: opnsense.ny.laundrylab.internal
+    port: 443
+    ca_file: "{{ inventory_dir }}/../certificates/laundrylab-root-ca.crt"
+    recovery_address: 10.10.10.1
+opnsense_selected: "{{ opnsense_profiles[opnsense_profile] }}"
+opnsense_url: "{{ lookup('ansible.builtin.env', 'OPNSENSE_URL') }}"
+opnsense_api_key: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_KEY') }}"
+opnsense_api_secret: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_SECRET') }}"
+opnsense_ca_file: "{{ opnsense_selected.ca_file }}"
+opnsense_module_defaults:
+  firewall: "{{ opnsense_selected.hostname }}"
+  api_port: "{{ opnsense_selected.port }}"
+  api_key: "{{ opnsense_api_key }}"
+  api_secret: "{{ opnsense_api_secret }}"
+  ssl_verify: true
+  ssl_ca_file: "{{ opnsense_ca_file }}"
+  debug: false
+  profiling: false

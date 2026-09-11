@@ -1,0 +1,37 @@
+---
+- name: Save the Dnsmasq handoff settings
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/set
+    action: post
+    data:
+      dnsmasq: "{{ opnsense_dns_settings }}"
+  register: dnsmasq_handoff
+  failed_when: not ansible_check_mode and dnsmasq_handoff.response.result | default('') != 'saved'
+
+- name: Disable Unbound for the Dnsmasq handoff
+  oxlorg.opnsense.raw:
+    url: unbound/settings/set
+    action: post
+    data:
+      unbound:
+        general:
+          enabled: '0'
+  register: unbound_handoff
+  failed_when: not ansible_check_mode and unbound_handoff.response.result | default('') != 'saved'
+
+- name: Reconfigure Unbound after the handoff
+  oxlorg.opnsense.raw:
+    url: unbound/service/reconfigure
+    action: post
+    timeout: 120
+  register: unbound_reconfigured
+  failed_when: not ansible_check_mode and unbound_reconfigured.response.status | default('') | trim | lower != 'ok'
+
+- name: Report the planned resolver handoff
+  ansible.builtin.debug:
+    msg: Check mode would enable Dnsmasq and disable Unbound; no handoff was performed.
+  when: ansible_check_mode
+
+- name: Configure Dnsmasq after ownership handoff
+  ansible.builtin.include_tasks: main.yml
+  when: not ansible_check_mode

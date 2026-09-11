@@ -1,0 +1,20 @@
+---
+opnsense_netbird_management_url: "https://api.netbird.io"
+opnsense_netbird_setup_key: ""
+opnsense_netbird_interface: ""
+opnsense_netbird_settings:
+  firewall:
+    allowConfig: "1"
+    blockInboundConnection: "0"
+  routing:
+    accessLan: "1"
+    acceptServerRoutes: "1"
+    acceptClientRoutes: "0"
+  dns:
+    enable: "0"
+  ssh:
+    enable: "0"
+    enableRoot: "0"
+    enableSFTP: "0"
+    enableLocalPortForwarding: "0"
+    enableRemotePortForwarding: "0"

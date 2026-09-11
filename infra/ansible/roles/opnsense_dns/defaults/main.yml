@@ -1,0 +1,28 @@
+---
+opnsense_dns_enabled: true
+opnsense_dns_settings:
+  enable: "{{ '1' if opnsense_dns_enabled | bool else '0' }}"
+  interface: "{{ (['lan', 'opt1'] + ([opnsense_dns_netbird_interface] if opnsense_dns_netbird_interface else [])) | join(',') }}"
+  port: "53"
+  strictbind: "0"
+  no_resolv: "1"
+  no_hosts: "0"
+  domain_needed: "1"
+  no_private_reverse: "1"
+  regdhcp: "0"
+  regdhcpstatic: "0"
+  dhcp:
+    no_interface: "{{ opnsense_dns_dhcp_excluded_interfaces | join(',') }}"
+    fqdn: "1"
+    domain: "{{ opnsense_dns_domain }}"
+    local: "1"
+    enable_ra: "0"
+    host_ping: "1"
+    default_fw_rules: "1"
+opnsense_dns_shared_records: []
+opnsense_dns_lease_holds: []
+opnsense_dns_reservations: []
+opnsense_dns_ranges: []
+opnsense_dns_domains: []
+opnsense_dns_netbird_interface: ""
+opnsense_dns_dhcp_excluded_interfaces: []

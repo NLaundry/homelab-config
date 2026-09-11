@@ -6,6 +6,7 @@
     ./zfs.nix
     ./samba.nix
     ./avahi.nix
+    ./guest-step-ca.nix
   ];
 
   boot.loader.systemd-boot.enable = true;
@@ -17,6 +18,11 @@
 
   programs.vim.enable = true;
   programs.git.enable = true;
+
+  # Local, interactive PKI operations; private keys stay outside the Nix store.
+  environment.systemPackages = [ pkgs.step-cli ];
+  # Public trust only; the private authority stays in its locked custody dataset.
+  security.pki.certificateFiles = [ ../../infra/certificates/laundrylab-root-ca.crt ];
 
   users.users.operator = {
     isNormalUser = true;

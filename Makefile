@@ -11,50 +11,53 @@ TEST_STORE ?= ssh-ng://operator@10.10.10.11?ssh-key=$(KEY)&system-features=kvm%2
 
 REBUILD = nix run .\#nixos-rebuild -- --flake $(FLAKE) --build-host $(TARGET)
 ACTIVATE = $(REBUILD) --target-host $(TARGET) --sudo
-VERIFY = env HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
+VERIFY = env HOMELAB_ROOT="$(CURDIR)" HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
 	HOMELAB_DEPLOYMENT_TARGET="$(TARGET)" HOMELAB_DEPLOYMENT_SSH_IDENTITY="$(KEY)" \
 	nix run .\#verify --
 
 .DEFAULT_GOAL := help
-.PHONY: help check test-vm verify build preview try boot deploy
+.PHONY: help lint test-vm verify dry-run try deploy
 
 help:
 	@printf '%s\n' \
 		'Usage: make <command> [VARIABLE=value]' \
 		'' \
 		'Checks:' \
-		'  check     Validate Nix configuration; no builds or live probes' \
+		'  lint      Validate Nix configuration; no builds or live probes' \
 		'  test-vm   Run Samba tests in disposable VMs on TEST_STORE' \
-		'  verify    Check the live NAS; create and remove SMB test files' \
+		'  verify    Run every live probe under tests/verify' \
 		'' \
 		'Deployment:' \
-		'  build     Build the NAS configuration without activation' \
-		'  preview   Show activation changes without applying them' \
+		'  dry-run   Show activation changes without applying them' \
 		'  try       Activate temporarily, then verify; keep the boot default' \
-		'  boot      Select a configuration for the next boot; do not activate' \
 		'  deploy    Activate now, make persistent, then verify' \
 		'' \
 		'Failed verification does not roll back an activation.' \
 		'See README.md for prerequisites and overrides.'
 
-check:
+lint:
 	nix flake check --no-update-lock-file --all-systems --no-build
 
 # Use separate test guests to avoid changing the live NAS.
-test-vm: check
+test-vm: lint
 	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
+XDG_CONFIG_HOME ?= $(HOME)/.config
+SOPS_AGE_FILE ?= $(XDG_CONFIG_HOME)/sops/age/keys.txt
+SECRETSPEC ?= env SOPS_AGE_KEY_FILE="$(SOPS_AGE_FILE)" secretspec --file secretspec.toml run --profile north_york
+
+# Run all live probes with the North York profile secrets available.
+# Outside `nix develop`, keep non-secret probes usable and visibly skip connectors.
 verify:
-	$(VERIFY) $(VERIFY_ARGS)
+	@if command -v secretspec >/dev/null 2>&1; then \
+	  $(SECRETSPEC) -- $(VERIFY) $(VERIFY_ARGS); \
+	else \
+	  $(VERIFY) $(VERIFY_ARGS); \
+	  printf '%s\n' 'Connector probes skipped: secretspec not on PATH (run inside nix develop)'; \
+	fi
 
-build:
-	$(REBUILD) build
-
-preview:
+dry-run:
 	$(ACTIVATE) dry-activate
-
-boot:
-	$(ACTIVATE) boot
 
 # Keep a failed candidate active so the operator can inspect it.
 try:

@@ -1,0 +1,41 @@
+---
+- name: Manage owned static hosts and reservations
+  oxlorg.opnsense.dnsmasq_host:
+    description: "{{ item.description }}"
+    host: "{{ item.host | default('') }}"
+    domain: "{{ item.domain | default(opnsense_dns_domain) if item.host | default('') else '' }}"
+    hardware_addr: "{{ item.hardware_addr | default([]) }}"
+    ip: "{{ item.ip }}"
+    aliases: >-
+      {{ (item.aliases | default([])) +
+         ([item.host ~ '.localdomain'] if item in opnsense_dns_reservations and item.legacy_alias | default(true) | bool and item.host | default('') else []) }}
+    cnames: "{{ item.cnames | default([]) }}"
+    client_id: "{{ item.client_id | default(omit) }}"
+    comments: "{{ item.comments | default('') }}"
+    local: "{{ item.local | default(false) | bool }}"
+    ignore: "{{ item.ignore | default(false) | bool }}"
+    lease_time: "{{ item.lease_time | default(omit) }}"
+    state: present
+    reload: false
+  loop: "{{ opnsense_dns_reservations + opnsense_dns_shared_records + opnsense_dns_lease_holds }}"
+  register: dns_hosts_result
+
+- name: Record host changes
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_configuration_changed | bool or (dns_hosts_result.results | selectattr('changed') | list | length > 0) }}"
+
+- name: Manage owned DHCP ranges
+  oxlorg.opnsense.dnsmasq_range:
+    description: "{{ item.description }}"
+    interface: "{{ dns_current.response.dnsmasq.interface[item.interface].value }}"
+    start_addr: "{{ item.start_addr }}"
+    end_addr: "{{ item.end_addr }}"
+    lease_time: "{{ item.lease_time }}"
+    state: present
+    reload: false
+  loop: "{{ opnsense_dns_ranges }}"
+  register: dns_ranges_result
+
+- name: Record range changes
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_configuration_changed | bool or (dns_ranges_result.results | selectattr('changed') | list | length > 0) }}"

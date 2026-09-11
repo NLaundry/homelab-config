@@ -10,6 +10,7 @@ north-york:
   hosts:
     opnsense:
       hostname: OPNsense
+      fqdn: opnsense.ny.laundrylab.internal
       addresses:
         lan: 10.10.10.1
     ax23:
@@ -22,6 +23,7 @@ north-york:
         lan: 10.10.10.10
     nas:
       hostname: NASty
+      fqdn: nasty.ny.laundrylab.internal
       addresses:
         lan: 10.10.10.11
       storage:
@@ -32,3 +34,12 @@ north-york:
         file-sharing:
           kind: samba
           protocol: smb
+      vms:
+        step-ca:
+          hostname: step-ca
+          addresses:
+            lan: 10.10.10.12
+          services:
+            private-ca:
+              kind: step-ca
+              url: https://ca.laundrylab.internal

@@ -1,0 +1,56 @@
+---
+- name: Require a setup key for enrollment bootstrap
+  ansible.builtin.assert:
+    that: opnsense_netbird_setup_key | length > 0
+    fail_msg: Set NETBIRD_SETUP_KEY for the one-time NetBird enrollment.
+
+- name: Save enrollment credentials
+  oxlorg.opnsense.raw:
+    url: netbird/authentication/set
+    action: post
+    data:
+      authentication:
+        managementUrl: "{{ opnsense_netbird_management_url }}"
+        setupKey: "{{ opnsense_netbird_setup_key }}"
+  register: netbird_authentication
+  no_log: true
+  failed_when: not ansible_check_mode and netbird_authentication.response.result | default('saved') | string | lower is search('error|failed')
+
+- name: Enroll the router with NetBird
+  oxlorg.opnsense.raw:
+    url: netbird/authentication/up
+    action: post
+  register: netbird_enrolled
+  no_log: true
+  failed_when: >-
+    not ansible_check_mode and
+    (netbird_enrolled.response.result | default('') | string | lower is search('error|failed') or
+     netbird_enrolled.response.result | default('') | length == 0)
+
+- name: Save the initial NetBird settings
+  oxlorg.opnsense.raw:
+    url: netbird/settings/set
+    action: post
+    data:
+      settings: >-
+        {{ {'general': {'enable': '1', 'wireguardPort': '51820', 'ipmapping': ''}}
+           | combine(opnsense_netbird_settings, recursive=true) }}
+  register: netbird_bootstrap_saved
+  failed_when: not ansible_check_mode and netbird_bootstrap_saved.response.result | default('') != 'saved'
+
+- name: Sync the initial NetBird settings
+  oxlorg.opnsense.raw:
+    url: netbird/settings/sync
+    action: post
+    timeout: 120
+  register: netbird_bootstrap_synced
+  failed_when: not ansible_check_mode and netbird_bootstrap_synced.response.result | default('') != 'synced'
+
+- name: Report the planned NetBird enrollment
+  ansible.builtin.debug:
+    msg: Check mode would enroll NetBird and apply the initial routing settings; no enrollment was performed.
+  when: ansible_check_mode
+
+- name: Configure routing after enrollment
+  ansible.builtin.include_tasks: main.yml
+  when: not ansible_check_mode

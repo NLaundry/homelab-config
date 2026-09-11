@@ -1,0 +1,109 @@
+---
+opnsense_dns_enabled: true
+opnsense_dns_domain: ny.laundrylab.internal
+opnsense_netbird_interface: opt2
+opnsense_dns_netbird_interface: "{{ opnsense_netbird_interface }}"
+opnsense_dns_dhcp_excluded_interfaces: ["{{ opnsense_netbird_interface }}"]
+opnsense_dns_shared_records:
+  - description: homelab:north_york:host:opnsense
+    host: opnsense
+    ip: [10.10.10.1]
+    comments: Private WebGUI identity; no change to router hostname or LAN address
+opnsense_dns_lease_holds:
+  - {description: 'homelab:north_york:lease:10.10.10.102', ip: [10.10.10.102], hardware_addr: ['04:99:b9:68:5e:d4']}
+  - {description: 'homelab:north_york:lease:10.10.10.103', ip: [10.10.10.103], hardware_addr: ['04:99:b9:7a:dd:e7']}
+  - {description: 'homelab:north_york:lease:10.10.10.104', ip: [10.10.10.104], hardware_addr: ['fc:9c:a7:76:42:2d']}
+  - {description: 'homelab:north_york:lease:10.10.10.111', ip: [10.10.10.111], hardware_addr: ['bc:d0:74:29:ad:92']}
+  - {description: 'homelab:north_york:lease:10.10.10.112', ip: [10.10.10.112], hardware_addr: ['48:e1:5c:78:9f:4a']}
+  - {description: 'homelab:north_york:lease:10.10.10.150', ip: [10.10.10.150], hardware_addr: ['a0:c1:c5:4d:bb:ed']}
+  - {description: 'homelab:north_york:lease:10.10.10.198', ip: [10.10.10.198], hardware_addr: ['bc:24:11:5e:f6:c5']}
+  - {description: 'homelab:north_york:lease:10.10.20.126', ip: [10.10.20.126], hardware_addr: ['0a:dd:40:c6:11:30']}
+  - {description: 'homelab:north_york:lease:10.10.20.132', ip: [10.10.20.132], hardware_addr: ['04:99:b9:6c:4a:35']}
+opnsense_dns_reservations:
+  - description: homelab:north_york:host:NASty
+    host: NASty
+    hardware_addr: ["c8:ff:bf:01:1f:12"]
+    ip: [10.10.10.11]
+    comments: Storage
+  - description: homelab:north_york:host:homeassistant
+    host: homeassistant
+    hardware_addr: ["bc:24:11:b3:68:0a"]
+    ip: [10.10.10.22]
+    comments: ""
+  - description: homelab:north_york:host:debianBTW
+    host: debianBTW
+    hardware_addr: ["d8:43:ae:1a:c8:6c"]
+    ip: [10.10.10.50]
+    comments: Linux Workstation
+  - description: homelab:north_york:host:Mac
+    host: Nathans-MBP-Wifi
+    hardware_addr: ["fe:04:02:3d:73:30"]
+    ip: [10.10.10.51]
+    legacy_alias: false
+    aliases: [Mac.localdomain]
+    comments: Nathan's Macbook WIFI
+  - description: homelab:north_york:host:Nathans-MBP
+    host: Nathans-MBP
+    hardware_addr: ["6c:1f:f7:5f:89:62"]
+    ip: [10.10.10.52]
+    comments: Nathan's MacBook Pro ETHERNET
+  - description: homelab:north_york:host:iPhone-4
+    host: iPhone-4
+    hardware_addr: ["fc:66:cf:d3:99:b5"]
+    ip: [10.10.10.90]
+    comments: Nathan's IPhone
+  - description: homelab:north_york:host:Nathan-MBP
+    host: Nathan-MBP
+    hardware_addr: ["6e:0c:a7:45:28:17"]
+    ip: [10.10.20.151]
+    comments: Nathan's MBP WIFI Guest
+    # Exact ASCII bytes of ISC's 'Nathan MBP'; retain the MAC too, never id:*.
+    # Dnsmasq tries CID then MAC fallback. ISC's documented MAC fallback applies
+    # when either side lacks CID. This is not identical matching semantics.
+    client_id: "4e:61:74:68:61:6e:20:4d:42:50"
+  - description: homelab:north_york:host:step-ca
+    host: step-ca
+    hardware_addr: ["02:4c:4c:10:00:12"]
+    ip: [10.10.10.12]
+    legacy_alias: false
+    aliases: [ca.laundrylab.internal]
+    comments: Dedicated existing-intermediate CA microVM; canonical HTTPS name verified
+opnsense_dns_ranges:
+  - description: homelab:north_york:range:lan
+    interface: lan
+    start_addr: 10.10.10.100
+    end_addr: 10.10.10.200
+    lease_time: 7200
+  - description: homelab:north_york:range:opt1
+    interface: opt1
+    start_addr: 10.10.20.100
+    end_addr: 10.10.20.199
+    lease_time: 7200
+opnsense_dns_domains:
+  - {descr: "homelab:north_york:domain:public-1", domain: "*", ip: 1.1.1.1, sequence: "1"}
+  - {descr: "homelab:north_york:domain:public-2", domain: "*", ip: 1.0.0.1, sequence: "2"}
+  - {descr: "homelab:north_york:domain:private", domain: laundrylab.internal, ip: "", sequence: "3"}
+  - {descr: "homelab:north_york:domain:legacy", domain: localdomain, ip: "", sequence: "4"}
+
+opnsense_netbird_management_url: "{{ lookup('ansible.builtin.env', 'NB_MANAGEMENT_URL') | default('https://api.netbird.io', true) }}"
+opnsense_netbird_setup_key: "{{ lookup('ansible.builtin.env', 'NETBIRD_SETUP_KEY') }}"
+
+opnsense_acme:
+  account_name: LaundryLab OPNsense
+  account_description: Existing private intermediate; router HTTPS only
+  challenge_name: LaundryLab LAN HTTP-01
+  challenge_description: Explicit LAN destination only; no WAN auto discovery
+  automation_name: LaundryLab WebGUI reload
+  certificate_description: LaundryLab router HTTPS; seven-day private certificate
+  hostname: opnsense.ny.laundrylab.internal
+  directory: https://ca.laundrylab.internal/acme/opnsense/directory
+  challenge_address: 10.10.10.1
+  renew_interval: 1
+  schedule:
+    description: AcmeClient Cronjob for Certificate AutoRenewal
+    minutes: '0'
+    hours: '0'
+    days: '*'
+    months: '*'
+    weekdays: '*'
+    who: root

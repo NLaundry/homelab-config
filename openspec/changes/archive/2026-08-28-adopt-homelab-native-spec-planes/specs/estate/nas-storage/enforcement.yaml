@@ -1,7 +1,0 @@
-bindings:
-  nas-estate-review:
-    type: review
-    covers:
-      - smb-workload-placement
-      - zfs-pool-placement
-    source: estate

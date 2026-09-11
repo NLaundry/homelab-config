@@ -1,0 +1,70 @@
+---
+- name: Require the assigned NetBird interface
+  ansible.builtin.assert:
+    that: opnsense_netbird_interface is match('^opt[0-9]+$')
+    fail_msg: Set the assigned opt interface for wt0 before configuring routing.
+
+- name: Read current NetBird settings
+  oxlorg.opnsense.raw:
+    url: netbird/settings/get
+    action: get
+  register: netbird_current
+  changed_when: false
+
+- name: Require an enrolled peer for routine routing runs
+  ansible.builtin.assert:
+    that: netbird_current.response.settings.general.enable == '1'
+    fail_msg: NetBird is not enabled. Run opnsense-netbird-enrollment.yml first.
+
+- name: Compare the owned NetBird settings
+  ansible.builtin.set_fact:
+    netbird_settings_differ: "{{ netbird_current.response.settings != (netbird_current.response.settings | combine(opnsense_netbird_settings, recursive=true)) }}"
+
+- name: Save the desired NetBird settings
+  oxlorg.opnsense.raw:
+    url: netbird/settings/set
+    action: post
+    data:
+      settings: "{{ opnsense_netbird_settings }}"
+  register: netbird_saved
+  failed_when: not ansible_check_mode and netbird_saved.response.result | default('') != 'saved'
+  when: netbird_settings_differ | bool
+
+- name: Sync NetBird settings after a change
+  oxlorg.opnsense.raw:
+    url: netbird/settings/sync
+    action: post
+    timeout: 120
+  register: netbird_synced
+  failed_when: not ansible_check_mode and netbird_synced.response.result | default('') != 'synced'
+  when: netbird_settings_differ | bool
+
+- name: Manage the OPNsense NetBird firewall rule
+  oxlorg.opnsense.rule:
+    description: Allow all on NetBird (managed by NetBird)
+    match_fields: [description]
+    sequence: 1
+    interface: ["{{ opnsense_netbird_interface }}"]
+    direction: in
+    action: pass
+    quick: true
+    ip_protocol: inet
+    protocol: any
+    source_net: any
+    source_port: ''
+    destination_net: any
+    destination_port: ''
+    log: false
+    enabled: true
+    state: present
+    reload: false
+  register: netbird_rule
+
+- name: Apply the firewall rule
+  oxlorg.opnsense.raw:
+    url: firewall/filter/apply
+    action: post
+    timeout: 120
+  register: netbird_firewall_applied
+  failed_when: not ansible_check_mode and netbird_firewall_applied.response.status | default('') | trim | lower != 'ok'
+  when: netbird_rule.changed

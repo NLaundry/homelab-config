@@ -1,7 +1,7 @@
 # Operator tools
 
 Install Nix with flakes enabled, then run `nix develop`. The shared package list
-is `nix/dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
+is `dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
 
 | Tool | Purpose |
 |---|---|
@@ -14,14 +14,33 @@ is `nix/dev.nix`; `flake.lock` pins nixpkgs and therefore the tool versions.
 | SOPS | Encrypt secret documents and decrypt them for consumers |
 | age / age-keygen | Create and use encryption identities |
 | Neovim | Edit files and secrets through SOPS |
+| LazyVim | Project-isolated IDE-style Neovim (`lazyvim`) |
+| Starship / vivid | Colored prompt and file listings |
+| eza / bat | Readable directory listings and file output |
+| ripgrep / fd / fzf | Fast text, file, and fuzzy search |
+| lazygit / delta | Git interface and readable diffs |
+| zoxide | Frecency-based directory navigation (`z`) |
 | jq / yq | Inspect JSON and YAML |
 | Bats | Run shell tests |
 | ShellCheck / shfmt | Check and format shell code |
+| nixd / nixfmt / statix / deadnix | Nix language support, formatting, and linting |
+| Language servers | Ansible, Lua, Markdown, OpenTofu, and YAML editor support |
 
 On macOS, `ssh` is a small Nix-packaged adapter to `/usr/bin/ssh`. This avoids
 local-network permission problems observed with Nix-packaged OpenSSH. Linux
 uses nixpkgs OpenSSH directly. Live SMB checks also use macOS's `smbutil` and
 `mount_smbfs`; the complete live suite requires a Mac.
+
+The interactive shell uses a Catppuccin-colored Starship prompt and matching
+colors for `bat`, `eza`, and `fzf`; Git uses Delta as its pager. The shell adds
+`ll`, `la`, `lt`, and `lg` aliases without replacing standard commands.
+
+Run `lazyvim` for the shell's isolated LazyVim environment. It enables LazyVim's
+Ansible, Git, Markdown, Nix, OpenTofu, and YAML support. Its configuration is
+read-only in the Nix store, while downloaded plugins and state stay under the
+normal Neovim data directories using the `homelab-lazyvim` application name.
+The first launch needs network access to fetch LazyVim's plugin dependencies.
+Plain `nvim` remains available and continues to use your personal configuration.
 
 Prefer Neovim, then Vim; use Nano only when neither is available.
 For secrets, disable editor backup, swap, undo, and history files as shown in the runbook.
