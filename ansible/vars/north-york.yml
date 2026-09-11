@@ -1,25 +1,14 @@
 ---
-# Approval must cover these exact records, pools and upstreams.
-# Commissioned state; routine runs cannot perform the original ISC handoff.
 opnsense_dns_enabled: true
-opnsense_dns_site_id: north_york
-opnsense_dns_approved_site_data: false
 opnsense_dns_domain: ny.laundrylab.internal
-# Verified through the normal UI: opt2 = wt0, enabled/locked, IP types None.
 opnsense_netbird_interface: opt2
 opnsense_dns_netbird_interface: "{{ opnsense_netbird_interface }}"
-# Independent of listening: a listener rollback must retain this exclusion.
 opnsense_dns_dhcp_excluded_interfaces: ["{{ opnsense_netbird_interface }}"]
-opnsense_dns_runtime_queries:
-  - {server: 10.10.10.1, name: opnsense.ny.laundrylab.internal, answer: 10.10.10.1}
 opnsense_dns_shared_records:
   - description: homelab:north_york:host:opnsense
     host: opnsense
     ip: [10.10.10.1]
     comments: Private WebGUI identity; no change to router hostname or LAN address
-# Temporary, unnamed DHCP holds; never infer that an old snapshot is current.
-# Omission does not remove these holds. Explicit removal must pass current
-# Dnsmasq allocation checks after approved reconciliation of old obligations.
 opnsense_dns_lease_holds:
   - {description: 'homelab:north_york:lease:10.10.10.102', ip: [10.10.10.102], hardware_addr: ['04:99:b9:68:5e:d4']}
   - {description: 'homelab:north_york:lease:10.10.10.103', ip: [10.10.10.103], hardware_addr: ['04:99:b9:7a:dd:e7']}
@@ -47,9 +36,11 @@ opnsense_dns_reservations:
     ip: [10.10.10.50]
     comments: Linux Workstation
   - description: homelab:north_york:host:Mac
-    host: Mac
+    host: Nathans-MBP-Wifi
     hardware_addr: ["fe:04:02:3d:73:30"]
     ip: [10.10.10.51]
+    legacy_alias: false
+    aliases: [Mac.localdomain]
     comments: Nathan's Macbook WIFI
   - description: homelab:north_york:host:Nathans-MBP
     host: Nathans-MBP
@@ -88,9 +79,29 @@ opnsense_dns_ranges:
     start_addr: 10.10.20.100
     end_addr: 10.10.20.199
     lease_time: 7200
-# Identity is the managed description, NOT domain (two wildcard servers).
 opnsense_dns_domains:
   - {descr: "homelab:north_york:domain:public-1", domain: "*", ip: 1.1.1.1, sequence: "1"}
   - {descr: "homelab:north_york:domain:public-2", domain: "*", ip: 1.0.0.1, sequence: "2"}
   - {descr: "homelab:north_york:domain:private", domain: laundrylab.internal, ip: "", sequence: "3"}
   - {descr: "homelab:north_york:domain:legacy", domain: localdomain, ip: "", sequence: "4"}
+
+opnsense_netbird_management_url: "{{ lookup('ansible.builtin.env', 'NB_MANAGEMENT_URL') | default('https://api.netbird.io', true) }}"
+opnsense_netbird_setup_key: "{{ lookup('ansible.builtin.env', 'NETBIRD_SETUP_KEY') }}"
+
+opnsense_acme:
+  account_name: LaundryLab OPNsense
+  challenge_name: LaundryLab LAN HTTP-01
+  automation_name: LaundryLab WebGUI reload
+  certificate_description: LaundryLab router HTTPS; seven-day private certificate
+  hostname: opnsense.ny.laundrylab.internal
+  directory: https://ca.laundrylab.internal/acme/opnsense/directory
+  challenge_address: 10.10.10.1
+  renew_interval: 1
+  schedule:
+    description: LaundryLab OPNsense ACME renewal
+    minutes: '0'
+    hours: '0'
+    days: '*'
+    months: '*'
+    weekdays: '*'
+    who: root

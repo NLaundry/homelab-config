@@ -1,43 +1,41 @@
 ---
-- name: Require an unambiguous domain identity without unowned overlaps
-  ansible.builtin.assert:
-    that:
-      - matches | length <= 1
-      - conflicts | length == 0
-  vars:
-    matches: "{{ dns_domain_search.response.rows | selectattr('descr', 'equalto', dns_domain.descr) | list }}"
-    conflicts: >-
-      {%- set rows = [] -%}
-      {%- for row in dns_domain_search.response.rows + opnsense_dns_domains -%}
-      {%- if row.domain | lower == dns_domain.domain | lower and row.descr != dns_domain.descr -%}
-      {%- if row.descr not in (opnsense_dns_domains | map(attribute='descr') | list) or row.ip == dns_domain.ip -%}
-      {%- set _ = rows.append(row) -%}
-      {%- endif -%}{%- endif -%}{%- endfor -%}
-      {{ rows }}
+- name: Locate the owned domain override
+  ansible.builtin.set_fact:
+    dns_domain_matches: "{{ dns_domain_search.response.rows | selectattr('descr', 'equalto', dns_domain.descr) | list }}"
 
-- name: Read the domain's actual scalar fields, not grid display values
+- name: Require one or no domain identity
+  ansible.builtin.assert:
+    that: dns_domain_matches | length <= 1
+    fail_msg: Domain override description is duplicated on OPNsense.
+
+- name: Read the existing domain override
   oxlorg.opnsense.raw:
-    url: "dnsmasq/settings/get_domain{{ '/' ~ matches[0].uuid if matches else '' }}"
+    url: "dnsmasq/settings/get_domain/{{ dns_domain_matches[0].uuid }}"
     action: get
-  vars:
-    matches: "{{ dns_domain_search.response.rows | selectattr('descr', 'equalto', dns_domain.descr) | list }}"
   register: dns_domain_current
   changed_when: false
+  when: dns_domain_matches | length == 1
 
-- name: Check the UUID still belongs to the managed description
-  ansible.builtin.assert:
-    that: dns_domain_current.response.domainoverride.descr == dns_domain.descr
-  when: dns_domain_search.response.rows | selectattr('descr', 'equalto', dns_domain.descr) | list | length > 0
-
-- name: Accumulate a partial-field UUID-addressed domain plan
+- name: Decide whether the domain override needs a write
   ansible.builtin.set_fact:
-    dns_domain_plan: "{{ dns_domain_plan + [{'uuid': matches[0].uuid if matches else '', 'desired': dns_domain, 'changed': differs | bool}] }}"
-  vars:
-    matches: "{{ dns_domain_search.response.rows | selectattr('descr', 'equalto', dns_domain.descr) | list }}"
-    differs: >-
-      {%- set ns = namespace(changed=(matches | length == 0)) -%}
-      {%- for key, value in dns_domain.items() -%}
-      {%- if dns_domain_current.response.domainoverride[key] | string != value | string -%}
-      {%- set ns.changed = true -%}
-      {%- endif -%}{%- endfor -%}
-      {{ ns.changed }}
+    dns_domain_changed: >-
+      {{ dns_domain_matches | length == 0 or
+         (dns_domain_current.response.domainoverride | default({})).descr | string != dns_domain.descr | string or
+         (dns_domain_current.response.domainoverride | default({})).domain | string != dns_domain.domain | string or
+         (dns_domain_current.response.domainoverride | default({})).ip | string != dns_domain.ip | string or
+         (dns_domain_current.response.domainoverride | default({})).sequence | string != dns_domain.sequence | string }}
+
+- name: Create or update the owned domain override
+  oxlorg.opnsense.raw:
+    url: "dnsmasq/settings/{{ 'add_domain' if dns_domain_matches | length == 0 else 'set_domain/' ~ dns_domain_matches[0].uuid }}"
+    action: post
+    data:
+      domainoverride: "{{ dns_domain }}"
+  register: dns_domain_saved
+  failed_when: not ansible_check_mode and dns_domain_saved.response.result | default('') != 'saved'
+  when:
+    - dns_domain_changed | bool
+
+- name: Record domain changes
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_configuration_changed | bool or dns_domain_changed | bool }}"

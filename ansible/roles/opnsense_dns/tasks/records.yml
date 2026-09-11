@@ -1,53 +1,41 @@
 ---
-# Both modules support real read/compare in check mode. Never reconfigure.
-# Existing extra host fields are retained; owned identity/address/name fields
-# are explicit. Static host records protect names from DHCP address replacement;
-# installed-version behavior and the live Guest 'Mac' collision need acceptance.
-- name: Compare or stage static hosts and reservations
+- name: Manage owned static hosts and reservations
   oxlorg.opnsense.dnsmasq_host:
-    description: "{{ item.descr }}"
-    host: "{{ item.host }}"
-    domain: "{{ item.domain }}"
-    hardware_addr: "{{ item.hwaddr }}"
+    description: "{{ item.description }}"
+    host: "{{ item.host | default('') }}"
+    domain: "{{ item.domain | default(opnsense_dns_domain) if item.host | default('') else '' }}"
+    hardware_addr: "{{ item.hardware_addr | default([]) }}"
     ip: "{{ item.ip }}"
-    aliases: "{{ item.aliases }}"
+    aliases: >-
+      {{ (item.aliases | default([])) +
+         ([item.host ~ '.localdomain'] if item in opnsense_dns_reservations and item.legacy_alias | default(true) | bool and item.host | default('') else []) }}
     cnames: "{{ item.cnames | default([]) }}"
     client_id: "{{ item.client_id | default(omit) }}"
-    comments: "{{ item.comments }}"
+    comments: "{{ item.comments | default('') }}"
     local: "{{ item.local | default(false) | bool }}"
     ignore: "{{ item.ignore | default(false) | bool }}"
-    lease_time: "{{ item.lease_time | default('') or omit }}"
-    set_tag: "{{ item.set_tag | default({}, true) | dict2items | selectattr('value.selected', 'in', [1, '1']) | rejectattr('key', 'equalto', '') | map(attribute='value.value') | first | default(omit) }}"
+    lease_time: "{{ item.lease_time | default(omit) }}"
     state: present
     reload: false
-  loop: "{{ dns_hosts }}"
-  check_mode: "{{ not (apply_dns | bool) or ansible_check_mode or dns_verify | default(false) | bool }}"
-  register: dns_host_result
+  loop: "{{ opnsense_dns_reservations + opnsense_dns_shared_records + opnsense_dns_lease_holds }}"
+  register: dns_hosts_result
 
-- name: Compare or stage IPv4 ranges
+- name: Record host changes
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_configuration_changed | bool or (dns_hosts_result.results | selectattr('changed') | list | length > 0) }}"
+
+- name: Manage owned DHCP ranges
   oxlorg.opnsense.dnsmasq_range:
     description: "{{ item.description }}"
-    # The collection resolves the interface label back to the API key.
     interface: "{{ dns_current.response.dnsmasq.interface[item.interface].value }}"
     start_addr: "{{ item.start_addr }}"
     end_addr: "{{ item.end_addr }}"
     lease_time: "{{ item.lease_time }}"
-    subnet_mask: "{{ old.subnet_mask | default(omit) }}"
-    domain: "{{ old.domain | default(omit) }}"
-    domain_type: "{{ old.domain_type | default({}, true) | dict2items | selectattr('value.selected', 'in', [1, '1']) | map(attribute='key') | first | default('range') }}"
-    set_tag: "{{ old.set_tag | default({}, true) | dict2items | selectattr('value.selected', 'in', [1, '1']) | rejectattr('key', 'equalto', '') | map(attribute='value.value') | first | default(omit) }}"
-    sync: "{{ not (old.nosync | default(false) | bool) }}"
-    ra_priority: "{{ old.ra_priority | default({}, true) | dict2items | selectattr('value.selected', 'in', [1, '1']) | map(attribute='key') | first | default('') }}"
-    ra_mtu: "{{ old.ra_mtu | default(omit, true) }}"
-    ra_interval: "{{ old.ra_interval | default(60, true) }}"
-    ra_router_lifetime: "{{ old.ra_router_lifetime | default(1200, true) }}"
-    constructor: ""
-    # Omit mode: this collection compares it as a scalar; [] never converges.
-    ra_mode: []
     state: present
     reload: false
   loop: "{{ opnsense_dns_ranges }}"
-  vars:
-    old: "{{ (dns_current.response.dnsmasq.dhcp_ranges | default({}, true)).values() | selectattr('description', 'equalto', item.description) | first | default({}) }}"
-  check_mode: "{{ not (apply_dns | bool) or ansible_check_mode or dns_verify | default(false) | bool }}"
-  register: dns_range_result
+  register: dns_ranges_result
+
+- name: Record range changes
+  ansible.builtin.set_fact:
+    dns_configuration_changed: "{{ dns_configuration_changed | bool or (dns_ranges_result.results | selectattr('changed') | list | length > 0) }}"

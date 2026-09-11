@@ -1,52 +1,21 @@
 ---
-- name: Read the commissioned ACME identities
-  oxlorg.opnsense.raw:
-    url: "acmeclient/{{ acme_identity.endpoint }}"
-    action: get
-  loop:
-    - {key: account, endpoint: accounts/search}
-    - {key: validation, endpoint: validations/search}
-    - {key: action, endpoint: actions/search}
-    - {key: certificate, endpoint: certificates/search}
-  loop_control:
-    loop_var: acme_identity
-  register: acme_identity_search
-  changed_when: false
-
-- name: Require ACME bootstrap before creating missing identities
-  ansible.builtin.assert:
-    that:
-      - >-
-        (acme_identity_search.results[0].response.rows
-        | selectattr('name', 'equalto', opnsense_acme.account_name) | list | length) == 1
-      - >-
-        (acme_identity_search.results[1].response.rows
-        | selectattr('name', 'equalto', opnsense_acme.challenge_name) | list | length) == 1
-      - >-
-        (acme_identity_search.results[2].response.rows
-        | selectattr('name', 'equalto', opnsense_acme.automation_name) | list | length) == 1
-      - >-
-        (acme_identity_search.results[3].response.rows
-        | selectattr('description', 'equalto', opnsense_acme.certificate_description) | list | length) == 1
-    fail_msg: ACME is not commissioned. Run opnsense-acme-bootstrap.yml before routine configuration.
-
-- name: Configure the native ACME client
+- name: Configure the native ACME client for bootstrap
   oxlorg.opnsense.acme_general:
     enabled: true
     auto_renewal: true
   register: acme_general
 
-- name: Configure the internal CA account without registering it
+- name: Create and register the internal CA account
   oxlorg.opnsense.acme_account:
     name: "{{ opnsense_acme.account_name }}"
     ca: custom
     custom_ca: "{{ opnsense_acme.directory }}"
-    register: false
+    register: true
     state: present
     reload: false
   register: acme_account
 
-- name: Configure the LAN HTTP-01 validation
+- name: Create the LAN HTTP-01 validation
   oxlorg.opnsense.acme_validation:
     name: "{{ opnsense_acme.challenge_name }}"
     method: http01
@@ -58,7 +27,7 @@
     reload: false
   register: acme_validation
 
-- name: Configure the WebGUI reload action
+- name: Create the WebGUI reload action
   oxlorg.opnsense.acme_action:
     name: "{{ opnsense_acme.automation_name }}"
     type: configd_restart_gui
@@ -66,7 +35,7 @@
     reload: false
   register: acme_action
 
-- name: Configure the commissioned router certificate
+- name: Create the router certificate object
   oxlorg.opnsense.acme_certificate:
     name: "{{ opnsense_acme.hostname }}"
     description: "{{ opnsense_acme.certificate_description }}"
@@ -80,7 +49,7 @@
     reload: false
   register: acme_certificate
 
-- name: Configure the native renewal schedule
+- name: Create the native renewal schedule
   oxlorg.opnsense.cron:
     description: "{{ opnsense_acme.schedule.description }}"
     command: acmeclient cron-auto-renew
@@ -94,10 +63,39 @@
     reload: false
   register: acme_schedule
 
-- name: Reconfigure the native ACME service after routine changes
+- name: Reconfigure the native ACME service after bootstrap
   oxlorg.opnsense.raw:
     url: acmeclient/service/reconfigure
     action: post
   register: acme_reconfigured
   failed_when: not ansible_check_mode and acme_reconfigured.response.status | default('') | trim | lower != 'ok'
-  when: acme_general.changed or acme_account.changed or acme_validation.changed or acme_action.changed or acme_certificate.changed or acme_schedule.changed
+
+- name: Find the bootstrap certificate by description
+  oxlorg.opnsense.raw:
+    url: acmeclient/certificates/search
+    action: get
+  register: acme_certificates
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Require one bootstrap certificate
+  ansible.builtin.assert:
+    that:
+      - >-
+        (acme_certificates.response.rows
+        | selectattr('description', 'equalto', opnsense_acme.certificate_description) | list | length) == 1
+    fail_msg: The expected ACME certificate was not uniquely created.
+  when: not ansible_check_mode
+
+- name: Issue the initial certificate
+  oxlorg.opnsense.raw:
+    url: >-
+      acmeclient/certificates/sign/{% set row = acme_certificates.response.rows
+      | selectattr('description', 'equalto', opnsense_acme.certificate_description) | first %}{{ row.uuid }}
+    action: post
+  register: acme_issued
+  failed_when: >-
+    (acme_issued.response.response | default(acme_issued.response.result | default('')) | string | trim) == '' or
+    (acme_issued.response.response | default(acme_issued.response.result | default('')) | string)
+    is search('(?i)(error|failed|fatal)')
+  when: not ansible_check_mode

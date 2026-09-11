@@ -1,63 +1,19 @@
 ---
-- name: Preflight North York NetBird enrollment
+- name: Bootstrap North York NetBird enrollment
   hosts: opnsense
   gather_facts: false
   connection: local
-  no_log: true
+  vars_files:
+    - ../vars/north-york.yml
   vars:
     ansible_pipelining: true
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
-    opnsense_netbird_prepare: false
   module_defaults:
     group/oxlorg.opnsense.all: "{{ opnsense_module_defaults }}"
   pre_tasks:
     - ansible.builtin.import_tasks: ../tasks/opnsense-connection.yml
-
   tasks:
-    - name: Read NetBird settings API
-      oxlorg.opnsense.raw:
-        url: netbird/settings/get
-        action: get
-      check_mode: true
-      changed_when: false
-      register: netbird_settings
-
-    - name: Read NetBird authentication API
-      oxlorg.opnsense.raw:
-        url: netbird/authentication/get
-        action: get
-      check_mode: true
-      changed_when: false
-      register: netbird_authentication
-
-    - name: Read NetBird service API
-      oxlorg.opnsense.raw:
-        url: netbird/service/status
-        action: get
-      check_mode: true
-      changed_when: false
-      register: netbird_service
-
-    - name: Read NetBird status API
-      oxlorg.opnsense.raw:
-        url: netbird/status/status
-        action: get
-      check_mode: true
-      changed_when: false
-      register: netbird_status
-
-    - name: Require every NetBird API response
-      ansible.builtin.assert:
-        that:
-          - netbird_settings.response is mapping
-          - netbird_authentication.response is mapping
-          - netbird_service.response is mapping
-          - netbird_status.response is mapping or netbird_status.response == []
-
-    # Read-only inspection is retained for recovery diagnosis. There is no
-    # executable enrollment reset, even for an apparently disconnected peer.
-    - name: Refuse retired enrollment preparation
-      ansible.builtin.assert:
-        that: not (opnsense_netbird_prepare | bool)
-        fail_msg: Enrollment preparation is retired and cannot reset a commissioned or connected peer. Use opnsense-netbird-routing.yml for routine settings and a separately reviewed recovery procedure for enrollment.
-      no_log: false
+    - name: Run the NetBird enrollment tasks
+      ansible.builtin.include_role:
+        name: ../roles/opnsense_netbird
+        tasks_from: bootstrap

@@ -1,6 +1,4 @@
 ---
-apply_acme: false
-reapply_acme: false
 opnsense_acme:
   account_name: LaundryLab OPNsense
   challenge_name: LaundryLab LAN HTTP-01
@@ -11,7 +9,7 @@ opnsense_acme:
   challenge_address: 10.10.10.1
   renew_interval: 1
   schedule:
-    enabled: '1'
+    description: LaundryLab OPNsense ACME renewal
     minutes: '0'
     hours: '0'
     days: '*'

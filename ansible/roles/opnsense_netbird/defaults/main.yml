@@ -1,15 +1,14 @@
 ---
-apply_routing: false
-reapply_routing: false
-routing_enabled: true
+opnsense_netbird_management_url: "https://api.netbird.io"
+opnsense_netbird_setup_key: ""
 opnsense_netbird_interface: ""
-desired_settings:
+opnsense_netbird_settings:
   firewall:
     allowConfig: "1"
-    blockInboundConnection: "{{ '0' if routing_enabled | bool else '1' }}"
+    blockInboundConnection: "0"
   routing:
-    accessLan: "{{ '1' if routing_enabled | bool else '0' }}"
-    acceptServerRoutes: "{{ '1' if routing_enabled | bool else '0' }}"
+    accessLan: "1"
+    acceptServerRoutes: "1"
     acceptClientRoutes: "0"
   dns:
     enable: "0"

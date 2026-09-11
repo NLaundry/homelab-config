@@ -1,5 +1,0 @@
----
-- name: Refuse the retired DNS ownership of general NetBird access
-  ansible.builtin.fail:
-    msg: General overlay access belongs to opnsense_netbird. Run opnsense-netbird-routing.yml separately; DNS does not change that rule.
-  no_log: false

@@ -1,9 +1,11 @@
 ---
-- name: Adopt existing North York native ACME configuration
+- name: Configure North York native ACME
   hosts: opnsense
   connection: local
   gather_facts: false
   no_log: true
+  vars_files:
+    - ../vars/north-york.yml
   vars:
     ansible_pipelining: true
     ansible_python_interpreter: "{{ ansible_playbook_python }}"

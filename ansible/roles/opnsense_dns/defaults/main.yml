@@ -1,23 +1,5 @@
 ---
-apply_dns: false
-cutover_dns: false  # Retired; routine runs reject this historical flag.
-reapply_dns: false
-recover_dns: false
-opnsense_dns_enabled: false
-opnsense_dns_approved_site_data: false
-opnsense_dns_shared_records: []
-opnsense_dns_lease_holds: []
-# Omission preserves rows. Removal items use description and optional UUID.
-opnsense_dns_remove_hosts: []
-opnsense_dns_remove_ranges: []
-opnsense_dns_remove_domains: []
-# Approval must include reconciliation of old lease obligations, not just absence
-# from the present Dnsmasq lease view. Protect all reservations/holds and ranges.
-opnsense_dns_allocation_removal_approved: false
-opnsense_dns_netbird_interface: ""  # Listener only; empty removes DNS listening.
-opnsense_dns_dhcp_excluded_interfaces: []
-opnsense_dns_runtime_queries: []
-# Only these general/DHCP fields are owned. Leave other settings unchanged.
+opnsense_dns_enabled: true
 opnsense_dns_settings:
   enable: "{{ '1' if opnsense_dns_enabled | bool else '0' }}"
   interface: "{{ (['lan', 'opt1'] + ([opnsense_dns_netbird_interface] if opnsense_dns_netbird_interface else [])) | join(',') }}"
@@ -37,3 +19,10 @@ opnsense_dns_settings:
     enable_ra: "0"
     host_ping: "1"
     default_fw_rules: "1"
+opnsense_dns_shared_records: []
+opnsense_dns_lease_holds: []
+opnsense_dns_reservations: []
+opnsense_dns_ranges: []
+opnsense_dns_domains: []
+opnsense_dns_netbird_interface: ""
+opnsense_dns_dhcp_excluded_interfaces: []
