@@ -2,11 +2,6 @@
 # Select a verified profile explicitly; never fall back after a TLS failure.
 opnsense_profile: "{{ lookup('ansible.builtin.env', 'OPNSENSE_PROFILE') | default('private', true) }}"
 opnsense_profiles:
-  legacy:
-    hostname: opnsense.localdomain
-    port: 443
-    ca_file: "{{ inventory_dir }}/certificates/north-york-opnsense-web.pem"
-    recovery_address: 10.10.10.1
   private:
     hostname: opnsense.ny.laundrylab.internal
     port: 443
