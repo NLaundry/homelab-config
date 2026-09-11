@@ -1,0 +1,25 @@
+---
+- name: Validate the selected verified management profile
+  ansible.builtin.assert:
+    that:
+      - opnsense_profile in opnsense_profiles
+    fail_msg: Select an approved OPNSENSE_PROFILE; no fallback is attempted.
+  no_log: true
+
+- name: Validate the management origin and required credentials
+  ansible.builtin.assert:
+    that:
+      - opnsense_url | ansible.builtin.urlsplit('scheme') == 'https'
+      - opnsense_url | ansible.builtin.urlsplit('hostname') == opnsense_selected.hostname
+      - (opnsense_url | ansible.builtin.urlsplit('port') | default(443, true)) == opnsense_selected.port
+      - opnsense_url | ansible.builtin.urlsplit('path') == ''
+      - opnsense_url | ansible.builtin.urlsplit('query') == ''
+      - opnsense_url | ansible.builtin.urlsplit('fragment') == ''
+      - not (opnsense_url | ansible.builtin.urlsplit('username'))
+      - not (opnsense_url | ansible.builtin.urlsplit('password'))
+      - opnsense_url is match('^https://[^/?#@\s]+$')
+      - opnsense_api_key | length > 0
+      - opnsense_api_secret | length > 0
+      - opnsense_ca_file is file
+    fail_msg: Invalid management origin, trust file or credentials; no request was sent.
+  no_log: true

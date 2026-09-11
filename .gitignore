@@ -7,3 +7,7 @@
 *.tfplan
 crash.log
 .ansible/
+
+# Local Python caches, never runtime state.
+__pycache__/
+*.py[cod]

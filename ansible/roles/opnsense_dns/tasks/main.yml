@@ -1,0 +1,135 @@
+---
+- name: Reject the retired commissioning flag and unauthorized reapply
+  ansible.builtin.assert:
+    that:
+      - not (cutover_dns | bool)
+      - not (reapply_dns | bool) or (apply_dns | bool)
+    fail_msg: The ISC cutover is retired. Reapply requires apply_dns=true; DNS-only recovery remains explicitly available.
+
+- name: Run DNS-only recovery only when explicitly requested
+  ansible.builtin.include_tasks: recovery.yml
+  when: recover_dns | bool
+
+- name: Do not apply normal desired state during recovery
+  ansible.builtin.meta: end_role
+  when: recover_dns | bool
+
+- name: Require approved site data and bounded DHCP settings
+  ansible.builtin.assert:
+    that:
+      - opnsense_dns_site_id == 'north_york'
+      - not (apply_dns | bool) or (opnsense_dns_approved_site_data is sameas true)
+      - opnsense_dns_settings.enable in ['0', '1']
+      - opnsense_dns_settings.dhcp.enable_ra == '0'
+      - opnsense_dns_netbird_interface | length == 0 or opnsense_dns_netbird_interface in opnsense_dns_dhcp_excluded_interfaces
+    fail_msg: Writes require approved North York data; overlay listeners must exclude DHCP.
+
+- name: Inspect and check every identity and current allocation before any write
+  ansible.builtin.import_tasks: inspect.yml
+
+- name: Validate module inputs and compare records before any write
+  ansible.builtin.import_tasks: records.yml
+  vars:
+    dns_verify: true
+
+- name: Compare Guest TCP DNS before any write
+  ansible.builtin.import_tasks: guest-dns.yml
+  vars:
+    dns_verify: true
+
+- name: Read live Dnsmasq status
+  oxlorg.opnsense.raw:
+    url: dnsmasq/service/status
+    action: get
+  register: dns_service
+  changed_when: false
+
+- name: Record saved differences separately from runtime checks
+  ansible.builtin.set_fact:
+    dns_reconfigure_needed: "{{ dns_settings_differ or dns_host_result.changed or dns_range_result.changed or dns_removal_plan | length > 0 or dns_domain_plan | selectattr('changed') | list | length > 0 }}"
+    dns_firewall_needed: "{{ dns_guest_rule_result.changed }}"
+    dns_runtime_verified: false
+
+- name: Refuse implicit activation or shutdown but permit explicit failed-apply recovery
+  ansible.builtin.assert:
+    that:
+      - dns_current.response.dnsmasq.enable == opnsense_dns_settings.enable
+      - reapply_dns | bool or dns_service.response.status == ('running' if opnsense_dns_settings.enable == '1' else 'disabled')
+      - opnsense_dns_settings.enable != '1' or opnsense_dns_runtime_queries | length > 0
+    fail_msg: Routine DNS cannot commission or shut down DHCP. For saved-but-not-running state use apply_dns=true reapply_dns=true with functional DNS queries.
+  when: apply_dns | bool
+
+- name: Save and apply only with explicit authorization
+  when:
+    - apply_dns | bool
+    - not ansible_check_mode
+  block:
+    - name: Save only managed settings
+      oxlorg.opnsense.raw:
+        url: dnsmasq/settings/set
+        action: post
+        data:
+          dnsmasq: "{{ opnsense_dns_settings }}"
+      register: dns_saved
+      failed_when: dns_saved.response.result | default('') != 'saved'
+      when: dns_settings_differ | bool
+
+    - name: Stage records without reconfiguration
+      ansible.builtin.include_tasks: records.yml
+
+    - name: Delete only resolved explicit identities
+      oxlorg.opnsense.raw:
+        url: "dnsmasq/settings/del_{{ item.kind }}/{{ item.uuid }}"
+        action: post
+      loop: "{{ dns_removal_plan }}"
+      register: dns_deleted
+      failed_when: dns_deleted.response.result | default('') != 'deleted'
+
+    - name: Save changed forwarding rows by UUID
+      oxlorg.opnsense.raw:
+        url: "dnsmasq/settings/{{ 'set_domain/' ~ item.uuid if item.uuid else 'add_domain' }}"
+        action: post
+        data:
+          domainoverride: "{{ item.desired }}"
+      loop: "{{ dns_domain_plan }}"
+      register: dns_domain_saved
+      failed_when: dns_domain_saved.response.result | default('') != 'saved'
+      when: item.changed | bool
+
+    - name: Stage every DNS-owned firewall rule before applying
+      ansible.builtin.include_tasks: guest-dns.yml
+
+    - name: Apply or explicitly reapply the saved configuration
+      ansible.builtin.include_tasks: apply.yml
+
+    - name: Read back saved settings and removal absence
+      ansible.builtin.include_tasks: inspect.yml
+
+    - name: Compare saved records without writes
+      ansible.builtin.include_tasks: records.yml
+      vars:
+        dns_verify: true
+
+    - name: Compare the saved Guest DNS rule
+      ansible.builtin.include_tasks: guest-dns.yml
+      vars:
+        dns_verify: true
+
+    - name: Require matching saved state separately from runtime health
+      ansible.builtin.assert:
+        that:
+          - not (dns_settings_differ | bool)
+          - not dns_host_result.changed
+          - not dns_range_result.changed
+          - dns_removal_plan | length == 0
+          - dns_domain_plan | selectattr('changed') | list | length == 0
+          - not dns_guest_rule_result.changed
+
+- name: Report non-secret saved-versus-runtime status
+  ansible.builtin.debug:
+    msg:
+      saved_changes_needed: "{{ dns_settings_differ or dns_host_result.changed or dns_range_result.changed or dns_removal_plan | length > 0 or dns_domain_plan | selectattr('changed') | list | length > 0 or dns_guest_rule_result.changed }}"
+      runtime_verified: "{{ dns_runtime_verified }}"
+      mode: "{{ 'saved-state and selected runtime checks' if apply_dns | bool and not ansible_check_mode else 'read-only comparison; runtime acceptance not established' }}"
+      pending: LAN/Guest/IPv6 and off-LAN acceptance remain separate checks.
+  no_log: false

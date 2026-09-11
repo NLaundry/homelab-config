@@ -1,0 +1,21 @@
+---
+apply_routing: false
+reapply_routing: false
+routing_enabled: true
+opnsense_netbird_interface: ""
+desired_settings:
+  firewall:
+    allowConfig: "1"
+    blockInboundConnection: "{{ '0' if routing_enabled | bool else '1' }}"
+  routing:
+    accessLan: "{{ '1' if routing_enabled | bool else '0' }}"
+    acceptServerRoutes: "{{ '1' if routing_enabled | bool else '0' }}"
+    acceptClientRoutes: "0"
+  dns:
+    enable: "0"
+  ssh:
+    enable: "0"
+    enableRoot: "0"
+    enableSFTP: "0"
+    enableLocalPortForwarding: "0"
+    enableRemotePortForwarding: "0"

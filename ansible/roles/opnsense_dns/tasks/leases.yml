@@ -1,0 +1,6 @@
+---
+# Historical migration checks are not a current allocation inventory.
+- name: Refuse the retired ISC lease migration entrypoint
+  ansible.builtin.fail:
+    msg: ISC migration is retired. Routine allocation safety uses current Dnsmasq leases; no ISC service or lease state is changed.
+  no_log: false

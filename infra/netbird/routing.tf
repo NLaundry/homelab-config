@@ -19,8 +19,8 @@ resource "netbird_network_router" "north_york" {
 
   lifecycle {
     precondition {
-      condition     = data.netbird_peer.north_york_router.connected && data.netbird_peer.north_york_router.name == "OPNsense.localdomain"
-      error_message = "The selected North York OPNsense peer must be connected and match its approved identity."
+      condition     = data.netbird_peer.north_york_router.name == "OPNsense.localdomain"
+      error_message = "The selected North York OPNsense peer must match its approved identity; check connectivity during activation."
     }
   }
 }

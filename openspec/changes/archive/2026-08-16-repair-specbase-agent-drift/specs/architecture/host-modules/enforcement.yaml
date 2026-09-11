@@ -1,9 +1,0 @@
-bindings:
-  default-imports-siblings:
-    type: command
-    covers: host-module-split
-    source: tests/specbase/current-bindings.sh#default-imports-siblings
-  default-imports-role-module:
-    type: command
-    covers: host-module-split
-    source: tests/specbase/current-bindings.sh#default-imports-role-module

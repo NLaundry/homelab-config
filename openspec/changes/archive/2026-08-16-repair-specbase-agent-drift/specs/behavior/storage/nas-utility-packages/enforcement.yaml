@@ -1,5 +1,0 @@
-bindings:
-  utility-packages-eval:
-    type: command
-    covers: utility-packages-enabled
-    source: tests/specbase/current-bindings.sh#utility-packages-eval

@@ -1,0 +1,87 @@
+---
+- name: Require explicit authorization for a routing retry
+  ansible.builtin.assert:
+    that:
+      - not (reapply_routing | bool) or (apply_routing | bool)
+      - opnsense_netbird_interface is match('^opt[0-9]+$')
+    fail_msg: Reapply requires apply_routing=true and the approved assigned interface.
+
+- name: Read current settings
+  oxlorg.opnsense.raw:
+    url: netbird/settings/get
+    action: get
+  register: current
+  changed_when: false
+
+- name: Read peer status without treating saved settings as runtime proof
+  oxlorg.opnsense.raw:
+    url: netbird/status/status
+    action: get
+  register: peer
+  changed_when: false
+
+- name: Require an enabled compatible commissioned plugin
+  ansible.builtin.assert:
+    that:
+      - current.response.settings is mapping
+      - current.response.settings.general.enable == '1'
+    fail_msg: Routine routing requires a commissioned enabled peer; it never runs enrollment.
+
+- name: Validate and compare the general overlay boundary before writes
+  ansible.builtin.import_tasks: boundary.yml
+  vars:
+    netbird_verify: true
+
+- name: Compare only managed settings
+  ansible.builtin.set_fact:
+    settings_differ: "{{ current.response.settings != (current.response.settings | combine(desired_settings, recursive=true)) }}"
+    netbird_firewall_needed: "{{ netbird_rule_result.changed }}"
+    netbird_runtime_verified: false
+
+- name: Stage and apply only explicitly authorized routing changes
+  when:
+    - apply_routing | bool
+    - not ansible_check_mode
+  block:
+    - name: Update changed forwarding settings without resetting enrollment
+      oxlorg.opnsense.raw:
+        url: netbird/settings/set
+        action: post
+        data:
+          settings: "{{ desired_settings }}"
+      register: saved
+      failed_when: saved.response.result | default('') != 'saved'
+      when: settings_differ | bool
+
+    - name: Stage all NetBird-owned rules before any runtime apply
+      ansible.builtin.include_tasks: boundary.yml
+
+    - name: Sync and check selected runtime health
+      ansible.builtin.include_tasks: apply.yml
+
+    - name: Read settings back
+      oxlorg.opnsense.raw:
+        url: netbird/settings/get
+        action: get
+      register: verified
+      changed_when: false
+
+    - name: Compare the saved overlay boundary
+      ansible.builtin.include_tasks: boundary.yml
+      vars:
+        netbird_verify: true
+
+    - name: Verify saved state independently of runtime checks
+      ansible.builtin.assert:
+        that:
+          - verified.response.settings == (verified.response.settings | combine(desired_settings, recursive=true))
+          - not netbird_rule_result.changed
+
+- name: Report the bounded routing outcome
+  ansible.builtin.debug:
+    msg:
+      saved_settings_differ_before_run: "{{ settings_differ }}"
+      runtime_verified: "{{ netbird_runtime_verified }}"
+      peer_connected_before_run: "{{ peer.response.management.connected | default(false) | bool }}"
+      pending: Service and management connectivity do not prove off-LAN forwarding or policy acceptance.
+  no_log: false

@@ -1,0 +1,20 @@
+---
+apply_acme: false
+reapply_acme: false
+opnsense_acme:
+  account_name: LaundryLab OPNsense
+  challenge_name: LaundryLab LAN HTTP-01
+  automation_name: LaundryLab WebGUI reload
+  certificate_description: LaundryLab router HTTPS; seven-day private certificate
+  hostname: opnsense.ny.laundrylab.internal
+  directory: https://ca.laundrylab.internal/acme/opnsense/directory
+  challenge_address: 10.10.10.1
+  renew_interval: 1
+  schedule:
+    enabled: '1'
+    minutes: '0'
+    hours: '0'
+    days: '*'
+    months: '*'
+    weekdays: '*'
+    who: root

@@ -25,7 +25,7 @@ help:
 		'Checks:' \
 		'  check     Validate Nix configuration; no builds or live probes' \
 		'  test-vm   Run Samba tests in disposable VMs on TEST_STORE' \
-		'  verify    Check the live NAS; create and remove SMB test files' \
+		'  verify    Run every live probe under tests/verify' \
 		'' \
 		'Deployment:' \
 		'  build     Build the NAS configuration without activation' \
@@ -44,8 +44,29 @@ check:
 test-vm: check
 	nix build --no-update-lock-file --store "$(TEST_STORE)" --eval-store auto --no-link .\#checks.x86_64-linux.nas-samba
 
+XDG_CONFIG_HOME ?= $(HOME)/.config
+SOPS_AGE_FILE ?= $(XDG_CONFIG_HOME)/sops/age/keys.txt
+SECRETSPEC ?= env SOPS_AGE_KEY_FILE="$(SOPS_AGE_FILE)" secretspec --file secretspec.toml run --profile north_york
+
+# Connector probes need secretspec/ansible: run from inside `nix develop`.
+# Outside it they skip with a visible notice instead of failing.
 verify:
-	$(VERIFY) $(VERIFY_ARGS)
+	@set -eu; \
+	$(VERIFY) $(VERIFY_ARGS); \
+	if command -v secretspec >/dev/null 2>&1; then \
+	  if $(SECRETSPEC) --scope opentofu -- true >/dev/null 2>&1; then \
+	    $(SECRETSPEC) --scope opentofu -- $(VERIFY) tests/verify/iac-connectors.bats; \
+	  else \
+	    printf '%s\n' 'NetBird connector probe skipped: opentofu scope not resolvable (operator age identity missing?)'; \
+	  fi; \
+	  if command -v ansible-playbook >/dev/null 2>&1 && $(SECRETSPEC) --scope opnsense -- true >/dev/null 2>&1; then \
+	    $(SECRETSPEC) --scope opnsense -- $(VERIFY) tests/verify/iac-connectors.bats; \
+	  else \
+	    printf '%s\n' 'OPNsense connector probe skipped: opnsense scope not resolvable or ansible-playbook unavailable'; \
+	  fi; \
+	else \
+	  printf '%s\n' 'Connector probes skipped: secretspec not on PATH (run inside nix develop)'; \
+	fi
 
 build:
 	$(REBUILD) build

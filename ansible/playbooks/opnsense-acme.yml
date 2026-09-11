@@ -1,0 +1,15 @@
+---
+- name: Adopt existing North York native ACME configuration
+  hosts: opnsense
+  connection: local
+  gather_facts: false
+  no_log: true
+  vars:
+    ansible_pipelining: true
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  module_defaults:
+    group/oxlorg.opnsense.all: "{{ opnsense_module_defaults }}"
+  pre_tasks:
+    - ansible.builtin.import_tasks: ../tasks/opnsense-connection.yml
+  roles:
+    - opnsense_acme

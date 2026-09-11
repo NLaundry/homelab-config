@@ -23,6 +23,9 @@ in
   # Import existing pools without creating or replacing data.
   boot.zfs.extraPools = [ "smolBoy" "mediaBin" ];
 
+  # Custody datasets are unlocked manually, never during pool import.
+  boot.zfs.requestEncryptionCredentials = false;
+
   # Avoid taking a root pool that another host may still use.
   boot.zfs.forceImportRoot = false;
 }

@@ -1,0 +1,103 @@
+---
+- name: Require explicit apply approval for runtime reapply
+  ansible.builtin.assert:
+    that: not (reapply_acme | bool) or (apply_acme | bool)
+    fail_msg: Reapply requires apply_acme=true; no action was taken.
+
+- ansible.builtin.import_tasks: inspect.yml
+
+- name: Keep the initial adoption identities and differences
+  ansible.builtin.set_fact:
+    acme_initial_plan: "{{ acme_plan }}"
+
+- name: Apply only explicitly approved ACME configuration
+  when:
+    - apply_acme | bool
+    - not ansible_check_mode
+  block:
+    - name: Save changed owned fields after fresh identity checks
+      ansible.builtin.include_tasks: update.yml
+      loop: "{{ acme_initial_plan.operations }}"
+      loop_control:
+        loop_var: acme_update
+
+    - name: Reconfigure the native HTTP challenge service when needed
+      oxlorg.opnsense.raw:
+        url: acmeclient/service/reconfigure
+        action: post
+      register: acme_reconfigured
+      failed_when: acme_reconfigured.response.status | default('') | trim | lower != 'ok'
+      when: acme_initial_plan.operations | length > 0 or reapply_acme | bool
+
+    - name: Recheck the native cron link before integration
+      ansible.builtin.include_tasks: inspect.yml
+
+    - name: Require the same compatible linked job before integration
+      ansible.builtin.assert:
+        that:
+          - acme_plan.identity == acme_initial_plan.identity
+          - acme_plan.job_id == acme_initial_plan.job_id
+          - acme_plan.operations | length == 0
+        fail_msg: ACME configuration changed or did not save; no integration will run.
+
+    - name: Reconcile the existing native renewal integration
+      oxlorg.opnsense.raw:
+        url: acmeclient/settings/fetch_cron_integration
+        action: post
+      register: acme_integration
+      failed_when: acme_integration.response.result | default('') != 'no change'
+      when: acme_initial_plan.operations | length > 0 or reapply_acme | bool
+
+    - name: Set only the existing plugin-owned job schedule
+      oxlorg.opnsense.raw:
+        url: "cron/settings/set_job/{{ acme_plan.job_id }}"
+        action: post
+        data:
+          job: "{{ acme_plan.schedule }}"
+      register: acme_cron_saved
+      failed_when: acme_cron_saved.response.result | default('') != 'saved'
+      when: acme_plan.schedule | length > 0
+
+    - name: Apply the native schedule after a change or explicit retry
+      oxlorg.opnsense.raw:
+        url: cron/service/reconfigure
+        action: post
+      register: acme_cron_applied
+      failed_when: acme_cron_applied.response.status | default('') | trim | lower != 'ok'
+      when: acme_plan.schedule | length > 0 or reapply_acme | bool
+
+    - name: Read back all adopted state
+      ansible.builtin.include_tasks: inspect.yml
+
+    - name: Require saved convergence and preserved native identities
+      ansible.builtin.assert:
+        that:
+          - acme_plan.identity == acme_initial_plan.identity
+          - acme_plan.job_id == acme_initial_plan.job_id
+          - acme_plan.operations | length == 0
+          - acme_plan.schedule | length == 0
+        fail_msg: Saved ACME configuration differs; existing identities must be preserved.
+
+- name: Read native challenge service status without starting issuance
+  oxlorg.opnsense.raw:
+    url: acmeclient/service/status
+    action: get
+  register: acme_runtime
+  changed_when: false
+
+- name: Require active challenge service after an apply
+  ansible.builtin.assert:
+    that: acme_runtime.response.status | default('') == 'running'
+    fail_msg: Saved state is not runtime acceptance; inspect service failure and explicitly reapply.
+  when:
+    - apply_acme | bool
+    - not ansible_check_mode
+
+- name: Report public adoption status without account or key data
+  ansible.builtin.debug:
+    msg:
+      configuration_changes_needed: "{{ acme_plan.operations | length }}"
+      schedule_change_needed: "{{ acme_plan.schedule | length > 0 }}"
+      challenge_service: "{{ acme_runtime.response.status if acme_runtime.response.status | default('') in ['running', 'stopped', 'disabled'] else 'unknown' }}"
+      pending: Served HTTPS, real renewal, browser trust and independent recovery require separate acceptance.
+  no_log: false

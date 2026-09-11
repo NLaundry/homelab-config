@@ -84,12 +84,16 @@ DECIDED — configuration ownership:
 DECIDED — replace the earlier CoreDNS P0 plan:
 - Do not deploy the dedicated CoreDNS microVM at `10.10.10.5` for now. CoreDNS is strong for static file-backed authority but does not discover DHCP clients; its `auto` plugin only reloads zone files.
 - Run **OPNsense Dnsmasq as the combined DNS/DHCP service at each site**. Each router owns its local leases and remains usable when the other site or NetBird is unavailable.
-- Use one site-specific dynamic subdomain per router, provisionally `ny.laundrylab.internal` and `sc.laundrylab.internal`. Dnsmasq publishes DHCP-provided names and reservation names beneath its local subdomain. Treat dynamic names as convenience, not identity: important machines and services still receive static reservations and declarative records.
-- Advertise the local OPNsense resolver through each site's DHCP. Configure conditional forwarding for the other site's dynamic subdomain to the remote OPNsense resolver over NetBird, with explicit UDP and TCP port 53 access.
+- Use the confirmed site-specific dynamic subdomains `ny.laundrylab.internal` and `sc.laundrylab.internal`. Dnsmasq publishes DHCP-provided names and reservation names beneath its local subdomain. All hosts use DHCP; fixed addresses are provided through static DHCP leases/reservations, not host-side static configuration. Treat dynamic names as convenience, not identity: important machines and services still receive static reservations and declarative records.
+- DNS registration does not enroll a host with Kanidm or authorize certificate issuance. Private-CA certificate issuance and identity enrollment remain separate, explicitly authorized processes.
+- Advertise the local OPNsense resolver through each site's DHCP. Configure conditional forwarding for the other site's dynamic subdomain to the remote OPNsense resolver's NetBird IP, with explicit UDP and TCP port 53 access.
+- DNS access through each router's NetBird IP requires no LAN subnet route. Allow the relevant managed clients and opposite-site router to query that peer through peer-to-peer policies for UDP and TCP port 53; configure Dnsmasq listener scope and OPNsense firewall rules accordingly. DNS runs on the peer itself, so a policy allowing forwarding to LAN resources is not sufficient.
 - Keep stable canonical service names such as `ca.laundrylab.internal` and `idm.laundrylab.internal` in one shared Ansible data set and render the same host aliases/overrides on both routers. This is synchronized desired configuration, not runtime lease or zone replication.
 - **Ansible owns both Dnsmasq configurations**, using one reusable role plus site-specific variables. It manages DHCP ranges, reservations, local domain, cross-site forwarding, stable aliases, listener scope, and firewall rules. Never edit generated Dnsmasq files directly.
-- **OpenTofu owns NetBird DNS distribution** through `netbird_nameserver_group` resources. NetBird peers receive the relevant split-domain resolvers; ordinary clientless LAN devices continue to use the local OPNsense resolver. Avoid applying NetBird-managed DNS to the OPNsense resolver peers where that could create a forwarding loop.
+- **OpenTofu owns NetBird DNS distribution** through `netbird_nameserver_group` resources. Match `ny.laundrylab.internal` to the North York router's NetBird IP and `sc.laundrylab.internal` to the Scarborough router's NetBird IP, distributing these to the relevant managed clients. Ordinary clientless LAN devices continue to use the local OPNsense resolver. Avoid applying NetBird-managed DNS to the OPNsense resolver peers where that could create a forwarding loop.
+- DNS resolution and resource connectivity are separate: site records return LAN addresses. Use one NetBird **Network** per site, the site's OPNsense as routing peer, permitted host/subnet resources, and explicit access policies to reach those addresses. Prefer Networks over the separate legacy Network Routes feature for this access; do not create domain resources merely to enable DNS forwarding. Clientless site-to-site access requires its own routing/policy validation and is not established by nameserver groups.
 - NetBird's automatic peer names remain useful for enrolled peers, while OPNsense Dnsmasq supplies names for non-NetBird LAN devices.
+- Do not duplicate the site domains in NetBird Custom Zones: they would require synchronizing DHCP-derived records, and Custom Zones take precedence over nameserver forwarding for the same domain. Use NetBird nameserver groups to distribute access to the site resolvers instead.
 - Revisit Technitium or Kea DHCP-DDNS only if a unified dynamic authoritative zone, richer DNS API/UI, or replicated authority becomes a concrete requirement. CoreDNS and PowerDNS are no longer part of the initial deployment.
 
 REVISED P0 DNS:
@@ -99,7 +103,7 @@ REVISED P0 DNS:
 OPEN THREADS:
 - Confirm both sites' OPNsense versions support `os-netbird` and the required Dnsmasq DNS/DHCP API surface; identify their current DHCP implementations before migration.
 - Validate the exact OPNsense API payloads for `os-netbird` settings/enrollment, `wt0` assignment, and Dnsmasq configuration against the installed versions before writing the Ansible roles.
-- Choose the final short labels for the two dynamic subdomains (`ny`/`sc` are provisional).
+- Validate DNS listener behavior on `wt0`, peer-to-peer DNS policies, and the installed NetBird/OpenTofu provider support for Networks. Define managed-client resolution for shared `laundrylab.internal` service aliases as well as the two site domains; site-domain matches alone do not cover those shared names.
 - Define the actual North York and Scarborough LAN/VLAN CIDRs and verify they do not overlap.
 - Decide where encrypted OpenTofu state and backups live.
 
@@ -122,3 +126,26 @@ DEFERRED — later stacks:
 - Stack 2 will establish North York naming and private trust. Expected order: offline root authority → North York Dnsmasq DNS/DHCP → NetBird DNS distribution → online step-ca intermediate → managed root-trust distribution. DNS details remain under exploration and are not part of Stack 1.
 - A separate Scarborough stack will add the second site with the reusable Estate schema, OpenTofu modules, and Ansible roles produced by Stack 1, then add site-local DNS and cross-site forwarding.
 - Kanidm, managed-host identity, Samba migration, web SSO, application hosting, AdGuard, CoreDNS, and Pangolin remain outside Stack 1.
+
+---
+## SESSION (explore): automated certificates and HTTP reverse proxies
+
+CONFIRMED — retain step-ca for private certificate automation:
+- OPNsense's built-in CA can issue certificates and manage revocation lists, but it is not a substitute for an ACME issuance/renewal service. Its ACME client plugin consumes certificates; it does not provide an ACME server. Retain the offline root and online step-ca intermediate design rather than moving fleet certificate issuance into the firewall.
+- New machines do not automatically become trusted merely by obtaining DHCP names. Provisioning must configure root trust, the CA endpoint, requested certificate names, and an authorized enrollment method. ACME endpoint validation proves control of a name's endpoint, not hardware-backed machine attestation or Kanidm enrollment. Protect infrastructure DHCP names and constrain certificate issuance independently.
+- For an AI-gateway microVM, the intended sequence is DHCP reservation and DNS registration → local private-key generation and authorized certificate request → HTTPS service startup → automatic renewal and service reload. The CA must resolve and reach the challenge endpoint when using HTTP-01 validation. Token-based enrollment remains an alternative if stronger machine-specific authorization is required.
+- Certificate private keys and renewal/account state are private runtime state, never committed to Git or embedded in the Nix store. Preserve them across rebuilds; a newly recreated VM must be able to enroll again. Configure renewal monitoring and certificate lifetimes with enough margin for CA or cross-site outages.
+- Preserve the namespace-to-issuer split: step-ca for `.internal`, publicly trusted Let's Encrypt certificates for browser-facing `.tech` services. Do not accidentally replace this with one global issuer.
+
+ACCEPTED OPTIONS — Caddy or Nginx; no exclusive proxy choice yet:
+- **Caddy:** use its built-in ACME client with the step-ca ACME endpoint and trusted root. Do not use `tls internal` for this purpose: that would introduce Caddy's own CA instead of the shared step-ca hierarchy.
+- **Nginx:** use the NixOS `security.acme` integration for certificate issuance/renewal against step-ca, with certificate permissions and Nginx reload integration. Nginx serves HTTPS; the NixOS ACME service manages the certificate lifecycle.
+- Both are acceptable to the user. Choose based on the service's existing NixOS integration and operational simplicity; no need to introduce Traefik solely for certificate automation.
+- A reverse proxy is convenient for HTTP applications without native certificate automation, not a requirement of step-ca. A proposed layout is a proxy alongside the application in its microVM, terminating HTTPS and forwarding to a localhost-only backend. A central proxy remains possible, but its certificate authenticates the proxy endpoint, not each backend; remote backend encryption would need separate configuration.
+- HTTPS server certificates do not authorize API callers. AI-gateway API authentication and any future Kanidm integration remain separate concerns.
+
+OPEN THREADS:
+- Select Caddy or Nginx for the first service and define reusable NixOS configuration for hostnames, issuer selection, root trust, enrollment, firewall access, private runtime state, and renewal/reload behavior.
+- Choose the initial issuance authorization method and constrain allowed names; do not treat client-supplied DHCP names as enrollment credentials.
+- Validate AI-gateway streaming responses, buffering, long-running request timeouts, and any WebSocket requirements with the chosen proxy.
+- Verify first issuance, renewal, root trust on clients, and recovery after VM recreation or CA unavailability before treating enrollment as automatic.

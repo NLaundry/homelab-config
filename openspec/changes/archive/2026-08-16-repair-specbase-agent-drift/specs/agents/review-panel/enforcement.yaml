@@ -1,7 +1,0 @@
-remove:
-  - panel-review
-bindings:
-  lens-roster-conforms:
-    type: command
-    covers: panel-covers-planes
-    source: tests/agents/specbase-instruments.sh#lenses

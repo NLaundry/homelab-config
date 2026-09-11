@@ -1,0 +1,6 @@
+---
+# Historical resolver handoff retired. Never import it from a routine run.
+- name: Refuse the retired ISC commissioning procedure
+  ansible.builtin.fail:
+    msg: The original ISC handoff is retired. Use an independently reviewed commissioning procedure. Explicit DNS-only recovery remains available; never restart ISC without lease reconciliation.
+  no_log: false

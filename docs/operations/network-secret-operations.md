@@ -1,130 +1,71 @@
-# Prepare network secret custody
+# Network secret custody and delivery
 
-## What
+## Current contract
 
-Keep NetBird and OPNsense credentials in `secrets/network.yaml`, encrypted with
-SOPS and age. Keep private decryption identities outside Git and the Nix store. Use SecretSpec
-0.20+ with its SOPS provider and root `secretspec.toml` for scoped environment
-delivery, not custom adapters or temporary runtime credential files.
+Keep NetBird and OPNsense credentials in SOPS/age-encrypted
+`secrets/network.yaml`. Private decryption identities stay outside Git and the
+Nix store. SecretSpec 0.20+ delivers only the selected scope to a child process;
+do not export/eval resolved secrets into the parent shell or create temporary
+runtime credential files.
 
-## Why
+The initial secret foundation and authenticated reads were recorded as passing.
+NetBird resources and the OPNsense peer are now managed by the current
+[OpenTofu](netbird-opentofu.md), [routing](netbird-routing.md),
+[DNS](opnsense-dns.md) and [ACME](opnsense-acme.md) procedures. Enrollment writes
+are [retired](opnsense-netbird-enrollment.md). This guide does not authorize live
+apply, permission changes, key creation or replacement of an existing identity.
 
-Automation needs credentials. It must not leave plaintext files, logs, or shared
-shell variables behind. A separate recovery copy prevents permanent loss of access.
+## Prepare tools and the existing identity
 
-## Before you start
-
-The shared secret foundation is complete: operator custody, root `.sops.yaml`,
-SecretSpec 0.20.0, encrypted `secrets/network.yaml`, local OpenTofu and Ansible
-credential wiring, and bounded read-only authentication are recorded as passing.
-
-Full NetBird resource management and OPNsense enrollment remain later changes.
-This runbook does not authorize a live apply, setup-key creation, or enrollment.
-
-You need local OPNsense access, NetBird administrator access, and an encrypted
-recovery location independent of this workstation. Do not paste secrets into chat,
-command arguments, shell history, screenshots, or clipboard managers.
-
-## 1. Open the tool environment
+From the repository root:
 
 ```sh
 nix develop --no-update-lock-file
 set +x
 umask 077
+export SOPS_AGE_KEY_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt"
 export SOPS_EDITOR='nvim -u NONE -i NONE -n --cmd "set noswapfile nobackup nowritebackup noundofile"'
-```
-
-These editor flags disable user configuration, history, swap, backup, and undo files.
-If Neovim is unavailable, replace `nvim` with `vim` in that command.
-
-Use SOPS for secret editing. Do not first create a plaintext file in the repository.
-SOPS uses temporary plaintext while editing; keep that workspace private and
-outside the repository. Do not record the editor session.
-
-## 2. Create and back up the age identity
-
-### 2.1 Create the identity
-
-Use the conventional user-private location. Do not replace an existing identity.
-
-```sh
-AGE_KEY_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sops/age"
-AGE_KEY_FILE="$AGE_KEY_DIR/keys.txt"
-install -d -m 700 "$AGE_KEY_DIR"
-if test ! -e "$AGE_KEY_FILE"; then
-  age-keygen -o "$AGE_KEY_FILE"
-fi
-chmod 600 "$AGE_KEY_FILE"
-age-keygen -y "$AGE_KEY_FILE"
-```
-
-The last command prints a public `age1...` recipient. Only that public value may
-enter `.sops.yaml`. Never share the `AGE-SECRET-KEY-...` line.
-
-### 2.2 Back up the identity in Bitwarden
-
-Store `keys.txt` as an encrypted attachment on a dedicated Bitwarden item. Do not
-paste the private identity into the item's notes or any other text field. Give the
-item a clear recovery purpose, but do not put private key material in its name.
-
-Download the attachment into a private temporary directory and confirm that the
-recovery copy produces the same public recipient as the working identity. Remove
-the downloaded verification copy, then lock Bitwarden when finished. Ensure the
-Bitwarden account itself has a tested recovery method independent of this
-workstation.
-
-## 3. Review the root SOPS policy
-
-### 3.1 Check the policy and recipients
-
-1. From the repository root, open `.sops.yaml` with `nvim .sops.yaml`.
-2. Verify the existing rule has this shape; do not replace its approved recipient
-   with the placeholder or add a duplicate rule:
-
-   ```yaml
-   creation_rules:
-     - path_regex: ^secrets/network\.yaml$
-       age: age1_REPLACE_WITH_YOUR_PUBLIC_RECIPIENT
-   ```
-
-3. If a separate recovery key exists, put both full public recipients in `age`,
-   separated by a comma; a backup of the same key needs no second recipient.
-4. Keep other valid rules, but put this exact-path rule before any broader match.
-5. Save, then inspect:
-
-   ```sh
-   find . -name .sops.yaml -print
-   yq eval '.creation_rules' .sops.yaml
-   ```
-
-**Expected:** one policy file, `./.sops.yaml`, with only the intended public
-recipients on the network rule; no private `AGE-SECRET-KEY-...` value.
-
-### 3.2 Verify local SecretSpec delivery before live bootstrap
-
-The initial policy selection check is already recorded in
-[policy evidence](../../openspec/changes/establish-network-secret-operations/evidence/sops-policy-validation.md).
-Retain that evidence; do not build another cryptography or backup-product test
-suite as part of SecretSpec integration.
-
-The one-time dummy check confirmed all six mappings and both scopes using
-SecretSpec 0.20.0. See [delivery evidence](../../openspec/changes/establish-network-secret-operations/evidence/secretspec-validation.md).
-No recurring test suite is needed for this configuration. Recheck with isolated
-dummy ciphertext when the manifest mappings or SecretSpec version change; do not
-use production credentials for that check.
-
-To inspect the local tool version:
-
-```sh
 secretspec --version
 ```
 
-Review root `secretspec.toml`: its SOPS provider must point to
-`sops://secrets/network.yaml?sops_config=.sops.yaml`. Profile `north_york` must use
-root-item references plus JSON extraction, preserving the nested YAML layout:
+The editor flags disable configuration, history, swap, backup and undo files.
+Use `vim` instead if necessary. SOPS temporarily decrypts for editing; keep that
+workspace private and outside the repository. Never record the session, dump the
+environment, enable tracing or put secrets in chat, screenshots, argv or history.
 
-| Scope | Variable | Root `ref.item` | JSON extraction pointer |
-|---|---|---|---|
+If the identity is missing on an existing installation, recover it below; do not
+generate a replacement to solve a decryption failure. For a separately approved
+first-time identity only:
+
+```sh
+install -d -m 700 "$(dirname "$SOPS_AGE_KEY_FILE")"
+if test ! -e "$SOPS_AGE_KEY_FILE"; then
+  age-keygen -o "$SOPS_AGE_KEY_FILE"
+fi
+chmod 600 "$SOPS_AGE_KEY_FILE"
+age-keygen -y "$SOPS_AGE_KEY_FILE"
+```
+
+Only the printed public `age1...` recipient may enter `.sops.yaml`. Never display
+or share the private `AGE-SECRET-KEY-...` line.
+
+## Review policy and scope mappings
+
+Root `.sops.yaml` selects `^secrets/network\.yaml$` and the approved public age
+recipient(s). Preserve other valid rules; put this exact-path rule before broader
+matches. A backup of the same identity needs no second recipient. Add a separate
+recovery recipient only with approval and verified custody.
+
+```sh
+yq eval '.creation_rules' .sops.yaml
+```
+
+Root `secretspec.toml` uses
+`sops://secrets/network.yaml?sops_config=.sops.yaml`, profile `north_york`, and
+root-item JSON extraction from the existing nested YAML:
+
+| Scope | Variable | Root item | JSON pointer |
+| --- | --- | --- | --- |
 | `opentofu` | `NB_PAT` | `netbird` | `/pat` |
 | `opentofu` | `NB_MANAGEMENT_URL` | `netbird` | `/management_url` |
 | `opentofu` | `TF_VAR_state_encryption_passphrase` | `opentofu` | `/state_encryption_passphrase` |
@@ -132,203 +73,161 @@ root-item references plus JSON extraction, preserving the nested YAML layout:
 | `opnsense` | `OPNSENSE_API_KEY` | `opnsense` | `/api_key` |
 | `opnsense` | `OPNSENSE_API_SECRET` | `opnsense` | `/api_secret` |
 
-For each entry use `extract = { format = "json", pointer = "..." }` with its
-listed pointer. All six are required; no plaintext defaults, environment
-fallback provider, prompts, generation, `as_path`, or plaintext cache. Edit the
-nested file through SOPS rather than SecretSpec convention-addressed writes.
-Always pass a nonempty scope; unscoped execution would deliver the whole profile.
-Scopes limit delivery, not decryption authority over the shared document.
+All six are required. Do not add plaintext defaults, fallback providers, prompts,
+generation, `as_path` or a plaintext cache. Edit through SOPS, not SecretSpec
+convention-addressed writes. Always select a nonempty scope: scopes narrow child
+delivery, not the age identity's ability to decrypt the shared document.
 
-Also verify the later consumer integrations locally with dummy inputs as described
-in step 6. The one-time delivery check alone does not satisfy that prerequisite.
-Stop before step 5 while either consumer is missing.
+Historical [policy validation](../../openspec/changes/archive/2026-09-05-establish-network-secret-operations/evidence/sops-policy-validation.md)
+and [SecretSpec delivery validation](../../openspec/changes/archive/2026-09-05-establish-network-secret-operations/evidence/secretspec-validation.md)
+record the original dummy-input checks. Recheck changed mappings/tool versions
+with isolated dummy ciphertext, never production secrets. Those records are not
+current live acceptance or a reason to recreate retired wrapper tests.
 
-## 4. Approve the remote permissions
+## Management transport
 
-### 4.1 Bound OPNsense permissions
+`ansible/group_vars/all/opnsense.yml` defines the two explicit verified profiles;
+`ansible/tasks/opnsense-connection.yml` validates URL, credentials and trust file
+before a request. Playbooks, the connector probe and DNS recovery share them.
 
-Discovery is complete: the GUI recorded OPNsense `26.7.3` and the official
-`os-netbird` plugin installed. Group `netbird-automation` and user `svc-admin`
-already exist with these four approved privileges:
+| Profile | HTTPS hostname | Controller trust file |
+| --- | --- | --- |
+| `legacy` (explicit recovery) | `opnsense.localdomain` | `ansible/certificates/north-york-opnsense-web.pem` |
+| `private` (current default) | `opnsense.ny.laundrylab.internal` | `certificates/laundrylab-root-ca.crt` |
 
-- `VPN: NetBird`
-- `Interfaces: Assign network ports`
-- `Firewall: Alias: Edit`
-- `Firewall: Rules [new]`
-
-**These ACLs are subsystem-wide, not limited to the objects this automation
-manages.** They do not grant firmware or configuration-backup access. The later
-consumer must stay within the approved operations and must not silently add
-privileges if an API call fails.
-
-Before key creation, sign in locally at `https://10.10.10.1`, review **System →
-Access → Groups**, then **System → Access → Users → svc-admin** and confirm:
-
-| Field | Expected |
-|---|---|
-| Disabled | Unchecked, so API authentication works |
-| Password | **Scrambled Password**, preventing password login |
-| Group membership | `netbird-automation` only |
-| Direct privileges | None |
-| Login shell / SSH keys | No shell access and no authorized keys |
-| Effective Privileges | Exactly the four approved ACLs; no `admins`, **All pages**, or unrelated access |
-
-Stop on drift; do not recreate the group or user unnecessarily. The upstream
-source revisions in [inspection evidence](../../openspec/changes/establish-network-secret-operations/evidence/opnsense-inspection.md)
-are research references, not exact installed-code pins for this release. Later
-consumer integration must confirm actual API/module compatibility.
-
-No API key was generated during discovery. Do not generate one until step 5,
-after local delivery and both later consumer integrations are verified.
-
-### 4.2 Bound NetBird permissions
-
-1. Sign in to the NetBird dashboard as an administrator.
-The NetBird service user `Config Automation` exists with the **Network Admin**
-role. Its `Infra Token` expires on 5 September 2027 and is backed up in Bitwarden.
-Network Admin covers the planned Network, resource, group, router-assignment, and
-policy operations, but not peer mutation or setup-key creation.
-
-**Network Admin access covers the NetBird account, not just North York.** The
-OpenTofu plan limits which objects we manage; it does not narrow the token's
-permissions. The later enrollment operation needs a separately approved method
-to create and retire one-use setup keys; do not widen this service user's role
-silently.
-
-## 5. Enter the live credentials through SOPS
-
-### 5.1 Create and enter the credentials
-
-**Gate:** local SecretSpec delivery, OpenTofu encryption/provider wiring, Ansible
-credential wiring, and the permissions in step 4 are verified with dummy inputs.
-Proceed only through direct SOPS editing; do not run a live consumer yet.
-
-Then open the encrypted target using the editor settings from step 1:
+Both select port 443 and retain `10.10.10.1` as the recovery connection address.
+`OPNSENSE_URL` must be an HTTPS origin matching the selected hostname and port,
+without a path, query, fragment or embedded credentials. The scoped URL and
+shared default now use the private hostname after backup and served-certificate
+verification. An explicit private check selects those same non-secret values:
 
 ```sh
-export SOPS_AGE_KEY_FILE="$AGE_KEY_FILE"
-install -d -m 700 secrets
+ANSIBLE_CONFIG=ansible/ansible.cfg \
+  secretspec --file secretspec.toml run --profile north_york --scope opnsense -- \
+  env OPNSENSE_PROFILE=private OPNSENSE_URL=https://opnsense.ny.laundrylab.internal \
+  ansible-playbook -i ansible/inventory.yml \
+  ansible/playbooks/opnsense-credential-preflight.yml
+```
+
+Install the pinned collection as shown under **Check consumers** before invoking
+Ansible. This default preflight checks local inputs only. Add
+`-e opnsense_auth_check=true` for an explicit authenticated read and connected-peer
+check. Do not confuse either result with served-certificate, browser, renewal or
+off-LAN acceptance.
+
+After the [private HTTPS procedure](opnsense-acme.md) verifies the served
+certificate, alternate hostname and independent recovery, coordinate the shared
+default and the SOPS `opnsense.url` value across all callers. No automatic fallback
+occurs on TLS failure. Fixed-address DNS recovery retains hostname/SNI and its
+matching trust anchor; a retained profile does not make the router serve an old
+certificate. Do not use bare-IP HTTPS or disable verification. The retained legacy
+certificate's recorded expiry is 28 October 2026; verify replacements before use.
+
+## Review permissions without changing grants
+
+The original OPNsense discovery recorded `netbird-automation` / `svc-admin` with
+four approved subsystem privileges: **VPN: NetBird**, **Interfaces: Assign network
+ports**, **Firewall: Alias: Edit**, and **Firewall: Rules [new]**. This is historical
+baseline evidence, not today's complete expected grant set; later DNS and ACME
+work has separate approvals. See the archived
+[OPNsense inspection](../../openspec/changes/archive/2026-09-05-establish-network-secret-operations/evidence/opnsense-inspection.md)
+and the [current ACME permission boundary](opnsense-acme.md#required-privileges).
+Source revisions are research references, not proof of installed compatibility.
+
+Review the actual account/group in **System → Access → Users / Groups** against
+the approved operations before use. Retain the service account's scrambled
+password, no shell/SSH access and no full-admin membership. These API privileges
+are subsystem-wide, not per managed object. Stop on a denied required endpoint;
+never silently grant more access, remove write restrictions or recreate the user.
+Routine checks do not require old ISC migration or firmware/backup permissions.
+
+NetBird's `Config Automation` service user has the **Network Admin** role. Its
+recorded `Infra Token` expires on 5 September 2027 and has Bitwarden custody.
+Verify current validity before use. The role covers account-wide Network,
+resource, group, router-assignment, policy and DNS management, not peer mutation
+or setup-key creation. An OpenTofu plan limits intended changes, not token powers.
+Do not widen this role for enrollment.
+
+## Edit or rotate credentials
+
+Use the existing encrypted file:
+
+```sh
 sops secrets/network.yaml
 ```
 
-With the editor open, create the credentials one at a time:
+For approved creation/rotation, transfer values directly between the native
+credential UI/password manager and the private SOPS editor. OPNsense API key
+creation is under **System → Access → Users → svc-admin → API keys**. Keep its
+one-time download private and outside the repository, then remove it after
+transfer. Use the existing NetBird service user's approved token. Never store a
+peer setup key in this file or OpenTofu state.
 
-1. Retrieve the existing `Config Automation` service user's `Infra Token` from
-   Bitwarden and transfer it directly into the SOPS editor.
-2. In OPNsense, edit `svc-admin` under **System → Access → Users** and add a
-   key in its **API keys / ApiKeys** section.
-3. Save the one-time download in a private location outside the repository;
-   transfer its `key` and `secret` into the SOPS editor.
+Keep the fields in the scope table unchanged. NetBird Cloud uses
+`https://api.netbird.io`; confirm any different deployment. The state-encryption
+passphrase must be a unique password-manager value of at least 32 characters.
+Do not replace a passphrase needed to decrypt existing state as if it were an API
+token; preserve encrypted state and follow a separately reviewed migration.
 
-Enter these fields in the editor, not in the shell:
+Save and inspect only ciphertext and public metadata. Prove replacement API
+credentials with scoped read-only authentication before revoking predecessors.
+Record dates, public fingerprints, non-secret IDs, approved privileges and results,
+never decrypted values or raw credential-bearing responses.
 
-- `netbird.management_url` and `netbird.pat`.
-- `opnsense.url`, `opnsense.api_key`, and `opnsense.api_secret`.
-- `opentofu.state_encryption_passphrase`: a unique random password-manager value
-  of at least 32 characters.
+## Check consumers
 
-The North York OPNsense URL is `https://OPNsense.localdomain`. That name resolves
-to `10.10.10.1` and matches the pinned public web certificate at
-`ansible/certificates/north-york-opnsense-web.pem`. NetBird Cloud uses
-`https://api.netbird.io`; confirm the endpoint if using another deployment.
+Install the pinned collection before Ansible commands:
 
-### 5.2 Check ciphertext and remove the download
-
-Save and close SOPS. Inspect the file and Git diff for ciphertext and public
-metadata only. Remove the downloaded OPNsense credential file. Never store a
-NetBird peer setup key in this document or in OpenTofu state.
-
-## 6. Check the consumers
-
-### 6.1 Local prerequisites — required before step 5
-
-Local wiring is complete. `infra/netbird/` consumes the standard NetBird
-provider variables and a sensitive, ephemeral state-encryption passphrase; it
-requires native encryption for state and saved plans. It currently declares no
-NetBird resources. Initialize its real backend only through the later adoption
-runbook with an external state path.
-
-`ansible/playbooks/opnsense-credential-preflight.yml` reads the three
-`OPNSENSE_*` variables through play-level module defaults, enables `no_log` and
-pipelining, and creates no credential file. It performs local input validation
-only; it does not authenticate or change the router.
-
-A one-time SecretSpec-to-consumer check passed with temporary dummy ciphertext.
-Read-only remote authentication passed. Full resource management and enrollment
-remain later work.
-
-### 6.2 Future management command shape
-
-Run from the repository root with the explicit manifest, profile, and scope:
-
-```text
-secretspec --file secretspec.toml run --profile north_york --scope opentofu -- tofu -chdir=infra/netbird ...
-secretspec --file secretspec.toml run --profile north_york --scope opnsense -- ansible-playbook <later-enrollment-playbook> ...
+```sh
+ansible-galaxy collection install -r ansible/requirements.yml -p .ansible/collections
+ANSIBLE_CONFIG=ansible/ansible.cfg \
+  secretspec --file secretspec.toml run --profile north_york --scope opnsense -- \
+  ansible-playbook -i ansible/inventory.yml \
+  ansible/playbooks/opnsense-credential-preflight.yml
 ```
 
-The ellipses and enrollment playbook name remain placeholders for later members.
-Do not use an unscoped run or SecretSpec export/eval into the parent shell. Avoid
-tracing, environment dumps, debug output, and detached child processes.
+For separately selected live authenticated reads:
 
-### 6.3 Recorded read-only authentication
+```sh
+secretspec --file secretspec.toml run --profile north_york --scope opentofu -- \
+  bats --filter 'NetBird API connection' tests/verify/iac-connectors.bats
 
-The NetBird check read account settings through the pinned provider. The OPNsense
-check used HTTP GET for `api/netbird/status/status` through
-`ansible/playbooks/opnsense-credential-preflight.yml`. Both ran under their
-matching SecretSpec scopes, suppressed consumer output, and made no remote
-change. See the change evidence for the recorded result.
+ANSIBLE_CONFIG=ansible/ansible.cfg OPNSENSE_VERIFY=1 \
+  secretspec --file secretspec.toml run --profile north_york --scope opnsense -- \
+  bats --filter 'OPNsense API connection' tests/verify/iac-connectors.bats
+```
 
-The pinned OPNsense certificate expires on 28 October 2026. Replace it only after
-verifying the new public certificate against the live endpoint; a mismatch must
-fail closed.
+The OPNsense connector invokes the shared preflight with explicit inventory and
+requires management connectivity as well as API access. Selected missing inputs
+fail; a skipped test is not a pass. Apply no configuration to diagnose a failed
+read. Keep full model responses and credential-bearing output suppressed.
 
-SecretSpec scopes narrow which declared inputs a child receives; they do not
-stop an operator process with the age identity from decrypting the shared file.
+`infra/netbird/` now owns seven resources, not an empty bootstrap root. It uses
+native encrypted external state/plans and an ephemeral sensitive passphrase.
+Initialize, plan, apply or recover only through [OpenTofu operations](netbird-opentofu.md),
+with its existing external backend; never overwrite surviving state.
 
-## Recover the age identity
+## Recover custody and revoke access
 
-1. Retrieve the Bitwarden `keys.txt` attachment into a mode-`0700` temporary
-   directory outside the repository.
-2. Run `age-keygen -y` against the retrieved file and compare the resulting
-   public recipient with the recipient declared in `.sops.yaml`.
-3. Stop if the file does not parse or the recipients differ. Do not display or
-   record the private identity.
-4. If recovery is not currently required, remove the downloaded copy and lock
-   Bitwarden. If recovery is required, install it at the conventional SOPS path
-   with directory mode `0700` and file mode `0600`.
-
-## Rotate or revoke
-
-### 1. Rotate a credential
-
-For a credential rotation, create the replacement, edit it through SOPS, prove
-read-only authentication, then revoke the predecessor. Do not revoke the working
-credential before the replacement passes.
-
-### 2. Rotate an age key
-
-For an age-key rotation, add and verify the replacement public recipient, run
-`sops updatekeys secrets/network.yaml`, and prove recovery before removing an old
-recipient. If a decryption key was exposed, also rotate the underlying credentials;
-changing recipients cannot protect copies of old ciphertext.
-
-### 3. Revoke remote access and record results
-
-Delete a revoked PAT in NetBird and an API key in OPNsense. Deleting the local
-encrypted file does not revoke remote access. Revoke and replace exposed values;
-do not treat editing Git history as sufficient recovery.
-
-Record only dates, public fingerprints, non-secret credential identifiers,
-approved privileges, and results. Do not store secret values or decrypted output.
+- Keep `keys.txt` as an encrypted Bitwarden attachment, not in notes. Test the
+  Bitwarden account's own recovery independently of this workstation. Download
+  verification/recovery copies only into a mode-`0700` directory outside Git.
+- Use `age-keygen -y` on a retrieved copy and compare its public recipient with
+  `.sops.yaml`. Stop if parsing or identity differs; do not display private data.
+  Install a required recovery copy at the conventional SOPS path with directory
+  mode `0700` and file mode `0600`. Otherwise remove it and lock Bitwarden.
+- For approved age rotation, add and verify the replacement public recipient,
+  run `sops updatekeys secrets/network.yaml`, and prove independent recovery
+  before removing an old recipient. An exposed key also requires rotating the
+  underlying credentials: recipient changes cannot protect old ciphertext.
+- Revoke PATs in NetBird and API keys in OPNsense. Deleting local ciphertext or
+  rewriting Git history does not revoke remote access. Preserve access until an
+  approved replacement passes unless immediate revocation is required for compromise.
 
 ## Sources
 
-- [Planned change](../../openspec/changes/establish-network-secret-operations/).
-- [SecretSpec SOPS provider](https://secretspec.dev/providers/sops/).
-- [SecretSpec configuration](https://secretspec.dev/reference/configuration/).
-- [SecretSpec scopes](https://secretspec.dev/concepts/scopes/).
-- [SOPS](https://getsops.io/docs/).
-- [age](https://age-encryption.org/).
+- [Archived secret-foundation change](../../openspec/changes/archive/2026-09-05-establish-network-secret-operations/).
+- [SecretSpec SOPS provider](https://secretspec.dev/providers/sops/), [configuration](https://secretspec.dev/reference/configuration/) and [scopes](https://secretspec.dev/concepts/scopes/).
+- [SOPS](https://getsops.io/docs/) and [age](https://age-encryption.org/).
 - [NetBird API access](https://docs.netbird.io/how-to/access-netbird-public-api).
-- [OPNsense users and privileges](https://docs.opnsense.org/manual/users.html).
-- [OPNsense API key creation](https://docs.opnsense.org/development/how-tos/api.html#creating-keys).
+- [OPNsense privileges](https://docs.opnsense.org/manual/users.html) and [API keys](https://docs.opnsense.org/development/how-tos/api.html#creating-keys).

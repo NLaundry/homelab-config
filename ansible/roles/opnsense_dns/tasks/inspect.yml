@@ -1,0 +1,155 @@
+---
+- name: Read settings and all configured host and range records
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/get
+    action: get
+  register: dns_current
+  changed_when: false
+
+- name: Compare managed scalar settings rather than API selection objects
+  ansible.builtin.set_fact:
+    dns_settings_differ: >-
+      {%- set ns = namespace(changed=false) -%}
+      {%- for key, wanted in opnsense_dns_settings.items() -%}
+      {%- set pairs = wanted.items() if key == 'dhcp' else [(key, wanted)] -%}
+      {%- set current = dns_current.response.dnsmasq.dhcp if key == 'dhcp' else dns_current.response.dnsmasq -%}
+      {%- for field, value in pairs -%}
+      {%- set actual = current[field] -%}
+      {%- if actual is mapping -%}
+      {%- set actual = actual | dict2items | selectattr('value.selected', 'in', [1, '1']) | map(attribute='key') | reject('equalto', '') | sort | join(',') -%}
+      {%- set value = value.split(',') | reject('equalto', '') | sort | join(',') -%}
+      {%- endif -%}
+      {%- if field != 'enable' and actual | string != value | string -%}{%- set ns.changed = true -%}{%- endif -%}
+      {%- endfor -%}{%- endfor -%}
+      {{ ns.changed }}
+    dns_existing_hosts: >-
+      {%- set rows = [] -%}
+      {%- for uuid, row in (dns_current.response.dnsmasq.hosts | default({}, true)).items() -%}
+      {%- set clean = {'uuid': uuid} -%}
+      {%- for key, value in row.items() -%}
+      {%- if key in ['ip', 'hwaddr', 'aliases', 'cnames'] -%}
+      {%- set value = value | dict2items | selectattr('value.selected', 'in', [1, '1']) | map(attribute='key') | reject('equalto', '') | list -%}
+      {%- endif -%}
+      {%- set _ = clean.update({key: value}) -%}
+      {%- endfor -%}
+      {%- set _ = rows.append(clean) -%}
+      {%- endfor -%}
+      {{ rows }}
+    dns_domain_plan: []
+
+- name: Require unique desired and existing managed descriptions
+  ansible.builtin.assert:
+    that:
+      - desired | length == desired | unique | length
+      - desired | select('match', item.prefix) | list | length == desired | length
+      - existing | select('in', desired) | list | length == existing | select('in', desired) | unique | length
+  loop:
+    - desired: "{{ (opnsense_dns_reservations + opnsense_dns_shared_records + opnsense_dns_lease_holds) | map(attribute='description') | list }}"
+      existing: "{{ dns_existing_hosts | map(attribute='descr') | list }}"
+      prefix: '^homelab:north_york:(host|lease):.+'
+    - desired: "{{ opnsense_dns_ranges | map(attribute='description') | list }}"
+      existing: "{{ (dns_current.response.dnsmasq.dhcp_ranges | default({}, true)).values() | map(attribute='description') | list }}"
+      prefix: '^homelab:north_york:range:.+'
+    - desired: "{{ opnsense_dns_domains | map(attribute='descr') | list }}"
+      existing: "{{ (dns_current.response.dnsmasq.domainoverrides | default({}, true)).values() | map(attribute='descr') | list }}"
+      prefix: '^homelab:north_york:domain:.+'
+  vars:
+    desired: "{{ item.desired }}"
+    existing: "{{ item.existing }}"
+
+- name: Reject explicit alias additions that are also removed
+  ansible.builtin.assert:
+    that:
+      - item.aliases | default([]) | map('lower') | intersect(item.remove_aliases | default([]) | map('lower')) | length == 0
+    fail_msg: An alias cannot be both explicitly desired and removed.
+  loop: "{{ opnsense_dns_reservations + opnsense_dns_shared_records + opnsense_dns_lease_holds }}"
+
+- name: Preserve existing aliases except explicit per-host removals
+  ansible.builtin.set_fact:
+    dns_hosts: >-
+      {%- set rows = [] -%}
+      {%- for item in opnsense_dns_reservations + opnsense_dns_shared_records + opnsense_dns_lease_holds -%}
+      {%- set old = dns_existing_hosts | selectattr('descr', 'equalto', item.description) | first | default({}) -%}
+      {%- set aliases = old.aliases | default([]) + item.aliases | default([]) -%}
+      {%- if item in opnsense_dns_reservations and (item.legacy_alias | default(true) | bool) -%}{%- set aliases = aliases + [item.host ~ '.localdomain'] -%}{%- endif -%}
+      {%- set kept = [] -%}
+      {%- for alias in aliases -%}
+      {%- if alias | lower not in (item.remove_aliases | default([]) | map('lower') | list) -%}{%- set _ = kept.append(alias) -%}{%- endif -%}
+      {%- endfor -%}
+      {%- set aliases = kept -%}
+      {%- set host = item.host | default('') -%}
+      {%- set row = old | combine({'descr': item.description, 'host': host, 'domain': item.domain | default(opnsense_dns_domain) if host else '', 'ip': item.ip, 'hwaddr': item.hardware_addr | default([]), 'aliases': aliases | unique | list, 'comments': item.comments | default(old.comments | default(''))}) -%}
+      {%- if item.client_id is defined -%}{%- set row = row | combine({'client_id': item.client_id}) -%}{%- endif -%}
+      {%- set _ = rows.append(row) -%}
+      {%- endfor -%}
+      {{ rows }}
+
+- name: Reject address, MAC or protected-name overlaps before writing
+  ansible.builtin.assert:
+    that:
+      - item.0.ip | intersect(item.1.ip) | length == 0
+      - item.0.hwaddr | map('lower') | intersect(item.1.hwaddr | map('lower')) | length == 0
+      - names_a | map('lower') | intersect(names_b | map('lower')) | length == 0
+    fail_msg: A managed host conflicts with another desired or existing record; no records were changed.
+  loop: "{{ dns_hosts | product(dns_existing_hosts + dns_hosts) | list }}"
+  when: item.0.descr != item.1.descr
+  vars:
+    names_a: "{{ ([item.0.host, item.0.host ~ '.' ~ item.0.domain] if item.0.host else []) + item.0.aliases + item.0.cnames | default([]) }}"
+    names_b: "{{ ([item.1.host, item.1.host ~ '.' ~ item.1.domain] if item.1.host else []) + item.1.aliases + item.1.cnames | default([]) }}"
+
+- name: Plan and validate all explicit removals before writes
+  ansible.builtin.import_tasks: removals.yml
+
+- name: Require IPv4-only internal ranges
+  ansible.builtin.assert:
+    that:
+      - item.interface in ['lan', 'opt1']
+      - item.start_addr is match('^10\\.10\\.(10|20)\\.[0-9]+$')
+      - item.end_addr is match('^10\\.10\\.(10|20)\\.[0-9]+$')
+      - item.start_addr.rsplit('.', 1)[0] == item.end_addr.rsplit('.', 1)[0]
+      - item.start_addr.split('.')[3] | int <= item.end_addr.split('.')[3] | int
+      - item.end_addr.split('.')[3] | int < 255
+  loop: "{{ opnsense_dns_ranges }}"
+
+- name: Reject overlapping ranges without taking ownership of existing rows
+  ansible.builtin.assert:
+    that: a_end | int < b_start | int or b_end | int < a_start | int
+    fail_msg: An existing or desired IPv4 range overlaps a managed range.
+  loop: "{{ opnsense_dns_ranges | product(((dns_current.response.dnsmasq.dhcp_ranges | default({}, true)).values() | list) + opnsense_dns_ranges) | list }}"
+  when:
+    - item.0.description != item.1.description
+    - "':' not in item.1.start_addr"
+  vars:
+    a: "{{ item.0.start_addr.split('.') | map('int') | list }}"
+    ae: "{{ item.0.end_addr.split('.') | map('int') | list }}"
+    b: "{{ item.1.start_addr.split('.') | map('int') | list }}"
+    be: "{{ (item.1.end_addr or item.1.start_addr).split('.') | map('int') | list }}"
+    a_start: "{{ a[0]*16777216 + a[1]*65536 + a[2]*256 + a[3] }}"
+    a_end: "{{ ae[0]*16777216 + ae[1]*65536 + ae[2]*256 + ae[3] }}"
+    b_start: "{{ b[0]*16777216 + b[1]*65536 + b[2]*256 + b[3] }}"
+    b_end: "{{ be[0]*16777216 + be[1]*65536 + be[2]*256 + be[3] }}"
+
+# search_domain defaults to all rows in UIModelGrid. Verify completeness anyway.
+- name: Read all domain identities using the supported GET search
+  oxlorg.opnsense.raw:
+    url: dnsmasq/settings/search_domain
+    action: get
+  register: dns_domain_search
+  changed_when: false
+
+- name: Require a complete domain inventory
+  ansible.builtin.assert:
+    that:
+      - dns_domain_search.response.rows | length == dns_domain_search.response.total | int
+
+- name: Verify deletion UUIDs against the complete domain search
+  ansible.builtin.assert:
+    that:
+      - dns_domain_search.response.rows | selectattr('uuid', 'equalto', item.uuid) | selectattr('descr', 'equalto', item.description) | list | length == 1
+  loop: "{{ dns_removal_plan | selectattr('kind', 'equalto', 'domain') | list }}"
+
+- name: Plan each domain by its unique managed description
+  ansible.builtin.include_tasks: domain.yml
+  loop: "{{ opnsense_dns_domains }}"
+  loop_control:
+    loop_var: dns_domain

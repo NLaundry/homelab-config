@@ -1,0 +1,19 @@
+---
+# Recheck existence immediately before update; this API can create unknown UUIDs.
+- ansible.builtin.include_tasks: inspect.yml
+
+- name: Require unchanged adopted identities before writing
+  ansible.builtin.assert:
+    that:
+      - acme_plan.identity == acme_initial_plan.identity
+      - acme_plan.job_id == acme_initial_plan.job_id
+    fail_msg: Native identity changed during adoption; stop concurrent configuration edits.
+
+- name: Update owned ACME fields without issuance or registration
+  oxlorg.opnsense.raw:
+    url: "{{ acme_update.url }}"
+    action: post
+    data: "{{ acme_update.data }}"
+  register: acme_saved
+  failed_when: acme_saved.response.result | default('') != 'saved'
+  when: acme_update.url in (acme_plan.operations | map(attribute='url') | list)

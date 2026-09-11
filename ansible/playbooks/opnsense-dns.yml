@@ -1,0 +1,18 @@
+---
+- name: Manage North York DNS with an explicit guarded first cutover
+  hosts: opnsense
+  connection: local
+  gather_facts: false
+  no_log: true
+  vars_files:
+    - ../vars/north-york-dns.yml
+  vars:
+    ansible_pipelining: true
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    apply_dns: false
+  module_defaults:
+    group/oxlorg.opnsense.all: "{{ opnsense_module_defaults }}"
+  pre_tasks:
+    - ansible.builtin.import_tasks: ../tasks/opnsense-connection.yml
+  roles:
+    - role: ../roles/opnsense_dns
