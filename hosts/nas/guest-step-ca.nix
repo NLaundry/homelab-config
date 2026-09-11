@@ -15,7 +15,7 @@ in
     autostart = true;
     restartIfChanged = false;
     config = {
-      imports = [ ../../guests/step-ca ];
+      imports = [ ./step-ca ];
       users.users.operator.openssh.authorizedKeys.keys = operatorKeys;
     };
   };

@@ -6,7 +6,7 @@
     ./zfs.nix
     ./samba.nix
     ./avahi.nix
-    ./step-ca-vm.nix
+    ./guest-step-ca.nix
   ];
 
   boot.loader.systemd-boot.enable = true;

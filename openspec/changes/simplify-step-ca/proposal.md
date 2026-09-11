@@ -25,7 +25,7 @@ None.
 
 ## Impact
 
-- Affects `guests/step-ca/`, including the NixOS service configuration, startup checks, and OPNsense certificate template.
+- Affects `hosts/nas/step-ca/`, including the NixOS service configuration, startup checks, and OPNsense certificate template.
 - Affects the commissioned step-ca configuration and its persistent state migration procedure.
 - Affects future ACME clients using `https://ca.laundrylab.internal`.
 - Requires read-only acceptance checks for CA health, preserved intermediate identity, OPNsense certificate issuance, and rejection of wildcard names.

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Protect external commissioned state; optionally assemble one private JWE field.
+# Validate the commissioned CA state before step-ca starts; never initialize or assemble configuration.
+"""Protect the external commissioned step-ca state.
 
-Never initialize authority/database state or read the rollback config/ca.json.
+Never initialize authority/database state or assemble runtime configuration.
 Failure categories are fixed strings: neither private input nor tool output is logged.
 """
 import argparse
@@ -12,7 +13,6 @@ import pathlib
 import stat
 import subprocess
 import sys
-import tempfile
 
 
 class Refusal(Exception):
@@ -105,69 +105,16 @@ def check(state, trusted_root, password_file, openssl, commissioning=False, moun
     return fingerprint
 
 
-def encrypted_payload(path):
-    # Presence, size bound and private permissions only. Payload shape and
-    # decryption belong to the existing operator, not to this guard.
-    required_file(path, "operator-payload-missing", private=True)
-    require(path.stat().st_size <= 65536, "operator-payload-invalid")
-    value = path.read_text().strip()
-    require(bool(value), "operator-payload-invalid")
-    return value
-
-
-def assemble(state, public_config, payload_mode, runtime_config=None):
-    cfg = read_json(pathlib.Path(public_config), "public-config-invalid")
-    try:
-        provisioners = cfg["authority"]["provisioners"]
-        require(isinstance(provisioners, list) and all(isinstance(p, dict) for p in provisioners),
-                "public-config-invalid")
-        require(all("encryptedKey" not in p for p in provisioners), "public-config-private-field")
-        operators = [p for p in provisioners if p.get("type") == "JWK"
-                     and p.get("name") == "laundrylab-admin"]
-        require(len(operators) == 1, "operator-identity")
-    except (KeyError, TypeError):
-        raise Refusal("public-config-invalid") from None
-    if payload_mode == "none":
-        require(runtime_config is None, "runtime-mode")
-        require(not (pathlib.Path(state) / "secrets/operator-encrypted-key").exists(),
-                "unexpected-operator-payload")
-        return  # Native module executes its immutable JSON directly.
-    require(payload_mode == "required" and runtime_config is not None, "runtime-mode")
-    operators[0]["encryptedKey"] = encrypted_payload(pathlib.Path(state) / "secrets/operator-encrypted-key")
-    target = pathlib.Path(runtime_config)
-    require(target.parent.is_dir() and not target.parent.is_symlink()
-            and stat.S_IMODE(target.parent.stat().st_mode) == 0o700, "runtime-permissions")
-    # Write atomically with 0600, including on restart. Never touch persistent JSON.
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(mode="w", dir=target.parent, delete=False) as stream:
-            temporary = pathlib.Path(stream.name)
-            json.dump(cfg, stream)
-        os.replace(temporary, target)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("state", "trusted_root", "password_file", "openssl"):
         parser.add_argument(name)
     parser.add_argument("--commission", action="store_true")
     parser.add_argument("--mount")
-    parser.add_argument("--public-config")
-    parser.add_argument("--payload-mode", choices=("required", "none"))
-    parser.add_argument("--runtime-config")
     args = parser.parse_args()
     try:
-        require(not args.commission or not args.public_config, "runtime-mode")
         check(args.state, args.trusted_root, args.password_file, args.openssl,
               commissioning=args.commission, mount=args.mount)
-        if args.public_config:
-            require(args.payload_mode is not None, "runtime-mode")
-            assemble(args.state, args.public_config, args.payload_mode, args.runtime_config)
-        else:
-            require(args.payload_mode is None and args.runtime_config is None, "runtime-mode")
         print("CA state checks passed" if not args.commission else "First commissioning prerequisites passed")
     except Refusal as exc:
         print(f"CA state check failed [{exc}]; no initialization attempted.", file=sys.stderr)

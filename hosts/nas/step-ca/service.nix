@@ -1,12 +1,5 @@
 { config, lib, pkgs, ... }:
 
-let
-  # The verified existing operator has an encryptedKey. No public-only fallback
-  # is permitted for this deployment. Only dummy/no-payload authorities use none.
-  requireOperatorPayload = true;
-  publicConfig = "/etc/smallstep/ca.json";
-  runtimeConfig = "/run/step-ca/ca.json";
-in
 {
   # Ciphertext and its dedicated guest identity are provisioned privately into
   # the persistent /var volume. Neither is a build-time filesystem input.
@@ -48,14 +41,22 @@ in
         enableAdmin = false;
         claims.enableSSHCA = false;
         policy.x509 = {
-          allow.dns = [ "ca.laundrylab.internal" "opnsense.ny.laundrylab.internal" ];
+          allow.dns = [ "*.laundrylab.internal" ];
           allowWildcardNames = false;
         };
         provisioners = [
           {
-            type = "JWK";
-            name = "laundrylab-admin";
-            key = builtins.fromJSON (builtins.readFile ../../infra/certificates/laundrylab-operator-jwk.json);
+            type = "ACME";
+            name = "services";
+            challenges = [ "http-01" ];
+            claims = {
+              minTLSCertDuration = "5m";
+              defaultTLSCertDuration = "168h";
+              maxTLSCertDuration = "168h";
+              enableSSHCA = false;
+              disableRenewal = false;
+              allowRenewalAfterExpiry = false;
+            };
           }
           {
             type = "ACME";
@@ -85,25 +86,20 @@ in
     environment.STEPPATH = "/var/lib/step-ca";
     preStart = ''
       ${pkgs.python3}/bin/python3 ${./check-state.py} \
-        /var/lib/step-ca ${../../infra/certificates/laundrylab-root-ca.crt} \
+        /var/lib/step-ca ${../../../infra/certificates/laundrylab-root-ca.crt} \
         "$CREDENTIALS_DIRECTORY/intermediate_password" ${pkgs.openssl}/bin/openssl \
-        --mount /var --public-config ${publicConfig} \
-        --payload-mode ${if requireOperatorPayload then "required" else "none"} \
-        ${lib.optionalString requireOperatorPayload "--runtime-config ${runtimeConfig}"}
+        --mount /var
     '';
     serviceConfig = {
       DynamicUser = lib.mkForce false;
       StateDirectoryMode = "0700";
-      RuntimeDirectory = "step-ca";
-      RuntimeDirectoryMode = "0700";
       UnsetEnvironment = [ "STEP_CA_TOKEN" ];
-      # Preserve native credentials and public-only execution when explicitly
-      # selected, but assemble the required private field in /run for this CA.
-      # The old persistent config/ca.json is never read or modified.
-      ExecStart = lib.mkIf requireOperatorPayload (lib.mkForce [
+      # Use the immutable module-generated configuration directly. The checker
+      # validates commissioned state but never assembles or mutates config.
+      ExecStart = lib.mkForce [
         ""
-        "${config.services.step-ca.package}/bin/step-ca ${runtimeConfig} --password-file \${CREDENTIALS_DIRECTORY}/intermediate_password"
-      ]);
+        "${config.services.step-ca.package}/bin/step-ca /etc/smallstep/ca.json --password-file \${CREDENTIALS_DIRECTORY}/intermediate_password"
+      ];
       Restart = "on-failure";
       RestartSec = 30;
     };
