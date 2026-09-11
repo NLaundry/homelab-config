@@ -4,10 +4,11 @@ Run from the repository root. Install the pinned collection once:
 
 ```sh
 nix develop
-ansible-galaxy collection install -r ansible/requirements.yml -p .ansible/collections
-The dev shell sets `ANSIBLE_CONFIG` to `ansible/ansible.cfg` and selects the
-standard SOPS age key path automatically.
+ansible-galaxy collection install -r infra/ansible/requirements.yml -p .ansible/collections
 ```
+
+The dev shell sets `ANSIBLE_CONFIG` to `infra/ansible/ansible.cfg` and selects the
+standard SOPS age key path automatically.
 
 The playbooks run locally against the OPNsense API. They configure state only;
 acceptance checks live in `tests/verify` and are run with `make verify`.
@@ -19,20 +20,20 @@ certificate, or switch resolver ownership:
 
 ```sh
 secretspec run --profile north_york --scope opnsense -- \
-  ansible-playbook -i ansible/inventory.yml ansible/playbooks/opnsense-dns.yml
+  ansible-playbook -i infra/ansible/inventory.yml infra/ansible/playbooks/opnsense-dns.yml
 
 secretspec run --profile north_york --scope opnsense -- \
-  ansible-playbook -i ansible/inventory.yml ansible/playbooks/opnsense-netbird-routing.yml
+  ansible-playbook -i infra/ansible/inventory.yml infra/ansible/playbooks/opnsense-netbird-routing.yml
 
 secretspec run --profile north_york --scope opnsense -- \
-  ansible-playbook -i ansible/inventory.yml ansible/playbooks/opnsense-acme.yml
+  ansible-playbook -i infra/ansible/inventory.yml infra/ansible/playbooks/opnsense-acme.yml
 ```
 
 Check syntax before applying:
 
 ```sh
-for play in ansible/playbooks/*.yml; do
-  ansible-playbook -i ansible/inventory.yml --syntax-check "$play"
+for play in infra/ansible/playbooks/*.yml; do
+  ansible-playbook -i infra/ansible/inventory.yml --syntax-check "$play"
 done
 ```
 
@@ -43,17 +44,17 @@ service:
 
 ```sh
 # Dnsmasq takes ownership from Unbound.
-ansible-playbook -i ansible/inventory.yml \
-  ansible/playbooks/opnsense-dns-bootstrap.yml
+ansible-playbook -i infra/ansible/inventory.yml \
+  infra/ansible/playbooks/opnsense-dns-bootstrap.yml
 
 # The setup key is supplied out-of-band and is never logged.
 export NETBIRD_SETUP_KEY='...'
-ansible-playbook -i ansible/inventory.yml \
-  ansible/playbooks/opnsense-netbird-enrollment.yml
+ansible-playbook -i infra/ansible/inventory.yml \
+  infra/ansible/playbooks/opnsense-netbird-enrollment.yml
 
 # The internal step-ca directory is used for the first issuance.
-ansible-playbook -i ansible/inventory.yml \
-  ansible/playbooks/opnsense-acme-bootstrap.yml
+ansible-playbook -i infra/ansible/inventory.yml \
+  infra/ansible/playbooks/opnsense-acme-bootstrap.yml
 ```
 
 The NetBird management URL comes from `NB_MANAGEMENT_URL` when supplied by

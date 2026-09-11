@@ -1,7 +1,9 @@
 ---
 opnsense_acme:
   account_name: LaundryLab OPNsense
+  account_description: Existing private intermediate; router HTTPS only
   challenge_name: LaundryLab LAN HTTP-01
+  challenge_description: Explicit LAN destination only; no WAN auto discovery
   automation_name: LaundryLab WebGUI reload
   certificate_description: LaundryLab router HTTPS; seven-day private certificate
   hostname: opnsense.ny.laundrylab.internal

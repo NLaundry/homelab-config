@@ -55,7 +55,7 @@ in
           {
             type = "JWK";
             name = "laundrylab-admin";
-            key = builtins.fromJSON (builtins.readFile ../../certificates/laundrylab-operator-jwk.json);
+            key = builtins.fromJSON (builtins.readFile ../../infra/certificates/laundrylab-operator-jwk.json);
           }
           {
             type = "ACME";
@@ -85,7 +85,7 @@ in
     environment.STEPPATH = "/var/lib/step-ca";
     preStart = ''
       ${pkgs.python3}/bin/python3 ${./check-state.py} \
-        /var/lib/step-ca ${../../certificates/laundrylab-root-ca.crt} \
+        /var/lib/step-ca ${../../infra/certificates/laundrylab-root-ca.crt} \
         "$CREDENTIALS_DIRECTORY/intermediate_password" ${pkgs.openssl}/bin/openssl \
         --mount /var --public-config ${publicConfig} \
         --payload-mode ${if requireOperatorPayload then "required" else "none"} \

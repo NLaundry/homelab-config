@@ -12,7 +12,7 @@ setup_file() {
 
 setup() {
   ROOT=${HOMELAB_ROOT:-"$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"}
-  NAS_ADDRESS=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/ansible/inventory.yml")"}
+  NAS_ADDRESS=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/infra/ansible/inventory.yml")"}
   SSH_COMMAND=${HOMELAB_DEPLOYMENT_SSH_COMMAND:-ssh}
   SSH_IDENTITY=${HOMELAB_DEPLOYMENT_SSH_IDENTITY:-"$HOME/.ssh/id_ed25519"}
   SSH_DEADLINE_SECONDS=${HOMELAB_DEPLOYMENT_SSH_DEADLINE_SECONDS:-60}

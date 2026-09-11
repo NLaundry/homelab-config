@@ -6,8 +6,8 @@ setup() {
   ROUTER_HOST=${HOMELAB_ROUTER_HOST:-opnsense.ny.laundrylab.internal}
   CA_HOST=${HOMELAB_CA_HOST:-ca.laundrylab.internal}
   NAS_JUMP=${HOMELAB_DEPLOYMENT_TARGET:-operator@10.10.10.11}
-  ROOT_CERT="$ROOT/certificates/laundrylab-root-ca.crt"
-  PINNED_INTERMEDIATE="$ROOT/certificates/laundrylab-intermediate-ca.crt"
+  ROOT_CERT="$ROOT/infra/certificates/laundrylab-root-ca.crt"
+  PINNED_INTERMEDIATE="$ROOT/infra/certificates/laundrylab-intermediate-ca.crt"
   SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=5)
   CHAIN="$BATS_TEST_TMPDIR/chain.pem"
   capture_leaf() {

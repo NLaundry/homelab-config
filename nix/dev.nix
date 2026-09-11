@@ -196,6 +196,11 @@ in
   ];
 
   shellHook = ''
+    export SOPS_AGE_FILE="''${XDG_CONFIG_HOME:-$HOME/.config}/sops/age/keys.txt"
+    export SOPS_AGE_KEY_FILE="''${SOPS_AGE_KEY_FILE:-$SOPS_AGE_FILE}"
+    if [[ -z "''${ANSIBLE_CONFIG:-}" && -f "$PWD/infra/ansible/ansible.cfg" ]]; then
+      export ANSIBLE_CONFIG="$PWD/infra/ansible/ansible.cfg"
+    fi
     export BAT_THEME="Catppuccin Mocha"
     export CLICOLOR=1
     export COLORTERM=truecolor

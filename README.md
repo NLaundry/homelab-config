@@ -22,7 +22,6 @@ The shell supports macOS ARM and Linux x86-64. Full live SMB checks need macOS.
 | Command | Action |
 |---|---|
 | `make check` | Evaluate Nix configuration without building or deploying |
-| `make test-local` | Run isolated PKI, Ansible and OpenTofu regressions; dependencies may download |
 | `make test-vm` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
 | `make verify` | Check live NAS, control-plane, DNS, and private-PKI health |
 | `make build` | Build the NAS configuration without activation |
@@ -60,6 +59,8 @@ and does not activate the candidate.
 
 - `hosts/nas/`: NAS configuration.
 - `estate.yaml`: sites, hosts, optional VMs, and their services.
+- `infra/ansible/`: Ansible inventory, playbooks, roles, and operations.
+- `infra/terraform/`: OpenTofu/Terraform infrastructure definitions.
 - `nix/dev.nix`: operator tools. See [tooling.md](tooling.md).
 - `docs/`: [operations and recovery runbooks](docs/operations/README.md).
 - `openspec/`: specs, changes, ideas, and stack order. See [planning](openspec/README.md).

@@ -22,7 +22,7 @@
   # Local, interactive PKI operations; private keys stay outside the Nix store.
   environment.systemPackages = [ pkgs.step-cli ];
   # Public trust only; the private authority stays in its locked custody dataset.
-  security.pki.certificateFiles = [ ../../certificates/laundrylab-root-ca.crt ];
+  security.pki.certificateFiles = [ ../../infra/certificates/laundrylab-root-ca.crt ];
 
   users.users.operator = {
     isNormalUser = true;

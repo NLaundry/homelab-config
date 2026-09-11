@@ -39,6 +39,7 @@
 - name: Configure the internal CA account without registering it
   oxlorg.opnsense.acme_account:
     name: "{{ opnsense_acme.account_name }}"
+    description: "{{ opnsense_acme.account_description }}"
     ca: custom
     custom_ca: "{{ opnsense_acme.directory }}"
     register: false
@@ -49,6 +50,7 @@
 - name: Configure the LAN HTTP-01 validation
   oxlorg.opnsense.acme_validation:
     name: "{{ opnsense_acme.challenge_name }}"
+    description: "{{ opnsense_acme.challenge_description }}"
     method: http01
     http_service: opnsense
     http_opn_autodiscovery: false

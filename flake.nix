@@ -53,7 +53,7 @@
             meta.description = "Run deployed-homelab checks";
             program = lib.getExe (pkgs.writeShellApplication {
               name = "homelab-verify";
-              runtimeInputs = [ pkgs.bats dev.ssh pkgs.yq-go pkgs.coreutils pkgs.curl pkgs.openssl pkgs.dnsutils pkgs.cacert ];
+              runtimeInputs = [ pkgs.bats dev.ssh pkgs.yq-go pkgs.coreutils pkgs.curl pkgs.openssl pkgs.dnsutils pkgs.cacert pkgs.python3 ] ++ lib.optional pkgs.stdenv.isLinux pkgs.iproute2;
               text = ''
                 preflight=false
                 if [[ ''${1:-} == --preflight ]]; then
@@ -69,7 +69,7 @@
                 # paths instead of --cacert overrides or insecure modes.
                 trust_bundle=$(mktemp)
                 cat ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
-                  ${self}/certificates/laundrylab-root-ca.crt > "$trust_bundle" 2>/dev/null || true
+                  ${self}/infra/certificates/laundrylab-root-ca.crt > "$trust_bundle" 2>/dev/null || true
                 export SSL_CERT_FILE=''${SSL_CERT_FILE:-$trust_bundle}
                 if [[ -f $estate ]]; then
                   router_addr=$(yq -r '.north-york.hosts.opnsense.addresses.lan // ""' "$estate")
