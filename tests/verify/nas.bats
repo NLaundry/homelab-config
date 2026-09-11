@@ -1,6 +1,8 @@
 #!/usr/bin/env bats
 
 # bats file_tags=nas,samba
+# shellcheck source=tests/verify/lib/deployment-health.sh
+source "$BATS_TEST_DIRNAME/lib/deployment-health.sh"
 # shellcheck source=tests/verify/lib/nas-samba-safety.sh
 source "$BATS_TEST_DIRNAME/lib/nas-samba-safety.sh"
 
@@ -10,7 +12,16 @@ setup_file() {
 
 setup() {
   ROOT=${HOMELAB_ROOT:-"$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"}
-  SERVER=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/ansible/inventory.yml")"}
+  NAS_ADDRESS=${HOMELAB_NAS_ADDRESS:-"$(yq -r '.all.children.nas.hosts.nasty.ansible_host' "$ROOT/ansible/inventory.yml")"}
+  SSH_COMMAND=${HOMELAB_DEPLOYMENT_SSH_COMMAND:-ssh}
+  SSH_IDENTITY=${HOMELAB_DEPLOYMENT_SSH_IDENTITY:-"$HOME/.ssh/id_ed25519"}
+  SSH_DEADLINE_SECONDS=${HOMELAB_DEPLOYMENT_SSH_DEADLINE_SECONDS:-60}
+  [[ $SSH_DEADLINE_SECONDS =~ ^[1-9][0-9]*$ ]] || {
+    printf 'SSH deadline must be a positive whole number of seconds.\n' >&2
+    return 1
+  }
+  TARGET=${HOMELAB_DEPLOYMENT_TARGET:-"operator@$NAS_ADDRESS"}
+  SERVER=$NAS_ADDRESS
   EXPECTED_SHARES=(mediaBin smolBoy)
 }
 
@@ -61,6 +72,25 @@ guest_share_round_trip() {
     return 1
   fi
   printf '%s supports guest list, write, read, delete, and clean unmount\n' "$share"
+}
+
+@test "the NAS becomes reachable over SSH within a finite deadline" {
+  run wait_for_ssh
+  if [ "$status" -ne 0 ]; then printf '%s\n' "$output" >&2; fi
+  [ "$status" -eq 0 ]
+}
+
+@test "the NAS has no failed systemd units" {
+  run assert_systemd_healthy
+  if [ "$status" -ne 0 ]; then printf '%s\n' "$output" >&2; fi
+  [ "$status" -eq 0 ]
+}
+
+@test "the NAS exposes an existing NixOS system generation" {
+  run assert_active_generation
+  if [ "$status" -ne 0 ]; then printf '%s\n' "$output" >&2; fi
+  [ "$status" -eq 0 ]
+  [[ $output == *"active deployment generation: /nix/store/"* ]]
 }
 
 @test "the NAS advertises every expected ordinary SMB share to guests" {
