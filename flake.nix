@@ -80,18 +80,24 @@
                   ca_fqdn=$(yq -r '.north-york.hosts.nas.vms.step-ca.services."private-ca".url // ""' "$estate" \
                     | sed -e 's|^https://||' -e 's|/$||')
                   if [[ -z ''${DNS_SERVER:-} && -n $router_addr ]]; then export DNS_SERVER=$router_addr; fi
-                  if [[ -z ''${DNS_SITE_FQDN:-} && -n $nas_fqdn ]]; then export DNS_SITE_FQDN=$nas_fqdn; fi
-                  if [[ -z ''${DNS_SITE_ADDRESS:-} && -n $nas_addr ]]; then export DNS_SITE_ADDRESS=$nas_addr; fi
-                  if [[ -z ''${DNS_SHARED_FQDN:-} && -n $ca_fqdn ]]; then export DNS_SHARED_FQDN=$ca_fqdn; fi
-                  if [[ -z ''${DNS_SHARED_ADDRESS:-} && -n $ca_addr ]]; then export DNS_SHARED_ADDRESS=$ca_addr; fi
-                  if [[ -z ''${DNS_VERIFY:-} && -n $DNS_SERVER && -n $DNS_SITE_FQDN && -n $DNS_SHARED_FQDN ]]; then export DNS_VERIFY=1; fi
+                  if [[ -z ''${DNS_NAS_FQDN:-} && -n $nas_fqdn ]]; then export DNS_NAS_FQDN=$nas_fqdn; fi
+                  if [[ -z ''${DNS_NAS_ADDRESS:-} && -n $nas_addr ]]; then export DNS_NAS_ADDRESS=$nas_addr; fi
+                  if [[ -z ''${DNS_ROUTER_FQDN:-} && -n $router_fqdn ]]; then export DNS_ROUTER_FQDN=$router_fqdn; fi
+                  if [[ -z ''${DNS_ROUTER_ADDRESS:-} && -n $router_addr ]]; then export DNS_ROUTER_ADDRESS=$router_addr; fi
+                  if [[ -z ''${DNS_CA_FQDN:-} && -n $ca_fqdn ]]; then export DNS_CA_FQDN=$ca_fqdn; fi
+                  if [[ -z ''${DNS_CA_ADDRESS:-} && -n $ca_addr ]]; then export DNS_CA_ADDRESS=$ca_addr; fi
+                  if [[ -z ''${DNS_VERIFY:-} && -n $DNS_SERVER && -n $DNS_NAS_FQDN && -n $DNS_ROUTER_FQDN && -n $DNS_CA_FQDN ]]; then export DNS_VERIFY=1; fi
                   if [[ -z ''${HTTPS_URL:-} && -n $router_fqdn ]]; then export HTTPS_URL=https://$router_fqdn/; fi
                   if [[ -z ''${HTTPS_VERIFY:-} && -n $HTTPS_URL ]]; then export HTTPS_VERIFY=1; fi
                 fi
+                # Make-based verification supplies the checkout so new, untracked
+                # probe files run before their first commit. Direct `nix run` uses
+                # the immutable flake source instead.
+                test_root=''${HOMELAB_ROOT:-${self}}
                 if (( $# == 0 )); then
                   # Every probe file under tests/verify runs by default; new
                   # .bats files are registered automatically.
-                  set -- ${self}/tests/verify/*.bats
+                  set -- "$test_root"/tests/verify/*.bats
                 fi
                 if [[ $preflight == true ]]; then
                   for test_file in "$@"; do
@@ -100,13 +106,13 @@
                       exit 1
                     fi
                     case "$test_file" in
-                      ${self}/tests/verify/*.bats) ;;
+                      "$test_root"/tests/verify/*.bats) ;;
                       *) printf 'Activation verification accepts probe files under tests/verify only: %s\n' "$test_file" >&2; exit 1 ;;
                     esac
                     case "$test_file" in
-                      */nas-samba.bats)
+                      */nas.bats)
                         # shellcheck source=/dev/null
-                        source ${self}/tests/verify/lib/nas-samba-safety.sh
+                        source "$test_root"/tests/verify/lib/nas-samba-safety.sh
                         require_smb_tools
                         ;;
                     esac

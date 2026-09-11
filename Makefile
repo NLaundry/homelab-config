@@ -11,7 +11,7 @@ TEST_STORE ?= ssh-ng://operator@10.10.10.11?ssh-key=$(KEY)&system-features=kvm%2
 
 REBUILD = nix run .\#nixos-rebuild -- --flake $(FLAKE) --build-host $(TARGET)
 ACTIVATE = $(REBUILD) --target-host $(TARGET) --sudo
-VERIFY = env HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
+VERIFY = env HOMELAB_ROOT="$(CURDIR)" HOMELAB_NAS_ADDRESS="$(lastword $(subst @, ,$(TARGET)))" \
 	HOMELAB_DEPLOYMENT_TARGET="$(TARGET)" HOMELAB_DEPLOYMENT_SSH_IDENTITY="$(KEY)" \
 	nix run .\#verify --
 
@@ -48,23 +48,13 @@ XDG_CONFIG_HOME ?= $(HOME)/.config
 SOPS_AGE_FILE ?= $(XDG_CONFIG_HOME)/sops/age/keys.txt
 SECRETSPEC ?= env SOPS_AGE_KEY_FILE="$(SOPS_AGE_FILE)" secretspec --file secretspec.toml run --profile north_york
 
-# Connector probes need secretspec/ansible: run from inside `nix develop`.
-# Outside it they skip with a visible notice instead of failing.
+# Run all live probes with the North York profile secrets available.
+# Outside `nix develop`, keep non-secret probes usable and visibly skip connectors.
 verify:
-	@set -eu; \
-	$(VERIFY) $(VERIFY_ARGS); \
-	if command -v secretspec >/dev/null 2>&1; then \
-	  if $(SECRETSPEC) --scope opentofu -- true >/dev/null 2>&1; then \
-	    $(SECRETSPEC) --scope opentofu -- $(VERIFY) tests/verify/iac-connectors.bats; \
-	  else \
-	    printf '%s\n' 'NetBird connector probe skipped: opentofu scope not resolvable (operator age identity missing?)'; \
-	  fi; \
-	  if command -v ansible-playbook >/dev/null 2>&1 && $(SECRETSPEC) --scope opnsense -- true >/dev/null 2>&1; then \
-	    $(SECRETSPEC) --scope opnsense -- $(VERIFY) tests/verify/iac-connectors.bats; \
-	  else \
-	    printf '%s\n' 'OPNsense connector probe skipped: opnsense scope not resolvable or ansible-playbook unavailable'; \
-	  fi; \
+	@if command -v secretspec >/dev/null 2>&1; then \
+	  $(SECRETSPEC) -- $(VERIFY) $(VERIFY_ARGS); \
 	else \
+	  $(VERIFY) $(VERIFY_ARGS); \
 	  printf '%s\n' 'Connector probes skipped: secretspec not on PATH (run inside nix develop)'; \
 	fi
 

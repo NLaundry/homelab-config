@@ -24,7 +24,7 @@ The shell supports macOS ARM and Linux x86-64. Full live SMB checks need macOS.
 | `make check` | Evaluate Nix configuration without building or deploying |
 | `make test-local` | Run isolated PKI, Ansible and OpenTofu regressions; dependencies may download |
 | `make test-vm` | Evaluate, then test Samba in disposable VMs on `TEST_STORE` |
-| `make verify` | Check live NAS health and guest SMB file access |
+| `make verify` | Check live NAS, control-plane, DNS, and private-PKI health |
 | `make build` | Build the NAS configuration without activation |
 | `make preview` | Preview activation without applying it |
 | `make try` | Activate temporarily, then verify |
@@ -41,18 +41,16 @@ files on the shares. They check current health, not every deployment outcome.
 
 Defaults target `operator@10.10.10.11`. Override `HOST`, `TARGET`, `KEY`, `FLAKE`,
 or `TEST_STORE` on the command line. Use `VERIFY_ARGS` to select live test files.
-For SSH-only verification on Linux, use `VERIFY_ARGS=tests/verify/deployment.bats`;
+For SSH-only verification on Linux, use `VERIFY_ARGS=tests/verify/nas.bats`;
 this also works with `try` and `deploy`, but then skips the other probes.
 Bats options are accepted by standalone `verify`, not activation preflight.
 The test store needs Linux, Nix, SSH access, and KVM.
 
 `make verify` runs every probe file under `tests/verify`; new `.bats` files
-are registered automatically. The runner supplies non-secret probe context
-(DNS/HTTPS targets) from `estate.yaml`. Secret-dependent connector probes
-run under their SecretSpec scope when invoked inside `nix develop`
-(secretspec, ansible and the operator age identity must be available),
-and skip with a notice otherwise; the off-LAN routing probe only runs off
-the LAN.
+are registered automatically. The runner supplies DNS and HTTPS context from
+`estate.yaml`. Inside `nix develop`, it loads the North York SecretSpec profile
+for the whole suite so the control-plane probes can authenticate. Without
+SecretSpec, those connector probes skip with a visible notice.
 
 If macOS reports an SSH Unix socket path is too long, use a shorter temporary
 path for the build: `TMPDIR=/tmp make build`. This changes no SSH trust setting
